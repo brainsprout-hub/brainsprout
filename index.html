@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BrainSprout — Supporting Every Learner</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --sky:#B8DEE8;--red:#E8404A;--redLight:#FADADC;--redDark:#B52830;
+  --yellow:#F5C842;--yellowLight:#FFF6CC;--yellowDark:#C49A00;
+  --green:#5BAD5A;--greenLight:#D6F0D6;--greenDark:#347A33;
+  --pink:#F0698A;--pinkLight:#FCDDE6;--pinkDark:#B83060;
+  --blue:#4A90C4;--blueLight:#D6EAF8;--blueDark:#2C6090;
+  --cream:#FFF8F0;--white:#fff;--text:#2A1F1A;--muted:#6B5B52;
+  --rad:20px;--shadow:0 6px 20px rgba(42,31,26,0.12);
+}
+body{font-family:'Baloo 2',cursive;background:var(--sky);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.35) 2px,transparent 2px);background-size:32px 32px;pointer-events:none;z-index:0}
+
+/* LOADING */
+.loading-screen{position:fixed;inset:0;background:var(--sky);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500}
+.loading-screen.hidden{display:none}
+.ls-sprout{font-size:64px;animation:bounce 1s infinite ease-in-out}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.ls-text{font-size:18px;font-weight:800;color:var(--text);margin-top:16px}
+.ls-sub{font-size:13px;font-weight:700;color:var(--muted);margin-top:6px}
+
+/* AUTH */
+.auth-screen{position:fixed;inset:0;background:var(--sky);display:flex;align-items:center;justify-content:center;padding:20px;z-index:400}
+.auth-screen.hidden{display:none}
+.auth-box{background:var(--white);border-radius:28px;padding:36px;max-width:420px;width:100%;border:5px solid #E8D5C0;box-shadow:0 16px 50px rgba(42,31,26,0.15);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-sprout{font-size:52px;display:block;animation:wobble 2s infinite ease-in-out}
+@keyframes wobble{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(7deg)}}
+.auth-title{font-size:30px;font-weight:900;color:var(--text);margin-top:8px}
+.auth-sub{font-size:13px;font-weight:700;color:var(--muted);margin-top:4px}
+.auth-beta{background:var(--greenLight);border:2px solid var(--green);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:800;color:var(--greenDark);margin:14px 0;text-align:center}
+.auth-tabs{display:flex;background:#F5EDE0;border-radius:16px;padding:4px;margin-bottom:20px;gap:4px}
+.auth-tab{flex:1;padding:10px;border:none;border-radius:12px;font-family:'Baloo 2',cursive;font-weight:800;font-size:14px;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+.auth-tab.active{background:var(--white);color:var(--red);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.auth-field{margin-bottom:14px}
+.auth-field label{font-size:11px;font-weight:900;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.auth-input{width:100%;border:3px solid #E8D5C0;border-radius:14px;padding:12px 16px;font-family:'Baloo 2',cursive;font-size:15px;font-weight:700;color:var(--text);background:var(--cream);outline:none;transition:border-color .2s}
+.auth-input:focus{border-color:var(--red)}
+.auth-btn{width:100%;background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 5px 0 var(--redDark);transition:all .2s;margin-top:6px}
+.auth-btn:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--redDark)}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:0 3px 0 var(--redDark)}
+.auth-msg{border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;margin-top:12px;display:none}
+.auth-msg.show{display:block}
+.auth-msg.error{background:var(--redLight);border:2px solid var(--red);color:var(--redDark)}
+.auth-msg.success{background:var(--greenLight);border:2px solid var(--green);color:var(--greenDark)}
+.forgot-link{text-align:center;margin-top:12px;font-size:13px;font-weight:700;color:var(--blue);cursor:pointer}
+.forgot-link:hover{text-decoration:underline}
+
+/* MAIN APP */
+.app{display:none}
+.app.visible{display:block}
+
+/* HEADER */
+.header{background:var(--red);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:4px solid var(--redDark);box-shadow:0 4px 0 var(--redDark)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-sprout{font-size:32px;animation:wobble 2s infinite ease-in-out;display:inline-block}
+.logo-text{font-size:26px;font-weight:900;color:#fff;line-height:1;text-shadow:3px 3px 0 var(--redDark)}
+.logo-sub{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-top:1px}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.teacher-pill-wrap{position:relative;display:flex;align-items:center}
+.teacher-pill{background:rgba(255,255,255,0.2);color:#fff;padding:6px 12px;border-radius:30px;font-size:11px;font-weight:800;border:2px solid rgba(255,255,255,0.35);display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;transition:all .2s}
+.teacher-pill:hover{background:rgba(255,255,255,0.3)}
+.teacher-edit-input{display:none;background:rgba(255,255,255,0.95);color:var(--text);border:3px solid var(--yellow);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;font-family:'Baloo 2',cursive;outline:none;min-width:150px}
+.teacher-edit-input.visible{display:block}
+.teacher-pill.hidden{display:none}
+.logout-btn{background:rgba(255,255,255,0.15);color:#fff;border:2px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Baloo 2',cursive;transition:all .2s}
+.logout-btn:hover{background:rgba(255,255,255,0.25)}
+.beta-pill{background:var(--green);color:#fff;padding:5px 10px;border-radius:20px;font-size:10px;font-weight:900;border:2px solid var(--greenDark);letter-spacing:.5px}
+
+/* NAV */
+.nav{display:flex;background:var(--cream);border-bottom:4px solid #E8D5C0;overflow-x:auto;padding:0 8px;gap:2px;position:sticky;top:64px;z-index:99}
+.nav-btn{padding:11px 12px;font-size:12px;font-weight:800;border:none;background:transparent;cursor:pointer;color:var(--muted);border-bottom:4px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px;border-radius:12px 12px 0 0;font-family:'Baloo 2',cursive}
+.nav-btn.active{color:var(--red);border-bottom-color:var(--red);background:#FFF0F0}
+.nav-btn:hover:not(.active){color:var(--text);background:#F5EDE0}
+
+/* SCREENS */
+.screen{display:none;padding:20px;max-width:1020px;margin:0 auto;animation:slideIn .3s ease;position:relative;z-index:1}
+.screen.active{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--white);border-radius:var(--rad);box-shadow:var(--shadow);padding:22px;margin-bottom:16px;border:3px solid #E8D5C0}
+.sec-title{font-size:24px;font-weight:900;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{border-radius:var(--rad);padding:18px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;border:4px solid transparent}
+.stat-card:hover{transform:translateY(-5px) rotate(-1deg);box-shadow:0 14px 32px rgba(0,0,0,0.15)}
+.sc1{background:var(--red);border-color:var(--redDark);color:#fff}
+.sc2{background:var(--yellow);border-color:var(--yellowDark);color:var(--text)}
+.sc3{background:var(--green);border-color:var(--greenDark);color:#fff}
+.sc4{background:var(--blue);border-color:var(--blueDark);color:#fff}
+.stat-card h3{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;opacity:.8;margin-bottom:4px}
+.stat-card .big{font-size:48px;font-weight:900;line-height:1}
+.stat-card p{font-size:12px;font-weight:700;opacity:.75;margin-top:2px}
+.blob{position:absolute;font-size:52px;opacity:.18;right:-8px;bottom:-10px;transform:rotate(12deg)}
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:20px}
+.qa-btn{border:4px solid transparent;border-radius:var(--rad);padding:14px 8px;cursor:pointer;font-weight:800;font-size:12px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(0,0,0,0.1);font-family:'Baloo 2',cursive}
+.qa-btn:hover{transform:translateY(-4px);box-shadow:0 8px 0 rgba(0,0,0,0.1)}
+.qa-icon{font-size:26px}
+.qa1{background:var(--pinkLight);color:var(--pinkDark);border-color:var(--pink)}
+.qa2{background:var(--greenLight);color:var(--greenDark);border-color:var(--green)}
+.qa3{background:var(--blueLight);color:var(--blueDark);border-color:var(--blue)}
+.qa4{background:var(--yellowLight);color:var(--yellowDark);border-color:var(--yellow)}
+.qa5{background:var(--redLight);color:var(--redDark);border-color:var(--red)}
+.qa6{background:#EDE8FF;color:#4A00CC;border-color:#9B6DFF}
+.today-card{background:var(--white);border-radius:var(--rad);padding:22px;border:4px solid #E8D5C0;box-shadow:var(--shadow)}
+.today-card h3{font-size:20px;font-weight:900}
+.dash-flow-row{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--cream);border-radius:14px;margin-bottom:8px;border:3px solid #E8D5C0;transition:border-color .2s}
+.dash-flow-row:hover{border-color:var(--skyDark)}
+.df-emoji{font-size:22px;cursor:pointer;background:none;border:none;padding:0 2px;transition:transform .15s;flex-shrink:0}
+.df-emoji:hover{transform:scale(1.3)}
+
+.df-text{flex:1;border:none;background:transparent;font-family:'Baloo 2',cursive;font-size:14px;font-weight:700;color:var(--text);outline:none;min-width:0}
+.df-text:focus{border-bottom:2px dashed var(--muted)}
+.df-check{width:26px;height:26px;border-radius:8px;border:3px solid #CBD5E0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:13px;font-weight:900;flex-shrink:0;font-family:'Baloo 2',cursive}
+.df-check.df-checked{background:var(--green);border-color:var(--greenDark);color:#fff}
+.df-del{background:none;border:none;color:var(--pink);font-size:18px;cursor:pointer;flex-shrink:0;font-weight:900;line-height:1;padding:0 2px;transition:transform .15s}
+.df-del:hover{transform:scale(1.2)}
+
+/* REWARDS */
+.reward-toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.add-student-btn{background:var(--red);border:3px solid var(--redDark);border-radius:16px;padding:10px 18px;color:#fff;font-weight:900;font-size:13px;cursor:pointer;transition:all .2s;box-shadow:0 4px 0 var(--redDark);font-family:'Baloo 2',cursive}
+.add-student-btn:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--redDark)}
+.class-total{background:var(--yellow);border:3px solid var(--yellowDark);border-radius:16px;padding:10px 16px;font-weight:900;font-size:13px;color:var(--yellowDark);box-shadow:0 4px 0 var(--yellowDark)}
+.filter-select{border:3px solid #E8D5C0;border-radius:16px;padding:8px 12px;font-size:13px;font-weight:800;background:var(--white);cursor:pointer;color:var(--text);font-family:'Baloo 2',cursive}
+.student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px}
+.student-card{background:var(--white);border-radius:var(--rad);padding:16px;text-align:center;border:4px solid #E8D5C0;transition:all .2s;position:relative;overflow:visible}
+.student-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.12)}
+.s-avatar{width:64px;height:64px;border-radius:50%;margin:10px auto 6px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:4px solid rgba(0,0,0,0.1);box-shadow:0 4px 0 rgba(0,0,0,0.15);cursor:pointer;transition:transform .2s}
+.s-avatar:hover{transform:scale(1.08)}
+.s-avatar-hint{font-size:9px;color:var(--muted);font-weight:700;margin-top:-4px;margin-bottom:4px}
+.s-name{font-size:18px;font-weight:900;margin-bottom:2px;cursor:text;border-bottom:2px dashed transparent;transition:border-color .2s;display:inline-block;width:100%;text-align:center}
+.s-name:hover{border-bottom-color:var(--muted)}
+.s-name-input{display:none;width:100%;text-align:center;border:3px solid var(--blue);border-radius:10px;padding:4px 8px;font-size:15px;font-weight:900;font-family:'Baloo 2',cursive;color:var(--text);background:var(--blueLight);outline:none}
+.s-name-input.visible{display:block}
+.s-name.hidden{display:none}
+.s-grade-wrap{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:2px}
+.s-grade-select{border:2px solid #E8D5C0;border-radius:10px;padding:3px 6px;font-size:11px;font-weight:800;font-family:'Baloo 2',cursive;color:var(--muted);background:var(--cream);cursor:pointer}
+.s-level{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.stars-row{display:flex;justify-content:center;gap:2px;margin:6px 0;font-size:15px;flex-wrap:wrap}
+.s-points{font-size:24px;font-weight:900;color:var(--red)}
+.star-btns{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.add-star{background:var(--yellow);border:3px solid var(--yellowDark);border-radius:14px;padding:7px 12px;color:var(--yellowDark);font-weight:900;font-size:12px;cursor:pointer;transition:all .2s;box-shadow:0 3px 0 var(--yellowDark);font-family:'Baloo 2',cursive;flex:1}
+.add-star:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--yellowDark)}
+.remove-star{background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:7px 9px;color:var(--muted);font-weight:900;font-size:12px;cursor:pointer;transition:all .2s;box-shadow:0 3px 0 #E8D5C0;font-family:'Baloo 2',cursive}
+.delete-student{position:absolute;top:-8px;right:-8px;background:var(--red);border:3px solid var(--redDark);border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;transition:all .2s;box-shadow:0 3px 0 var(--redDark);z-index:5}
+.delete-student:hover{transform:scale(1.15)}
+.color-dots{display:flex;justify-content:center;gap:4px;margin-top:6px;flex-wrap:wrap}
+.color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0}
+.color-dot:hover{transform:scale(1.2)}
+.color-dot.active{border-color:var(--text);transform:scale(1.15)}
+.confetti-burst{position:fixed;pointer-events:none;top:40%;left:50%;transform:translate(-50%,-50%);font-size:48px;animation:starBurst 1.1s forwards;z-index:9999}
+@keyframes starBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}60%{opacity:1;transform:translate(-50%,-160%) scale(2)}100%{opacity:0;transform:translate(-50%,-240%) scale(1.3)}}
+
+/* TIMER */
+.timer-wrapper{text-align:center;padding:16px 0}
+.timer-ring{width:200px;height:200px;margin:0 auto 14px;position:relative}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring circle.bg{fill:none;stroke:#E8D5C0;stroke-width:14}
+.timer-ring circle.prog{fill:none;stroke:var(--red);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .4s}
+.timer-inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.timer-big{font-size:48px;font-weight:900;color:var(--text);line-height:1}
+.timer-sub{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin:14px 0}
+.preset-btn{border:3px solid #E8D5C0;border-radius:14px;padding:10px 4px;background:var(--white);cursor:pointer;font-weight:800;font-size:12px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text);box-shadow:0 3px 0 #E8D5C0;font-family:'Baloo 2',cursive}
+.preset-btn:hover,.preset-btn.sel{background:var(--red);color:#fff;border-color:var(--redDark);box-shadow:0 3px 0 var(--redDark);transform:translateY(-2px)}
+.preset-icon{font-size:16px}
+.timer-controls{display:flex;justify-content:center;gap:12px;margin:18px 0}
+.tc-btn{border:none;border-radius:18px;padding:13px 28px;font-weight:900;font-size:15px;cursor:pointer;transition:all .2s;font-family:'Baloo 2',cursive}
+.tc-start{background:var(--green);color:#fff;border:4px solid var(--greenDark);box-shadow:0 5px 0 var(--greenDark)}
+.tc-reset{background:var(--cream);color:var(--text);border:4px solid #E8D5C0;box-shadow:0 5px 0 #E8D5C0}
+.tc-btn:hover{transform:translateY(-3px)}
+.sound-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:10px;font-size:14px;font-weight:800;color:var(--muted)}
+.toggle{width:44px;height:24px;background:#E8D5C0;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.toggle.on::after{left:22px}
+
+/* ACTIVITIES */
+.activity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.activity-card{border-radius:var(--rad);padding:18px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s;border:4px solid transparent}
+.activity-card:hover{transform:translateY(-5px) rotate(-1deg);box-shadow:0 12px 30px rgba(0,0,0,0.18)}
+.ac-icon{font-size:40px;margin-bottom:8px;display:block}
+.ac-title{font-size:19px;font-weight:900;margin-bottom:4px}
+.ac-desc{font-size:12px;opacity:.9;line-height:1.4;font-weight:700}
+.ac-time-badge{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.3);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:900;text-transform:uppercase}
+.ac-grade{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.1);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:900}
+
+/* BREATHING */
+.breathing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px;margin-bottom:20px}
+.breath-card{background:var(--white);border-radius:var(--rad);padding:20px;text-align:center;cursor:pointer;border:4px solid #E8D5C0;transition:all .2s;position:relative}
+.breath-card:hover{border-color:var(--red);transform:translateY(-3px)}
+.breath-card.active-breath{border-color:var(--red);background:var(--redLight)}
+.breath-icon{font-size:36px;margin-bottom:8px}
+.breath-name{font-size:17px;font-weight:900;color:var(--text);margin-bottom:4px}
+.breath-desc{font-size:12px;color:var(--muted);line-height:1.4;font-weight:700}
+.breath-player{background:var(--red);border-radius:var(--rad);padding:30px;text-align:center;color:#fff;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:4px solid var(--redDark);box-shadow:0 6px 0 var(--redDark)}
+.breath-circle{width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.15);margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:52px;transition:transform 3.5s ease,background 1.2s;border:5px solid rgba(255,255,255,0.3)}
+.breath-circle.inhale{transform:scale(1.5);background:rgba(255,255,255,0.3);border-color:var(--yellow)}
+.breath-circle.hold{transform:scale(1.5);background:rgba(255,255,255,0.2);border-color:var(--yellow)}
+.breath-circle.exhale{transform:scale(0.75);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.2)}
+.breath-phase{font-size:34px;font-weight:900;margin-bottom:4px}
+.breath-count{font-size:20px;opacity:.85;font-weight:800}
+.breath-controls{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.bc-btn{border:3px solid transparent;border-radius:16px;padding:11px 24px;font-weight:900;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Baloo 2',cursive}
+.bc-start{background:var(--yellow);color:var(--yellowDark);border-color:var(--yellowDark);box-shadow:0 4px 0 var(--yellowDark)}
+.bc-stop{background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3)}
+.cycle-count{font-size:13px;opacity:.7;margin-top:10px;font-weight:800}
+
+/* SCHEDULE */
+.sched-editor{display:flex;flex-direction:column;gap:8px}
+.sched-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--cream);border-radius:16px;border:3px solid #E8D5C0}
+.sched-time{border:2px solid #CBD5E0;border-radius:8px;padding:4px 6px;font-family:'Baloo 2',cursive;font-size:12px;font-weight:800;color:var(--text);background:var(--white);width:88px;flex-shrink:0;cursor:pointer}
+.sched-time:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.df-time-input{border:2px solid #CBD5E0;border-radius:8px;padding:3px 5px;font-family:'Baloo 2',cursive;font-size:12px;font-weight:800;color:var(--text);background:var(--white);width:88px;flex-shrink:0;cursor:pointer}
+.df-time-input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.sched-emoji{font-size:24px;cursor:pointer;padding:4px;border-radius:8px;background:none;border:none}
+.sched-input{flex:1;border:none;background:transparent;font-size:15px;font-weight:700;color:var(--text);outline:none;font-family:'Baloo 2',cursive}
+.sched-done-check{width:26px;height:26px;border-radius:8px;border:3px solid #CBD5E0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:13px;flex-shrink:0;font-weight:900}
+.sched-done-check.checked{background:var(--green);border-color:var(--greenDark);color:#fff}
+.sched-delete{background:none;border:none;color:var(--pink);font-size:20px;cursor:pointer;flex-shrink:0;font-weight:900}
+.add-sched-btn{background:var(--blue);border:3px solid var(--blueDark);border-radius:16px;padding:12px 20px;color:#fff;font-weight:900;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;align-self:flex-start;margin-top:10px;box-shadow:0 4px 0 var(--blueDark);font-family:'Baloo 2',cursive}
+.sched-prog-bar{height:14px;background:#E8D5C0;border-radius:8px;overflow:hidden;margin-top:8px;border:2px solid #D4C0A8}
+.sched-prog-fill{height:100%;background:linear-gradient(90deg,var(--green),#7FD07E);border-radius:6px;transition:width .5s ease}
+
+/* TOOLS */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px}
+.tool-card{background:var(--white);border-radius:var(--rad);box-shadow:var(--shadow);padding:22px;border:4px solid #E8D5C0}
+.tool-card h3{font-size:19px;font-weight:900;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.emotion-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.emotion-btn{border:3px solid #E8D5C0;border-radius:14px;padding:10px 4px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;font-size:10px;font-weight:900;font-family:'Baloo 2',cursive}
+.emotion-btn:hover,.emotion-btn.sel{transform:scale(1.12) rotate(-2deg);border-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,0.13)}
+.emotion-btn .em{font-size:24px;display:block;margin-bottom:3px}
+.e-happy:hover,.e-happy.sel{background:var(--yellow);color:var(--yellowDark)}
+.e-calm:hover,.e-calm.sel{background:var(--blueLight);color:var(--blueDark)}
+.e-sad:hover,.e-sad.sel{background:#EDE8FF;color:#4A00CC}
+.e-angry:hover,.e-angry.sel{background:var(--redLight);color:var(--redDark)}
+.e-anxious:hover,.e-anxious.sel{background:var(--greenLight);color:var(--greenDark)}
+#emotion-suggestion{margin-top:10px;font-size:13px;font-weight:800;color:var(--redDark);min-height:18px}
+.noise-levels{display:flex;gap:7px;align-items:flex-end;height:56px;margin-top:10px}
+.noise-bar{flex:1;border-radius:6px 6px 4px 4px;cursor:pointer;transition:all .25s;opacity:.3}
+.noise-bar.active{opacity:1}
+.n1{background:var(--green);height:20%}.n2{background:#A8CC44;height:40%}.n3{background:var(--yellow);height:60%}.n4{background:#F0903D;height:80%}.n5{background:var(--red);height:100%}
+
+/* NOISE FULLSCREEN TAB */
+.noise-fullscreen-card{background:var(--white);border-radius:var(--rad);border:5px solid var(--green);box-shadow:var(--shadow);padding:40px 24px 32px;text-align:center;transition:border-color .4s}
+.noise-big-label{font-size:clamp(38px,9vw,76px);font-weight:900;color:var(--greenDark);margin-bottom:10px;transition:color .35s;line-height:1.1}
+.noise-big-desc{font-size:clamp(16px,3.5vw,26px);font-weight:700;color:var(--muted);margin-bottom:40px;transition:opacity .3s}
+.noise-stair-wrap{display:flex;align-items:flex-end;justify-content:center;gap:14px;height:260px;margin-bottom:32px;padding:0 12px}
+.noise-stair-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:pointer;flex:1;max-width:130px;transition:transform .2s}
+.noise-stair-btn:hover{transform:translateY(-6px)}
+.noise-stair-bar{width:100%;border-radius:14px 14px 6px 6px;transition:all .35s cubic-bezier(.34,1.2,.64,1);border:4px solid transparent}
+.noise-stair-label{font-size:clamp(11px,2vw,15px);font-weight:900;margin-top:10px;transition:color .3s}
+
+/* each bar's natural stair height & color */
+.nsb1 .noise-stair-bar{height:52px; background:#5BAD5A;border-color:#347A33}
+.nsb2 .noise-stair-bar{height:104px;background:#A8CC44;border-color:#6A9A00}
+.nsb3 .noise-stair-bar{height:156px;background:#F5C842;border-color:#C49A00}
+.nsb4 .noise-stair-bar{height:208px;background:#F0903D;border-color:#B85A00}
+.nsb5 .noise-stair-bar{height:260px;background:#E8404A;border-color:#B52830}
+
+/* inactive — grey & dimmed */
+.noise-stair-btn.ns-inactive .noise-stair-bar{background:#D1D5C0;border-color:#B8C0A8;height:52px}
+.nsb2.ns-inactive .noise-stair-bar{height:104px;background:#D1D5C0;border-color:#B8C0A8}
+.nsb3.ns-inactive .noise-stair-bar{height:156px;background:#D1D5C0;border-color:#B8C0A8}
+.nsb4.ns-inactive .noise-stair-bar{height:208px;background:#D1D5C0;border-color:#B8C0A8}
+.nsb5.ns-inactive .noise-stair-bar{height:260px;background:#D1D5C0;border-color:#B8C0A8}
+.noise-stair-btn.ns-inactive{opacity:.35}
+.noise-stair-btn.ns-active{opacity:1}
+.noise-stair-btn.ns-below{opacity:.75}
+.noise-stair-label{color:var(--muted)}
+.noise-stair-btn.ns-active .noise-stair-label,.noise-stair-btn.ns-below .noise-stair-label{color:var(--text);font-size:clamp(13px,2.2vw,17px)}
+.noise-tip{font-size:13px;font-weight:700;color:var(--muted);margin-top:4px}
+.sensory-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sensory-tag{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:900;border:3px solid transparent;cursor:pointer;transition:all .2s;font-family:'Baloo 2',cursive}
+.sensory-tag:hover,.sensory-tag.sen-active{transform:scale(1.07);box-shadow:0 4px 10px rgba(0,0,0,0.1)}
+.st-a{background:var(--blueLight);color:var(--blueDark);border-color:var(--blue)}
+.st-b{background:var(--greenLight);color:var(--greenDark);border-color:var(--green)}
+.st-c{background:#EDE8FF;color:#4A00CC;border-color:#9B6DFF}
+.st-d{background:var(--yellowLight);color:var(--yellowDark);border-color:var(--yellow)}
+.st-e{background:var(--pinkLight);color:var(--pinkDark);border-color:var(--pink)}
+.st-f{background:var(--redLight);color:var(--redDark);border-color:var(--red)}
+.sensory-who-row{margin-bottom:10px}
+.sensory-who-label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.sensory-who-btns{display:flex;flex-wrap:wrap;gap:8px}
+.sensory-who-btn{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:800;border:3px solid #E8D5C0;background:var(--white);cursor:pointer;color:var(--muted);font-family:'Baloo 2',cursive;transition:all .2s}
+.sensory-who-btn:hover{border-color:var(--skyDark);color:var(--text)}
+.sensory-who-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+.sensory-who-btn.sw-class.active{background:var(--blue);border-color:var(--blueDark);color:#fff}
+.sensory-selected-bar{background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:10px 16px;font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sensory-summary{margin-top:16px;background:var(--cream);border-radius:14px;padding:0;overflow:hidden;border:3px solid #E8D5C0}
+.sensory-sum-title{font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px 6px;border-bottom:2px solid #E8D5C0}
+.sensory-sum-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:2px solid #E8D5C0;flex-wrap:wrap}
+.sensory-sum-row:last-child{border-bottom:none}
+.sensory-sum-who{font-size:14px;font-weight:900;color:var(--text);min-width:80px}
+.sensory-sum-needs{font-size:13px;font-weight:700;color:var(--muted)}
+.note-area{width:100%;border:3px solid #E8D5C0;border-radius:16px;padding:12px;font-size:14px;font-weight:700;resize:none;margin-top:10px;color:var(--text);background:var(--cream);outline:none;font-family:'Baloo 2',cursive}
+.note-area:focus{border-color:var(--blue)}
+.save-note{background:var(--green);border:3px solid var(--greenDark);border-radius:14px;padding:10px 20px;color:#fff;font-weight:900;font-size:14px;cursor:pointer;margin-top:8px;box-shadow:0 4px 0 var(--greenDark);font-family:'Baloo 2',cursive}
+.notes-log{margin-top:12px;max-height:140px;overflow-y:auto}
+.note-item{background:var(--cream);border-radius:12px;padding:9px 12px;margin-bottom:6px;font-size:13px;font-weight:700;border-left:5px solid var(--red)}
+.note-time{font-size:10px;color:var(--muted);font-weight:800}
+.note-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.note-actions{display:flex;gap:4px;opacity:0;transition:opacity .2s}
+.note-item:hover .note-actions{opacity:1}
+.note-action-btn{background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:6px;transition:background .2s;line-height:1}
+.note-action-btn:hover{background:#F0F0F0}
+.note-body{font-size:13px;font-weight:700;color:var(--text);line-height:1.45}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(42,31,26,0.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--white);border-radius:28px;padding:28px;max-width:520px;width:100%;position:relative;max-height:90vh;overflow-y:auto;animation:popIn .35s cubic-bezier(.34,1.56,.64,1);border:5px solid #E8D5C0}
+.modal-close{position:absolute;top:14px;right:14px;background:var(--redLight);border:3px solid var(--red);border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--redDark)}
+.modal-icon{font-size:56px;text-align:center;margin-bottom:8px}
+.modal-title{font-size:26px;font-weight:900;color:var(--text);text-align:center;margin-bottom:4px}
+.modal-sub{text-align:center;color:var(--muted);font-size:14px;margin-bottom:20px;font-weight:700}
+.instruction-list{list-style:none;padding:0}
+.instruction-list li{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-radius:14px;background:var(--cream);margin-bottom:8px;font-size:14px;font-weight:700;line-height:1.4;border:3px solid #E8D5C0}
+.step-num{background:var(--red);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+.start-activity-btn{background:var(--green);color:#fff;border:4px solid var(--greenDark);border-radius:18px;padding:14px 32px;font-weight:900;font-size:16px;cursor:pointer;width:100%;margin-top:16px;box-shadow:0 5px 0 var(--greenDark);font-family:'Baloo 2',cursive}
+.add-student-form{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.form-group label{font-size:11px;font-weight:900;color:var(--muted);display:block;margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase}
+.form-input{width:100%;border:3px solid #E8D5C0;border-radius:14px;padding:10px 14px;font-size:15px;font-weight:800;color:var(--text);background:var(--cream);outline:none;font-family:'Baloo 2',cursive}
+.form-input:focus{border-color:var(--red)}
+.avatar-picker{display:flex;flex-wrap:wrap;gap:8px}
+.av-opt{width:44px;height:44px;border-radius:50%;border:4px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;transition:all .2s;font-family:'Baloo 2',cursive}
+.av-opt.sel{border-color:var(--text);transform:scale(1.15)}
+.submit-student{background:var(--red);border:4px solid var(--redDark);border-radius:16px;padding:13px;color:#fff;font-weight:900;font-size:15px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);font-family:'Baloo 2',cursive}
+.confirm-modal{background:var(--white);border-radius:24px;padding:28px;max-width:360px;width:100%;text-align:center;border:5px solid var(--redLight);animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+.confirm-modal p{font-size:15px;font-weight:700;color:var(--muted);margin:8px 0 20px}
+.confirm-btns{display:flex;gap:10px;justify-content:center}
+.confirm-yes{background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:14px;padding:10px 24px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 0 var(--redDark);font-family:'Baloo 2',cursive}
+.confirm-no{background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:14px;padding:10px 24px;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 0 #E8D5C0;font-family:'Baloo 2',cursive}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--text);color:var(--yellow);padding:13px 26px;border-radius:30px;font-weight:900;font-size:14px;z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;border:3px solid var(--yellow);font-family:'Baloo 2',cursive}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── NEW AUTH LANDING ── */
+.auth-screen{position:fixed;inset:0;background:var(--sky);display:flex;align-items:stretch;justify-content:center;padding:0;z-index:400;overflow-y:auto}
+.auth-layout{display:flex;width:100%;min-height:100vh;align-items:stretch}
+.auth-hero{flex:1;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 40px;position:relative;overflow:hidden;min-width:0}
+.auth-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 2px,transparent 2px);background-size:28px 28px;pointer-events:none}
+.hero-sprout{font-size:72px;display:block;animation:wobble 2s infinite ease-in-out;margin-bottom:16px;position:relative;z-index:1}
+.hero-brand{font-size:clamp(36px,5vw,56px);font-weight:900;color:#fff;line-height:1;text-shadow:4px 4px 0 var(--redDark);position:relative;z-index:1}
+.hero-tagline{font-size:clamp(15px,2vw,20px);font-weight:700;color:rgba(255,255,255,0.9);margin-top:10px;margin-bottom:36px;line-height:1.4;text-align:center;max-width:380px;position:relative;z-index:1}
+.hero-features{display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px;position:relative;z-index:1}
+.hero-feat{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.15);border-radius:16px;padding:14px 18px;border:2px solid rgba(255,255,255,0.2)}
+.hero-feat-icon{font-size:28px;flex-shrink:0}
+.hero-feat-text{color:#fff}
+.hero-feat-title{font-size:15px;font-weight:900;line-height:1.2}
+.hero-feat-desc{font-size:12px;opacity:.85;font-weight:700;margin-top:2px;line-height:1.3}
+.auth-panel{width:100%;max-width:440px;background:var(--white);display:flex;flex-direction:column;justify-content:center;padding:48px 40px;box-shadow:-8px 0 40px rgba(42,31,26,0.12)}
+.auth-panel-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.auth-panel-sprout{font-size:36px;animation:wobble 2s infinite ease-in-out;display:inline-block}
+.auth-panel-brand{font-size:22px;font-weight:900;color:var(--text)}
+.auth-panel-sub{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:1px}
+/* override the old auth-box centering */
+.auth-box{background:transparent;border-radius:0;padding:0;border:none;box-shadow:none;animation:none;width:100%}
+
+/* ── TUTORIAL MODAL ── */
+.tutorial-overlay{position:fixed;inset:0;background:rgba(42,31,26,0.7);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px}
+.tutorial-overlay.hidden{display:none}
+.tutorial-modal{background:var(--white);border-radius:28px;padding:0;max-width:580px;width:100%;overflow:hidden;border:5px solid var(--yellow);animation:popIn .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
+.tutorial-header{background:var(--red);padding:28px 28px 24px;text-align:center;position:relative}
+.tutorial-header h2{font-size:28px;font-weight:900;color:#fff;margin-top:8px;text-shadow:2px 2px 0 var(--redDark)}
+.tutorial-header p{font-size:14px;color:rgba(255,255,255,.85);font-weight:700;margin-top:6px}
+.tutorial-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,.35);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff}
+.tutorial-steps{padding:24px 28px;display:flex;flex-direction:column;gap:14px}
+.tut-step{display:flex;align-items:flex-start;gap:16px;padding:16px;background:var(--cream);border-radius:16px;border:3px solid #E8D5C0}
+.tut-step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 3px 0 rgba(0,0,0,0.15)}
+.tut-step-body{flex:1}
+.tut-step-title{font-size:16px;font-weight:900;color:var(--text);margin-bottom:3px}
+.tut-step-desc{font-size:13px;font-weight:700;color:var(--muted);line-height:1.45}
+.tut-step-icon{font-size:28px;flex-shrink:0;margin-top:2px}
+.tutorial-footer{padding:0 28px 28px;display:flex;flex-direction:column;gap:10px}
+.tut-got-it{background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:15px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s}
+.tut-got-it:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--redDark)}
+.tut-replay{background:none;border:none;color:var(--muted);font-size:13px;font-weight:800;cursor:pointer;font-family:'Baloo 2',cursive;text-align:center}
+.tut-replay:hover{color:var(--text)}
+
+/* ── DASHBOARD HERO BANNER ── */
+.dash-hero{background:var(--red);border-radius:var(--rad);border:4px solid var(--redDark);box-shadow:0 6px 0 var(--redDark);padding:24px 28px;margin-bottom:20px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.dash-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 2px,transparent 2px);background-size:24px 24px;pointer-events:none}
+.dash-hero-text{position:relative;z-index:1}
+.dash-hero-greeting{font-size:clamp(18px,3vw,26px);font-weight:900;color:#fff;line-height:1.2;text-shadow:2px 2px 0 var(--redDark)}
+.dash-hero-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.85);margin-top:5px;line-height:1.4;max-width:400px}
+.dash-hero-emoji{font-size:52px;position:relative;z-index:1;flex-shrink:0;animation:wobble 3s infinite ease-in-out}
+.dash-hero-btn{background:var(--yellow);color:var(--yellowDark);border:3px solid var(--yellowDark);border-radius:14px;padding:8px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;margin-top:12px;box-shadow:0 3px 0 var(--yellowDark);transition:all .2s;display:inline-block}
+.dash-hero-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--yellowDark)}
+
+@media(max-width:720px){
+  .auth-layout{flex-direction:column}
+  .auth-hero{padding:36px 24px 28px;min-height:auto}
+  .hero-features{display:none}
+  .auth-panel{padding:28px 24px;box-shadow:none}
+}
+
+
+
+
+
+
+/* ── FEATURE LOCK OVERLAY ── */
+
+
+
+
+
+
+
+
+
+/* ── STUDENT PROFILE MODAL ── */
+.profile-overlay{position:fixed;inset:0;background:rgba(42,31,26,0.65);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.profile-overlay.hidden{display:none}
+.profile-modal{background:var(--white);border-radius:28px;max-width:620px;width:100%;max-height:92vh;overflow-y:auto;border:5px solid #E8D5C0;animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+.profile-header{background:var(--red);padding:24px 28px;display:flex;align-items:center;gap:16px;position:relative}
+.profile-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;border:4px solid rgba(255,255,255,.3);flex-shrink:0}
+.profile-name{font-size:26px;font-weight:900;color:#fff;text-shadow:2px 2px 0 var(--redDark)}
+.profile-grade{font-size:13px;color:rgba(255,255,255,.8);font-weight:700;margin-top:2px}
+.profile-stars-big{font-size:20px;font-weight:900;color:var(--yellow);margin-top:4px}
+.profile-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,.3);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff}
+.profile-body{padding:20px 24px}
+.profile-section{margin-bottom:20px}
+.profile-section-title{font-size:14px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.profile-log-item{background:var(--cream);border-radius:12px;padding:10px 14px;margin-bottom:8px;border:2px solid #E8D5C0}
+.profile-log-time{font-size:10px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.profile-log-val{font-size:14px;font-weight:700;color:var(--text)}
+.profile-empty{font-size:13px;color:var(--muted);font-weight:700;font-style:italic;padding:8px 0}
+
+/* ── WEEKLY REPORT ── */
+.report-overlay{position:fixed;inset:0;background:rgba(42,31,26,0.65);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.report-overlay.hidden{display:none}
+.report-modal{background:var(--white);border-radius:24px;max-width:680px;width:100%;max-height:92vh;overflow-y:auto;border:5px solid var(--blue);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+.report-header{background:var(--blue);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.report-header h2{font-size:22px;font-weight:900;color:#fff}
+.report-header p{font-size:13px;color:rgba(255,255,255,.8);font-weight:700}
+.report-close{background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,.3);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff}
+.report-student-select{padding:16px 24px;border-bottom:3px solid #E8D5C0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.report-sel{border:3px solid #E8D5C0;border-radius:14px;padding:8px 14px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;background:var(--cream);color:var(--text);outline:none;flex:1;min-width:160px}
+.report-body{padding:20px 24px}
+.report-student-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px;background:var(--cream);border-radius:16px;border:3px solid #E8D5C0}
+.report-s-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;flex-shrink:0}
+.report-s-name{font-size:20px;font-weight:900;color:var(--text)}
+.report-s-stars{font-size:14px;font-weight:700;color:var(--muted);margin-top:2px}
+.report-section{margin-bottom:18px}
+.report-section-title{font-size:13px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #E8D5C0;display:flex;align-items:center;gap:6px}
+.report-log-row{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--cream);border-radius:10px;margin-bottom:6px;border:2px solid #E8D5C0}
+.report-log-time{font-size:11px;font-weight:800;color:var(--muted);min-width:90px;flex-shrink:0;padding-top:1px}
+.report-log-val{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+.report-empty{font-size:13px;color:var(--muted);font-style:italic;font-weight:700;padding:6px 0}
+.report-actions{padding:0 24px 24px;display:flex;gap:10px;flex-wrap:wrap}
+.report-btn{border:3px solid transparent;border-radius:14px;padding:11px 22px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;transition:all .2s}
+.report-btn-print{background:var(--blue);color:#fff;border-color:var(--blueDark);box-shadow:0 4px 0 var(--blueDark)}
+.report-btn-email{background:var(--green);color:#fff;border-color:var(--greenDark);box-shadow:0 4px 0 var(--greenDark)}
+.report-btn-dl{background:var(--yellow);color:var(--yellowDark);border-color:var(--yellowDark);box-shadow:0 4px 0 var(--yellowDark)}
+.report-btn:hover{transform:translateY(-2px)}
+
+/* ── REFERRAL ── */
+.referral-box{background:var(--yellowLight);border:3px solid var(--yellow);border-radius:16px;padding:16px;margin-top:16px}
+.referral-title{font-size:15px;font-weight:900;color:var(--yellowDark);margin-bottom:6px}
+.referral-desc{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;line-height:1.4}
+.referral-code-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.referral-code{background:var(--white);border:3px solid var(--yellow);border-radius:12px;padding:10px 16px;font-size:18px;font-weight:900;color:var(--yellowDark);letter-spacing:2px;flex:1;text-align:center}
+.referral-copy{background:var(--yellow);color:var(--yellowDark);border:3px solid var(--yellowDark);border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--yellowDark)}
+.referral-input-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.referral-input{flex:1;border:3px solid #E8D5C0;border-radius:12px;padding:10px 14px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:700;background:var(--cream);color:var(--text);outline:none;min-width:120px}
+.referral-input:focus{border-color:var(--yellow)}
+.referral-apply{background:var(--green);color:#fff;border:3px solid var(--greenDark);border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)}
+
+/* ── NOTES STUDENT DROPDOWN ── */
+.notes-student-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.notes-student-sel{border:3px solid #E8D5C0;border-radius:14px;padding:8px 14px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;background:var(--cream);color:var(--text);outline:none;flex:1}
+.notes-student-sel:focus{border-color:var(--blue)}
+
+/* ── SCHEDULE TIME EDIT ── */
+
+
+@media print{
+  .header,.nav,.modal-overlay,.profile-overlay,.tutorial-overlay,
+  .report-actions,.report-student-select{display:none!important}
+  .report-modal{max-height:none;border:none;box-shadow:none}
+}
+
+@media(max-width:520px){
+  .logo-text{font-size:20px}.logo-sprout{font-size:26px}
+  .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .header-right{gap:5px}
+  .logout-btn,.beta-pill{font-size:10px;padding:4px 8px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading-screen">
+  <div class="ls-sprout">🌱</div>
+  <div class="ls-text">BrainSprout</div>
+  <div class="ls-sub">Loading your classroom...</div>
+</div>
+
+<!-- AUTH -->
+<div class="auth-screen hidden" id="auth-screen">
+  <div class="auth-layout">
+
+    <!-- LEFT HERO PANEL -->
+    <div class="auth-hero">
+      <span class="hero-sprout">🌱</span>
+      <div class="hero-brand">BrainSprout</div>
+      <div class="hero-tagline">The all-in-one classroom engagement dashboard built for teachers supporting students.</div>
+      <div class="hero-features">
+        <div class="hero-feat">
+          <span class="hero-feat-icon">⭐</span>
+          <div class="hero-feat-text">
+            <div class="hero-feat-title">Star Reward Board</div>
+            <div class="hero-feat-desc">Track stars per student and celebrate progress every day</div>
+          </div>
+        </div>
+        <div class="hero-feat">
+          <span class="hero-feat-icon">🎮</span>
+          <div class="hero-feat-text">
+            <div class="hero-feat-title">Brain Breaks &amp; Games</div>
+            <div class="hero-feat-desc">12 ready-to-go activities, breathing methods &amp; movement breaks</div>
+          </div>
+        </div>
+        <div class="hero-feat">
+          <span class="hero-feat-icon">📋</span>
+          <div class="hero-feat-text">
+            <div class="hero-feat-title">Visual Schedule &amp; Timer</div>
+            <div class="hero-feat-desc">Keep the class on track with countdowns and a daily flow board</div>
+          </div>
+        </div>
+        <div class="hero-feat">
+          <span class="hero-feat-icon">😊</span>
+          <div class="hero-feat-text">
+            <div class="hero-feat-title">Mood &amp; Sensory Tracking</div>
+            <div class="hero-feat-desc">Log how each student is feeling and flag sensory needs instantly</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT AUTH PANEL -->
+    <div class="auth-panel">
+      <div class="auth-panel-logo">
+        <span class="auth-panel-sprout">🌱</span>
+        <div>
+          <div class="auth-panel-brand">BrainSprout</div>
+          <div class="auth-panel-sub">Free Beta — All features unlocked!</div>
+        </div>
+      </div>
+
+      <div class="auth-box">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log In</button>
+          <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up Free</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="login-form">
+          <div class="auth-field"><label>Email</label><input class="auth-input" id="login-email" type="email" placeholder="you@school.edu" autocomplete="email"></div>
+          <div class="auth-field"><label>Password</label><input class="auth-input" id="login-password" type="password" placeholder="Your password" autocomplete="current-password"></div>
+          <button class="auth-btn" id="login-btn" onclick="doLogin()">Log In to My Classroom 🍎</button>
+          <div class="forgot-link" onclick="switchTab('forgot')">Forgot your password?</div>
+        </div>
+
+        <!-- SIGNUP -->
+        <div id="signup-form" style="display:none">
+          <div class="auth-field"><label>Your Name</label><input class="auth-input" id="signup-name" type="text" placeholder="e.g. Mrs. Smith" maxlength="40"></div>
+          <div class="auth-field"><label>Email</label><input class="auth-input" id="signup-email" type="email" placeholder="you@school.edu" autocomplete="email"></div>
+          <div class="auth-field"><label>Password</label><input class="auth-input" id="signup-password" type="password" placeholder="At least 6 characters" autocomplete="new-password"></div>
+          <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create My Classroom 🌱</button>
+        </div>
+
+        <!-- FORGOT -->
+        <div id="forgot-form" style="display:none">
+          <div class="auth-field"><label>Your Email</label><input class="auth-input" id="forgot-email" type="email" placeholder="you@school.edu"></div>
+          <button class="auth-btn" id="forgot-btn" onclick="doForgot()">Send Reset Link 📧</button>
+          <div class="forgot-link" onclick="switchTab('login')" style="margin-top:12px">← Back to Log In</div>
+        </div>
+
+        <div class="auth-msg" id="auth-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="main-app">
+
+  <div class="header">
+    <div class="logo">
+      <span class="logo-sprout">🌱</span>
+      <div><div class="logo-text">BrainSprout</div><div class="logo-sub">Supporting Every Learner</div></div>
+    </div>
+    <div class="header-right">
+      <span class="beta-pill">FREE BETA</span>
+      <div class="teacher-pill-wrap">
+        <div class="teacher-pill" id="teacher-pill" onclick="startEditTeacher()" title="Click to edit">
+          <span id="teacher-display">🍎 My Class</span>
+          <span style="font-size:10px;opacity:.7">✏️</span>
+        </div>
+        <input class="teacher-edit-input" id="teacher-input" type="text" placeholder="Class name" maxlength="30"
+          onblur="saveTeacher()" onkeydown="if(event.key==='Enter')saveTeacher()">
+      </div>
+      <button class="logout-btn" onclick="doLogout()">↩ Log Out</button>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('dashboard',this)"><span>🏠</span> Home</button>
+    <button class="nav-btn" onclick="showScreen('rewards',this)"><span>⭐</span> Stars</button>
+    <button class="nav-btn" onclick="showScreen('timer',this)"><span>⏱</span> Timer</button>
+    <button class="nav-btn" onclick="showScreen('schedule',this)"><span>📋</span> Schedule</button>
+    <button class="nav-btn" onclick="showScreen('activities',this)"><span>🎮</span> Activities</button>
+    <button class="nav-btn" onclick="showScreen('breathing',this)"><span>💨</span> Breathing</button>
+    <button class="nav-btn" onclick="showScreen('noise',this)"><span>🔊</span> Noise</button>
+    <button class="nav-btn" onclick="showScreen('tools',this)"><span>🛠</span> Tools</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="screen active">
+    <div class="dash-hero">
+      <div class="dash-hero-text">
+        <div class="dash-hero-greeting">🌱 Good Morning, <span id="dash-teacher-name">Teacher</span>!</div>
+        <div class="dash-hero-sub">Your classroom engagement dashboard — track moods, reward stars, run brain breaks, and keep the day on track, all in one place.</div>
+        <button class="dash-hero-btn" onclick="openTutorial()">🎬 How It Works</button>
+      </div>
+      <div class="dash-hero-emoji">🏫</div>
+    </div>
+    <div class="dash-grid">
+      <div class="stat-card sc1" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><h3>Students</h3><div class="big" id="dash-students">0</div><p>in your class</p><span class="blob">👧</span></div>
+      <div class="stat-card sc2" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><h3>Stars Today</h3><div class="big" id="dash-stars">0</div><p>awesome job!</p><span class="blob">⭐</span></div>
+      <div class="stat-card sc3" onclick="showScreen('timer',document.querySelectorAll('.nav-btn')[2])"><h3>Timer</h3><div class="big">⏱</div><p>start a countdown</p><span class="blob">⏰</span></div>
+      <div class="stat-card sc4" onclick="showScreen('activities',document.querySelectorAll('.nav-btn')[4])"><h3>Activities</h3><div class="big">🎮</div><p>brain breaks &amp; games</p><span class="blob">🎯</span></div>
+    </div>
+    <div class="sec-title" style="font-size:20px;margin-bottom:14px">⚡ Quick Actions</div>
+    <div class="quick-actions">
+      <button class="qa-btn qa1" onclick="quickBreath()"><span class="qa-icon">💨</span>Breathing Break</button>
+      <button class="qa-btn qa2" onclick="quickBreak()"><span class="qa-icon">🧠</span>Brain Break</button>
+      <button class="qa-btn qa3" onclick="showScreen('timer',document.querySelectorAll('.nav-btn')[2]);setPreset(5)"><span class="qa-icon">⏱</span>5 Min Timer</button>
+      <button class="qa-btn qa4" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><span class="qa-icon">⭐</span>Give Stars</button>
+      <button class="qa-btn qa5" onclick="showScreen('schedule',document.querySelectorAll('.nav-btn')[3])"><span class="qa-icon">📋</span>Schedule</button>
+      <button class="qa-btn qa6" onclick="showScreen('tools',document.querySelectorAll('.nav-btn')[6])"><span class="qa-icon">😊</span>Mood Check</button>
+    </div>
+    <div class="today-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <h3>🏫 Today's Flow</h3>
+        <button onclick="addDashItem()" style="background:var(--green);border:3px solid var(--greenDark);border-radius:14px;padding:7px 16px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)">+ Add Item</button>
+      </div>
+      <div id="dash-schedule"></div>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Click any item to edit · Check ✓ to mark done · × to remove</div>
+    </div>
+  </div>
+
+  <!-- REWARDS -->
+  <div id="rewards" class="screen">
+    <div class="sec-title">⭐ Star Board</div>
+    <div class="reward-toolbar">
+      <button class="add-student-btn" onclick="openAddStudent()">+ Add Student</button>
+      <div class="class-total">🏆 Class Stars: <span id="total-stars">0</span></div>
+      <select class="filter-select" onchange="filterStudents(this.value)">
+        <option value="all">All Students</option>
+        <option value="top">Top Stars ⬆</option>
+        <option value="low">Needs Encouragement ❤️</option>
+      </select>
+    </div>
+    <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:12px">💡 Click a name to edit · Click avatar to change color · ✕ to remove</div>
+    <div class="student-grid" id="student-grid"></div>
+  </div>
+
+  <!-- TIMER -->
+  <div id="timer" class="screen">
+    <div class="sec-title">⏱ Classroom Timer</div>
+    <div class="card">
+      <div class="timer-wrapper">
+        <div class="timer-ring">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle class="bg" cx="100" cy="100" r="86"/>
+            <circle class="prog" id="ring-prog" cx="100" cy="100" r="86" stroke-dasharray="540" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-inner"><div class="timer-big" id="timer-big">05:00</div><div class="timer-sub" id="timer-label">READY</div></div>
+        </div>
+        <div class="preset-grid">
+          <button class="preset-btn" onclick="setPreset(1)"><span class="preset-icon">⚡</span>1 min</button>
+          <button class="preset-btn sel" onclick="setPreset(5)"><span class="preset-icon">⏱</span>5 min</button>
+          <button class="preset-btn" onclick="setPreset(10)"><span class="preset-icon">📖</span>10 min</button>
+          <button class="preset-btn" onclick="setPreset(15)"><span class="preset-icon">✏️</span>15 min</button>
+          <button class="preset-btn" onclick="setPreset(20)"><span class="preset-icon">🎨</span>20 min</button>
+          <button class="preset-btn" onclick="setPreset(30)"><span class="preset-icon">🏫</span>30 min</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin:10px 0">
+          <label style="font-size:13px;font-weight:900;color:var(--muted)">Custom:</label>
+          <input type="number" id="custom-min" min="1" max="60" placeholder="min" style="width:70px;border:3px solid #E8D5C0;border-radius:12px;padding:8px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;text-align:center;color:var(--text);background:var(--cream);outline:none">
+          <button onclick="setCustom()" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:12px;padding:8px 14px;font-family:'Baloo 2',cursive;font-weight:900;cursor:pointer;font-size:13px;box-shadow:0 3px 0 var(--blueDark)">Set</button>
+        </div>
+        <div class="timer-controls">
+          <button class="tc-btn tc-reset" onclick="resetTimer()">↺ Reset</button>
+          <button class="tc-btn tc-start" id="start-btn" onclick="toggleTimer()">▶ Start</button>
+        </div>
+        <div class="sound-row"><button class="toggle on" id="sound-tog" onclick="toggleSound()"></button><span id="sound-label">Sound On</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="font-size:20px;margin-bottom:14px">🎯 Quick Activity Timers</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+        <button onclick="setTimerActivity('Work Time',20)" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--blueDark);font-size:13px;box-shadow:0 3px 0 var(--blue)">📝 Work Time<br><small>20 min</small></button>
+        <button onclick="setTimerActivity('Reading',15)" style="background:var(--greenLight);border:3px solid var(--green);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--greenDark);font-size:13px;box-shadow:0 3px 0 var(--green)">📚 Reading<br><small>15 min</small></button>
+        <button onclick="setTimerActivity('Brain Break',5)" style="background:var(--pinkLight);border:3px solid var(--pink);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--pinkDark);font-size:13px;box-shadow:0 3px 0 var(--pink)">🧠 Brain Break<br><small>5 min</small></button>
+        <button onclick="setTimerActivity('Cleanup',3)" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--yellowDark);font-size:13px;box-shadow:0 3px 0 var(--yellow)">🧹 Cleanup<br><small>3 min</small></button>
+        <button onclick="setTimerActivity('Snack',10)" style="background:var(--redLight);border:3px solid var(--red);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--redDark);font-size:13px;box-shadow:0 3px 0 var(--red)">🍎 Snack<br><small>10 min</small></button>
+        <button onclick="setTimerActivity('Transition',2)" style="background:#EDE8FF;border:3px solid #9B6DFF;border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:#4A00CC;font-size:13px;box-shadow:0 3px 0 #9B6DFF">🔄 Transition<br><small>2 min</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="schedule" class="screen">
+    <div class="sec-title">📋 Visual Schedule</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:20px;font-weight:900">Today's Plan</div>
+        <button onclick="window.print()" style="background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--text);box-shadow:0 3px 0 #E8D5C0">🖨 Print</button>
+      </div>
+      <div class="sched-editor" id="sched-editor"></div>
+      <button class="add-sched-btn" onclick="addSchedItem()">+ Add Activity</button>
+  <p style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Set a time · Click the emoji to change it · Click text to rename · ✓ to mark done</p>
+      <div style="margin-top:14px">
+        <div style="font-size:13px;font-weight:900;color:var(--muted)">Progress: <span id="prog-text">0 / 0 done</span></div>
+        <div class="sched-prog-bar"><div class="sched-prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="font-size:20px;margin-bottom:14px">⚡ Quick Templates</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button onclick="loadTemplate('morning')" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellow)">🌅 Morning</button>
+        <button onclick="loadTemplate('afternoon')" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--blueDark);box-shadow:0 3px 0 var(--blue)">☀️ Afternoon</button>
+        <button onclick="loadTemplate('full')" style="background:var(--greenLight);border:3px solid var(--green);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--greenDark);box-shadow:0 3px 0 var(--green)">📅 Full Day</button>
+        <button onclick="clearSched()" style="background:var(--redLight);border:3px solid var(--red);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--redDark);box-shadow:0 3px 0 var(--red)">🗑 Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITIES -->
+  <div id="activities" class="screen">
+    <div class="sec-title">🎮 Brain Breaks &amp; Games</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button onclick="filterActivities('all',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid var(--blue);background:var(--blueLight);color:var(--blueDark);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive;box-shadow:0 3px 0 var(--blue)">All</button>
+      <button onclick="filterActivities('game',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🎮 Games</button>
+      <button onclick="filterActivities('break',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🧠 Brain Breaks</button>
+      <button onclick="filterActivities('move',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🏃 Movement</button>
+    </div>
+    <div class="activity-grid" id="activity-grid"></div>
+  </div>
+
+  <!-- BREATHING -->
+  <div id="breathing" class="screen">
+    <div class="sec-title">💨 Breathing Methods</div>
+    <div class="breathing-grid" id="breathing-grid"></div>
+    <div class="breath-player">
+      <div class="breath-circle" id="breath-circle">🌱</div>
+      <div class="breath-phase" id="breath-phase">Pick a method above!</div>
+      <div class="breath-count" id="breath-count">Then press Start</div>
+      <div class="breath-controls">
+        <button class="bc-btn bc-start" id="breath-start" onclick="toggleBreath()">▶ Start</button>
+        <button class="bc-btn bc-stop" onclick="stopBreath()">⏹ Stop</button>
+      </div>
+      <div class="cycle-count" id="cycle-count"></div>
+    </div>
+  </div>
+
+  <!-- NOISE LEVEL -->
+  <div id="noise" class="screen">
+    <div class="sec-title">🔊 Noise Expectation</div>
+    <div class="noise-fullscreen-card">
+      <div class="noise-big-label" id="noise-big-label">🤫 Silent Work</div>
+      <div class="noise-big-desc" id="noise-big-desc">Eyes on your work. No talking.</div>
+      <div class="noise-stair-wrap">
+        <div class="noise-stair-btn nsb1 ns-active" id="nsb1" onclick="setNoise(1)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">🤫 Silent</div>
+        </div>
+        <div class="noise-stair-btn nsb2 ns-inactive" id="nsb2" onclick="setNoise(2)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">🤏 Whisper</div>
+        </div>
+        <div class="noise-stair-btn nsb3 ns-inactive" id="nsb3" onclick="setNoise(3)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">💬 Partner</div>
+        </div>
+        <div class="noise-stair-btn nsb4 ns-inactive" id="nsb4" onclick="setNoise(4)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">👥 Group</div>
+        </div>
+        <div class="noise-stair-btn nsb5 ns-inactive" id="nsb5" onclick="setNoise(5)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">📣 Loud</div>
+        </div>
+      </div>
+      <div class="noise-tip">👆 Tap a level to set the expectation for your whole class</div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div id="tools" class="screen">
+    <div class="sec-title">🛠 Classroom Tools</div>
+
+    <div class="tools-grid">
+
+      <!-- MOOD CHECK-IN -->
+      <div class="tool-card" id="mood-card" style="grid-column:1/-1;position:relative">
+        <h3>😊 Mood Check-In</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:700">Select a student, then tap how they're feeling today.</p>
+        <div class="sensory-who-row">
+          <div class="sensory-who-label">Which student?</div>
+          <div class="sensory-who-btns" id="mood-who-btns">
+            <div style="font-size:13px;color:var(--muted);font-weight:700;padding:6px 0">Add students to the Star Board first to use Mood Check-In.</div>
+          </div>
+        </div>
+        <div class="sensory-selected-bar" id="mood-selected-bar" style="display:none">
+          <span id="mood-selected-name">Select a student</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:700">— tap a mood below</span>
+        </div>
+        <div class="emotion-grid" id="mood-grid" style="opacity:.4;pointer-events:none;margin-bottom:14px">
+          <button class="emotion-btn e-happy" onclick="selectMood(this,'Happy')"><span class="em">😄</span>Happy</button>
+          <button class="emotion-btn e-calm" onclick="selectMood(this,'Calm')"><span class="em">😌</span>Calm</button>
+          <button class="emotion-btn e-sad" onclick="selectMood(this,'Sad')"><span class="em">😢</span>Sad</button>
+          <button class="emotion-btn e-angry" onclick="selectMood(this,'Frustrated')"><span class="em">😤</span>Frustrated</button>
+          <button class="emotion-btn e-anxious" onclick="selectMood(this,'Worried')"><span class="em">😟</span>Worried</button>
+        </div>
+        <div id="mood-suggestion"></div>
+        <div class="sensory-summary" id="mood-summary"></div>
+      </div>
+<!-- SENSORY NEEDS -->
+      <div class="tool-card" id="sensory-card" style="grid-column:1/-1;position:relative">
+        <h3>🫁 Sensory Needs</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:700">Select a student (or whole class), then tap their needs.</p>
+        <div class="sensory-who-row">
+          <div class="sensory-who-label">Who needs support?</div>
+          <div class="sensory-who-btns" id="sensory-who-btns">
+            <button class="sensory-who-btn sw-class active" id="swb-class" onclick="selectSensoryWho('class')">🏫 Whole Class</button>
+          </div>
+        </div>
+        <div class="sensory-selected-bar" id="sensory-selected-bar">
+          <span id="sensory-selected-name">🏫 Whole Class</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:700">— tap needs below</span>
+        </div>
+        <div class="sensory-items" id="sensory-tags-grid">
+          <button class="sensory-tag st-b" data-need="Quiet Space" onclick="toggleSensoryNeed(this)">🎧 Quiet Space</button>
+          <button class="sensory-tag st-a" data-need="Seat Break" onclick="toggleSensoryNeed(this)">💺 Seat Break</button>
+          <button class="sensory-tag st-d" data-need="Dim Lights" onclick="toggleSensoryNeed(this)">💡 Dim Lights</button>
+          <button class="sensory-tag st-c" data-need="Fidget Tool" onclick="toggleSensoryNeed(this)">🖐 Fidget Tool</button>
+          <button class="sensory-tag st-f" data-need="Movement" onclick="toggleSensoryNeed(this)">🚶 Movement</button>
+          <button class="sensory-tag st-a" data-need="Visual Cue" onclick="toggleSensoryNeed(this)">👁 Visual Cue</button>
+          <button class="sensory-tag st-b" data-need="Extra Time" onclick="toggleSensoryNeed(this)">⏱ Extra Time</button>
+        </div>
+        <div class="sensory-summary" id="sensory-summary"></div>
+      </div>
+<!-- TEACHER NOTES -->
+      <div class="tool-card" id="notes-card" style="grid-column:1/-1;position:relative">
+        <h3>📝 Teacher Notes</h3>
+        <div class="notes-student-row">
+          <select class="notes-student-sel" id="notes-student-sel">
+            <option value="">📋 General note (no student)</option>
+          </select>
+          <button onclick="openReport()" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:12px;padding:8px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark);white-space:nowrap">📊 Weekly Report</button>
+        </div>
+        <textarea class="note-area" id="note-input" rows="3" placeholder="Add a quick observation about a student's behavior, mood, or needs today..."></textarea>
+        <button class="save-note" onclick="saveNote()">💾 Save Note</button>
+        <div class="notes-log" id="notes-log"><div style="font-size:13px;color:var(--muted);padding:8px;text-align:center;font-weight:700">Your notes will appear here</div></div>
+      </div>
+<!-- REFERRAL -->
+      <div class="tool-card" id="referral-card" style="grid-column:1/-1;position:relative">
+        <h3>🎁 Refer a Teacher</h3>
+        <p style="font-size:13px;color:var(--muted);font-weight:700;margin-bottom:10px">Share your code with another teacher — you both get 1 free month!</p>
+        <div class="referral-box">
+          <div class="referral-title">Your Referral Code</div>
+          <div class="referral-desc">One referral per teacher. Both teachers must have an account for the credit to apply.</div>
+          <div class="referral-code-row">
+            <div class="referral-code" id="my-referral-code">Loading...</div>
+            <button class="referral-copy" onclick="copyReferralCode()">📋 Copy</button>
+          </div>
+          <div class="referral-input-row">
+            <input class="referral-input" id="referral-input" placeholder="Enter a friend's code..." maxlength="8">
+            <button class="referral-apply" onclick="applyReferralCode()">Apply Code</button>
+          </div>
+          <div id="referral-status" style="font-size:13px;font-weight:700;margin-top:8px;color:var(--greenDark)"></div>
+        </div>
+      </div>
+</div>
+  </div>
+
+</div><!-- end .app -->
+
+<!-- TUTORIAL MODAL -->
+<div class="tutorial-overlay hidden" id="tutorial-overlay">
+  <div class="tutorial-modal">
+    <div class="tutorial-header">
+      <button class="tutorial-close" onclick="closeTutorial()">✕</button>
+      <div style="font-size:48px">🌱</div>
+      <h2>Welcome to BrainSprout!</h2>
+      <p>Here's everything you can do</p>
+    </div>
+    <div class="tutorial-steps">
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--red)">1</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Add Your Students ⭐</div>
+          <div class="tut-step-desc">Go to the <strong>Stars</strong> tab and click <em>+ Add Student</em>. Add each student's name, grade, and pick a color. You can give or remove stars any time — great for rewarding good behavior!</div>
+        </div>
+        <div class="tut-step-icon">👧</div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--blue)">2</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Set Up Today's Schedule 📋</div>
+          <div class="tut-step-desc">Open the <strong>Schedule</strong> tab to build your daily plan, or use a quick template. The same schedule shows on your Home screen so you can check things off as the day goes.</div>
+        </div>
+        <div class="tut-step-icon">🗓</div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--green)">3</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Run Brain Breaks &amp; Breathing 🎮</div>
+          <div class="tut-step-desc">Use the <strong>Activities</strong> tab for 12 ready-to-go games and movement breaks. The <strong>Breathing</strong> tab has 6 calming methods — great for transitions or when energy runs high.</div>
+        </div>
+        <div class="tut-step-icon">🧠</div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--yellow);color:var(--yellowDark)">4</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Use the Timer &amp; Noise Level ⏱</div>
+          <div class="tut-step-desc">The <strong>Timer</strong> tab counts down for any activity. The <strong>Noise</strong> tab shows a big color-coded chart your whole class can see — tap a bar to set the expected noise level.</div>
+        </div>
+        <div class="tut-step-icon">🔊</div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:#9B6DFF">5</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Track Moods &amp; Sensory Needs 😊</div>
+          <div class="tut-step-desc">In the <strong>Tools</strong> tab, tap a student's name then select their mood or active sensory needs. A summary shows every student's status at a glance so nothing slips through.</div>
+        </div>
+        <div class="tut-step-icon">🫁</div>
+      </div>
+      <div class="tut-step">
+        <div class="tut-step-num" style="background:var(--pink)">6</div>
+        <div class="tut-step-body">
+          <div class="tut-step-title">Write Teacher Notes 📝</div>
+          <div class="tut-step-desc">Jot quick observations in the <strong>Notes</strong> section — they save to your account automatically so you can look back any time, edit them, or delete them.</div>
+        </div>
+        <div class="tut-step-icon">📓</div>
+      </div>
+    </div>
+    <div class="tutorial-footer">
+      <button class="tut-got-it" onclick="closeTutorial()">Got it — let's go! 🚀</button>
+      <button class="tut-replay" onclick="closeTutorial()">I'll explore on my own</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY MODAL -->
+<div class="modal-overlay hidden" id="activity-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="m-icon"></div>
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-sub" id="m-sub"></div>
+    <ul class="instruction-list" id="m-steps"></ul>
+    <button class="start-activity-btn" onclick="startActivityTimer()">▶ Start 5-Minute Timer</button>
+  </div>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay hidden" id="add-student-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddStudent()">✕</button>
+    <div class="modal-title">🌱 Add Student</div>
+    <div class="add-student-form">
+      <div class="form-group"><label>Student Name</label><input type="text" class="form-input" id="s-name-input" placeholder="Enter first name" maxlength="20"></div>
+      <div class="form-group"><label>Grade</label>
+        <select class="form-input" id="s-grade-input">
+          <option value="K">Kindergarten</option><option value="1">1st Grade</option>
+          <option value="2">2nd Grade</option><option value="3">3rd Grade</option>
+          <option value="4">4th Grade</option><option value="5">5th Grade</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Avatar Color</label><div class="avatar-picker" id="avatar-picker"></div></div>
+      <button class="submit-student" onclick="addStudent()">Add to Class ⭐</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="modal-overlay hidden" id="confirm-modal">
+  <div class="confirm-modal">
+    <div style="font-size:40px;margin-bottom:8px">🗑</div>
+    <div class="modal-title" style="font-size:20px">Remove Student?</div>
+    <p id="confirm-text">Are you sure?</p>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-yes" id="confirm-yes-btn">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE ──
+const{createClient}=supabase;
+const sb=createClient(
+  'https://qxsyxemaxlgrqyksqnpe.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4c3l4ZW1heGxncnF5a3NxbnBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTk3MzQsImV4cCI6MjA5MDIzNTczNH0.TnDm2W5Q0DhGmOOgwTCJ8yCwuU7Re0gHFLEpkm5yH80'
+);
+
+// ── STATE ──
+const AVATAR_COLORS=['#E8404A','#F5C842','#5BAD5A','#4A90C4','#F0698A','#9B6DFF','#FF7043','#26C6DA','#AB47BC','#66BB6A'];
+let currentUser=null,students=[],selectedAvatar=0,pendingDeleteId=null;
+let timerInterval=null,timerRunning=false,timerTotal=300,timerRemaining=300,soundOn=true;
+const CIRC=2*Math.PI*86;
+let breathRunning=false,breathMethod=null,breathStep=0,breathCycles=0;
+let teacherProfile=null; // stores plan, trial_start, referral_code etc.
+// Mood/sensory logs stored with timestamps
+const moodLogs=[];    // {studentId, mood, loggedAt}
+const sensoryLogs=[];  // {studentId, need, active, loggedAt}
+
+
+let stripeClient=null;
+function getStripe(){
+  if(!stripeClient)stripeClient=Stripe('pk_live_51TFkrMI3RU9VVJJmD32lKFIJjTVNNvFVAoE2yy8l5RPkF7FGXLql5dPsbj2MSL0fWulb6Km5byClQH4SKVVU8vnL00JnE7775f');
+  return stripeClient;
+}
+
+// ── PLAN HELPERS ──
+// ── PLAN HELPERS (everything free) ──
+function getPlan(){return "plus";}
+function isInTrial(){return false;}
+function canAccessPro(){return true;}
+function canAccessPlus(){return true;}
+
+// ── STARTUP ──
+async function init(){
+  const p=new URLSearchParams(window.location.search);
+  const successPlan=p.get('plan');           // 'pro' or 'plus' (from our redirect URL)
+  const isSuccess=p.get('success')==='true'||p.get('success')==='1';
+  const isCanceled=p.get('canceled')==='true'||p.get('canceled')==='1';
+
+  // Clean URL right away
+  if(isSuccess||isCanceled||successPlan){
+    window.history.replaceState({},'',window.location.pathname);
+  }
+
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){
+    showAuth();
+    if(isCanceled)setTimeout(()=>showToast('Payment canceled — upgrade anytime!'),800);
+    return;
+  }
+
+  currentUser=session.user;
+  await loadProfile(); // always loads fresh plan from DB
+
+  if(isSuccess||successPlan){
+    const newPlan=(successPlan==='plus')?'plus':'pro';
+    // Save to DB — update both plan AND is_pro so both checks work
+    await sb.from('teachers')
+      .update({plan:newPlan,is_pro:true})
+      .eq('id',currentUser.id);
+    // Re-read from DB to confirm it saved
+    const{data:updated}=await sb.from('teachers')
+      .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+      .eq('id',currentUser.id).single();
+    if(updated)teacherProfile=updated;
+    console.log('Plan after upgrade:',teacherProfile?.plan);
+    showApp();
+    setTimeout(()=>{
+      const planName=newPlan==='plus'?'Pro Plus 🚀':'Pro ⭐';
+      showToast('🎉 Welcome to BrainSprout '+planName+'! All features unlocked!');
+    },700);
+  } else {
+    showApp();
+  }
+}
+
+function showApp(){
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('main-app').classList.add('visible');
+  applyPlanUI();
+  initDashboard();renderStudents();renderActivities();renderBreathing();renderSchedule();renderNotesLog();renderNotesStudentDropdown();
+  document.getElementById('ring-prog').style.strokeDasharray=CIRC;
+  document.getElementById('ring-prog').style.strokeDashoffset=0;
+}
+function showAuth(){
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('auth-screen').classList.remove('hidden');
+}
+
+// ── APPLY PLAN UI (no-op — everything free) ──
+function applyPlanUI(){}
+
+// ── LOAD DATA ──
+async function loadProfile(){
+  let{data:profile,error:profErr}=await sb.from('teachers')
+    .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+    .eq('id',currentUser.id).single();
+  if(!profile){
+    const name=currentUser.user_metadata?.name||'My Class';
+    const code=Math.random().toString(36).substring(2,8).toUpperCase();
+    const{data:np}=await sb.from('teachers').insert({
+      id:currentUser.id,class_name:name+"'s Class",
+      is_pro:false,plan:'free',
+      trial_start:new Date().toISOString(),
+      referral_code:code
+    }).select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by').single();
+    profile=np;
+  }
+  teacherProfile=profile;
+  console.log('Plan loaded from DB:',profile?.plan,'is_pro:',profile?.is_pro);
+  const displayName=profile?.class_name||'My Class';
+  document.getElementById('teacher-display').textContent='🍎 '+displayName;
+  const firstName=displayName.replace(/'s Class/,'').replace(/^(Mrs?|Ms|Dr|Mr)\.?\s*/i,'');
+  document.getElementById('dash-teacher-name').textContent=firstName||'Teacher';
+
+  // Show referral code
+  const rcEl=document.getElementById('my-referral-code');
+  if(rcEl)rcEl.textContent=profile?.referral_code||'---';
+
+  // Load students
+  const{data:studentRows}=await sb.from('students').select('*').eq('teacher_id',currentUser.id).order('created_at');
+  students=studentRows||[];
+
+  // Load schedule
+  const{data:schedRows}=await sb.from('schedule_items').select('*').eq('teacher_id',currentUser.id).order('position');
+  if(schedRows&&schedRows.length>0){
+    schedItems=schedRows.map(r=>({id:r.id,emoji:r.emoji||'📌',text:r.text,time:r.time_label||'',done:r.done||false}));
+    dashItems=schedItems.map(s=>({...s}));
+  }
+
+  // Load notes
+  const{data:noteRows}=await sb.from('teacher_notes').select('*').eq('teacher_id',currentUser.id).order('created_at',{ascending:false});
+  if(noteRows&&noteRows.length>0){
+    notes.length=0;
+    noteRows.forEach(r=>notes.push({id:r.id,text:r.text,studentId:r.student_id||null,
+      time:new Date(r.created_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      created_at:r.created_at}));
+  }
+
+  // Load mood logs
+  const{data:moodRows}=await sb.from('mood_logs').select('*').eq('teacher_id',currentUser.id).order('logged_at',{ascending:false});
+  if(moodRows){moodLogs.length=0;moodRows.forEach(r=>moodLogs.push({id:r.id,studentId:r.student_id,mood:r.mood,loggedAt:r.logged_at}));}
+
+  // Load sensory logs
+  const{data:sensRows}=await sb.from('sensory_logs').select('*').eq('teacher_id',currentUser.id).order('logged_at',{ascending:false});
+  if(sensRows){sensoryLogs.length=0;sensRows.forEach(r=>sensoryLogs.push({id:r.id,studentId:r.student_id,need:r.need,active:r.active,loggedAt:r.logged_at}));}
+}
+
+// ── AUTH ──
+let currentTab='login';
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-signup').classList.toggle('active',tab==='signup');
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
+  document.getElementById('forgot-form').style.display=tab==='forgot'?'block':'none';
+  clearMsg();
+}
+function showMsg(text,type){const el=document.getElementById('auth-msg');el.textContent=text;el.className='auth-msg show '+type;}
+function clearMsg(){const el=document.getElementById('auth-msg');el.className='auth-msg';}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pw=document.getElementById('login-password').value;
+  if(!email||!pw){showMsg('Please enter your email and password.','error');return;}
+  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='Logging in...';
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pw});
+  btn.disabled=false;btn.textContent='Log In to My Classroom 🍎';
+  if(error){showMsg(error.message==='Invalid login credentials'?'Wrong email or password. Please try again.':error.message,'error');return;}
+  currentUser=data.user;await loadProfile();showApp();
+}
+
+async function doSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const pw=document.getElementById('signup-password').value;
+  if(!name){showMsg('Please enter your name.','error');return;}
+  if(!email){showMsg('Please enter your email.','error');return;}
+  if(pw.length<6){showMsg('Password must be at least 6 characters.','error');return;}
+  const btn=document.getElementById('signup-btn');btn.disabled=true;btn.textContent='Creating account...';
+  const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{name}}});
+  btn.disabled=false;btn.textContent='Create My Classroom 🌱';
+  if(error){showMsg(error.message,'error');return;}
+  if(data.user&&!data.session){showMsg('Account created! Check your email to confirm, then log in.','success');switchTab('login');}
+  else if(data.user){currentUser=data.user;await loadProfile();showApp();openTutorial();}
+}
+
+async function doForgot(){
+  const email=document.getElementById('forgot-email').value.trim();
+  if(!email){showMsg('Please enter your email.','error');return;}
+  const btn=document.getElementById('forgot-btn');btn.disabled=true;btn.textContent='Sending...';
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  btn.disabled=false;btn.textContent='Send Reset Link 📧';
+  if(error){showMsg(error.message,'error');return;}
+  showMsg('Reset link sent! Check your email inbox.','success');
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  currentUser=null;students=[];teacherProfile=null;moodLogs.length=0;sensoryLogs.length=0;notes.length=0;
+  document.getElementById('main-app').classList.remove('visible');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  switchTab('login');showToast('Logged out. See you next time! 👋');
+}
+
+// ── TEACHER NAME ──
+let prevName='';
+function startEditTeacher(){
+  const pill=document.getElementById('teacher-pill'),inp=document.getElementById('teacher-input');
+  prevName=document.getElementById('teacher-display').textContent.replace('🍎 ','');
+  inp.value=prevName;pill.classList.add('hidden');inp.classList.add('visible');inp.focus();inp.select();
+}
+async function saveTeacher(){
+  const pill=document.getElementById('teacher-pill'),inp=document.getElementById('teacher-input');
+  const val=inp.value.trim()||prevName||'My Class';
+  document.getElementById('teacher-display').textContent='🍎 '+val;
+  inp.classList.remove('visible');pill.classList.remove('hidden');
+  const firstName=val.replace(/'s Class/,'').replace(/^(Mrs?|Ms|Dr|Mr)\.?\s*/i,'');
+  document.getElementById('dash-teacher-name').textContent=firstName||'Teacher';
+  await sb.from('teachers').update({class_name:val}).eq('id',currentUser.id);
+  showToast('✅ Class name saved!');
+}
+
+// ── NAV ──
+function showScreen(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='activities')renderActivities();
+  if(id==='breathing')renderBreathing();
+  if(id==='schedule')renderSchedule();
+  if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();}
+}
+
+// ── DASHBOARD FLOW ──
+let dashItems=[
+  {id:1,emoji:'🌅',text:'Morning Meeting',time:'8:00',done:false},
+  {id:2,emoji:'📖',text:'Reading Block',time:'8:30',done:false},
+  {id:3,emoji:'🧠',text:'Brain Break',time:'9:15',done:false},
+  {id:4,emoji:'🧮',text:'Math Time',time:'9:20',done:false},
+  {id:5,emoji:'🍎',text:'Lunch',time:'11:30',done:false},
+];
+const DASH_EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸','💨','🎮'];
+let dashEmojiIdx=0;
+
+function initDashboard(){renderDashFlow();updateDashStats();}
+
+function renderDashFlow(){
+  const el=document.getElementById('dash-schedule');
+  if(dashItems.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:14px">No items yet — click "+ Add Item" to build today's flow!</div>`;
+    return;
+  }
+  el.innerHTML=dashItems.map(item=>`
+    <div class="dash-flow-row" id="dfrow-${item.id}">
+      <button class="df-emoji" onclick="cycleDashEmoji(${item.id})" title="Change icon">${item.emoji}</button>
+      <input type="time" class="df-time-input" value="${item.time||''}"
+        onchange="updateDashTime(${item.id},this.value)"
+        title="Set time">
+      <input class="df-text" type="text" value="${item.text}" maxlength="30" placeholder="Activity..."
+        onblur="updateDashText(${item.id},this.value)"
+        onkeydown="if(event.key==='Enter'){this.blur();}">
+      <button class="df-check${item.done?' df-checked':''}" onclick="toggleDashDone(${item.id})" title="Mark done">${item.done?'✓':''}</button>
+      <button class="df-del" onclick="deleteDashItem(${item.id})" title="Remove">×</button>
+    </div>`).join('');
+}
+
+// Sync dashItems → schedItems → DB
+function syncDashToDB(){
+  schedItems=dashItems.map(d=>({...d}));
+  saveSchedToDB();
+}
+function cycleDashEmoji(id){
+  const s=dashItems.find(x=>x.id===id);if(!s)return;
+  dashEmojiIdx=(dashEmojiIdx+1)%DASH_EMOJIS.length;
+  s.emoji=DASH_EMOJIS[dashEmojiIdx];renderDashFlow();syncDashToDB();
+}
+function updateDashText(id,val){const s=dashItems.find(x=>x.id===id);if(s&&s.text!==val){s.text=val;syncDashToDB();}}
+function updateDashTime(id,val){const s=dashItems.find(x=>x.id===id);if(s&&s.time!==val){s.time=val;syncDashToDB();}}
+function toggleDashDone(id){
+  const s=dashItems.find(x=>x.id===id);if(!s)return;
+  s.done=!s.done;renderDashFlow();syncDashToDB();
+  if(s.done)showToast('✅ "'+s.text+'" done!');
+}
+function deleteDashItem(id){dashItems=dashItems.filter(x=>x.id!==id);renderDashFlow();syncDashToDB();}
+function addDashItem(){
+  dashItems.push({id:Date.now(),emoji:'📌',text:'New Activity',time:'',done:false});
+  renderDashFlow();syncDashToDB();
+  setTimeout(()=>{
+    const inputs=document.querySelectorAll('.df-text');
+    if(inputs.length)inputs[inputs.length-1].focus();
+  },50);
+}
+function updateDashStats(){
+  const total=students.reduce((a,s)=>a+s.stars,0);
+  document.getElementById('dash-stars').textContent=total;
+  document.getElementById('dash-students').textContent=students.length;
+  const ts=document.getElementById('total-stars');if(ts)ts.textContent=total;
+}
+
+// ── STUDENTS ──
+function renderStudents(filter='all'){
+  let list=[...students];
+  if(filter==='top')list.sort((a,b)=>b.stars-a.stars);
+  if(filter==='low')list.sort((a,b)=>a.stars-b.stars);
+  const borders=['#E8404A','#F5C842','#5BAD5A','#4A90C4','#F0698A','#9B6DFF'];
+  if(list.length===0){
+    document.getElementById('student-grid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">👩‍🏫</div><div style="font-size:18px;font-weight:800">No students yet!</div><div style="font-size:14px;font-weight:700;margin-top:6px">Click "+ Add Student" to build your class</div></div>`;
+    updateDashStats();return;
+  }
+  document.getElementById('student-grid').innerHTML=list.map((s,i)=>{
+    const stars='⭐'.repeat(Math.min(s.stars,5))+'☆'.repeat(Math.max(0,5-Math.min(s.stars,5)));
+    const level=s.stars>=10?'Gold Champion':s.stars>=6?'Silver Star':s.stars>=3?'Rising Learner':'Star Seedling';
+    const bc=borders[i%borders.length];
+    const dots=AVATAR_COLORS.map((c,ci)=>`<div class="color-dot${s.color===c?' active':''}" style="background:${c}" onclick="event.stopPropagation();changeColor(${s.id},'${c}',this)"></div>`).join('');
+    return`<div class="student-card" id="card-${s.id}" style="border-color:${bc};cursor:pointer" onclick="openProfile(${s.id})" title="Click to view ${s.name}'s profile">
+      <button class="delete-student" onclick="event.stopPropagation();confirmDelete(${s.id},'${s.name.replace(/'/g,"\\'")}')">✕</button>
+      <div style="position:absolute;top:0;left:0;right:0;height:7px;background:${bc};border-radius:16px 16px 0 0"></div>
+      <div class="s-avatar" id="avatar-${s.id}" style="background:${s.color}" onclick="event.stopPropagation();cycleColor(${s.id})" title="Click to change color">${s.name.slice(0,2).toUpperCase()}</div>
+      <div class="s-avatar-hint">tap to recolor</div>
+      <div class="s-name-wrap">
+        <div class="s-name" id="sname-${s.id}" onclick="event.stopPropagation();startEditName(${s.id})" title="Click to edit name">${s.name}</div>
+
+        <input class="s-name-input" id="sinput-${s.id}" type="text" value="${s.name}" maxlength="20"
+          onblur="saveStudentName(${s.id})"
+          onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')cancelEditName(${s.id})">
+      </div>
+      <div class="s-grade-wrap">
+        <select class="s-grade-select" onclick="event.stopPropagation()" onchange="changeGrade(${s.id},this.value)">
+          ${['K','1','2','3','4','5'].map(g=>`<option value="${g}"${s.grade===g?' selected':''}>${g==='K'?'Kinder':'Gr '+g}</option>`).join('')}
+        </select>
+        <span class="s-level">${level}</span>
+      </div>
+      <div class="stars-row">${stars}</div>
+      <div class="s-points">${s.stars} ⭐</div>
+      <div class="star-btns">
+        <button class="remove-star" onclick="event.stopPropagation();removeStar(${s.id})">−</button>
+        <button class="add-star" onclick="event.stopPropagation();addStar(${s.id})">+ Star</button>
+      </div>
+      <div class="color-dots">${dots}</div>
+    </div>`;
+  }).join('');
+  updateDashStats();
+}
+function filterStudents(v){renderStudents(v);}
+function startEditName(id){document.getElementById('sname-'+id).classList.add('hidden');const inp=document.getElementById('sinput-'+id);inp.classList.add('visible');inp.focus();inp.select();}
+async function saveStudentName(id){
+  const inp=document.getElementById('sinput-'+id);const val=inp.value.trim();
+  const s=students.find(x=>x.id===id);if(!s)return;
+  if(val)s.name=val;
+  inp.classList.remove('visible');
+  document.getElementById('sname-'+id).classList.remove('hidden');
+  document.getElementById('sname-'+id).textContent=s.name;
+  document.getElementById('avatar-'+id).textContent=s.name.slice(0,2).toUpperCase();
+  await sb.from('students').update({name:s.name}).eq('id',id);
+  updateDashStats();
+}
+function cancelEditName(id){const s=students.find(x=>x.id===id);document.getElementById('sinput-'+id).value=s?s.name:'';document.getElementById('sinput-'+id).classList.remove('visible');document.getElementById('sname-'+id).classList.remove('hidden');}
+async function changeColor(id,color,dot){
+  const s=students.find(x=>x.id===id);if(!s)return;s.color=color;
+  const av=document.getElementById('avatar-'+id);if(av)av.style.background=color;
+  const card=document.getElementById('card-'+id);if(card){card.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));dot.classList.add('active');}
+  await sb.from('students').update({color}).eq('id',id);
+}
+const colorIdx={};
+async function cycleColor(id){
+  const s=students.find(x=>x.id===id);if(!s)return;
+  if(colorIdx[id]===undefined)colorIdx[id]=AVATAR_COLORS.indexOf(s.color);
+  colorIdx[id]=(colorIdx[id]+1)%AVATAR_COLORS.length;
+  const c=AVATAR_COLORS[colorIdx[id]];s.color=c;
+  const av=document.getElementById('avatar-'+id);if(av)av.style.background=c;
+  const card=document.getElementById('card-'+id);if(card){card.querySelectorAll('.color-dot').forEach((d,i)=>d.classList.toggle('active',AVATAR_COLORS[i]===c));}
+  await sb.from('students').update({color:c}).eq('id',id);
+}
+async function changeGrade(id,grade){const s=students.find(x=>x.id===id);if(s){s.grade=grade;await sb.from('students').update({grade}).eq('id',id);}}
+async function addStar(id){
+  const s=students.find(x=>x.id===id);if(!s)return;s.stars++;
+  renderStudents();updateDashStats();
+  await sb.from('students').update({stars:s.stars}).eq('id',id);
+  ['⭐','🌟','✨'].forEach((em,i)=>{setTimeout(()=>{const b=document.createElement('div');b.className='confetti-burst';b.textContent=em;b.style.left=(40+i*12)+'%';document.body.appendChild(b);setTimeout(()=>b.remove(),1200);},i*130);});
+  showToast('⭐ Star given to '+s.name+'! Total: '+s.stars);
+}
+async function removeStar(id){
+  const s=students.find(x=>x.id===id);if(!s||s.stars<=0)return;s.stars--;
+  renderStudents();updateDashStats();
+  await sb.from('students').update({stars:s.stars}).eq('id',id);
+  showToast('⭐ Star removed from '+s.name+'. Total: '+s.stars);
+}
+function confirmDelete(id,name){
+  pendingDeleteId=id;
+  document.getElementById('confirm-text').textContent='Remove '+name+' from the class? Their stars will be lost.';
+  document.getElementById('confirm-yes-btn').onclick=()=>deleteStudent(id);
+  document.getElementById('confirm-modal').classList.remove('hidden');
+}
+function closeConfirm(){document.getElementById('confirm-modal').classList.add('hidden');pendingDeleteId=null;}
+async function deleteStudent(id){
+  const s=students.find(x=>x.id===id);
+  students=students.filter(x=>x.id!==id);
+  closeConfirm();renderStudents();
+  await sb.from('students').delete().eq('id',id);
+  showToast('🗑 '+(s?s.name:'Student')+' removed from class.');
+}
+function openAddStudent(){
+  document.getElementById('avatar-picker').innerHTML=AVATAR_COLORS.map((c,i)=>`<div class="av-opt${i===0?' sel':''}" style="background:${c}" onclick="selectAvatar(${i},this)">${'ABCDEFGHIJ'[i]}</div>`).join('');
+  selectedAvatar=0;document.getElementById('s-name-input').value='';
+  document.getElementById('add-student-modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('s-name-input').focus(),100);
+}
+function closeAddStudent(){document.getElementById('add-student-modal').classList.add('hidden');}
+function selectAvatar(i,el){selectedAvatar=i;document.querySelectorAll('.av-opt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+async function addStudent(){
+  const name=document.getElementById('s-name-input').value.trim();
+  const grade=document.getElementById('s-grade-input').value;
+  if(!name){showToast('Please enter a student name!');return;}
+  if(students.find(s=>s.name.toLowerCase()===name.toLowerCase())){showToast('A student named '+name+' already exists!');return;}
+  const color=AVATAR_COLORS[selectedAvatar];
+  const{data:newS}=await sb.from('students').insert({teacher_id:currentUser.id,name,grade,color,stars:0}).select().single();
+  if(newS){students.push(newS);}else{students.push({id:Date.now(),name,grade,color,stars:0});}
+  closeAddStudent();renderStudents();showToast('🎉 '+name+' joined the class!');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!document.getElementById('add-student-modal').classList.contains('hidden'))addStudent();});
+
+// ── TIMER ──
+function setPreset(min){
+  clearInterval(timerInterval);timerRunning=false;timerTotal=min*60;timerRemaining=min*60;
+  document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='READY';
+  document.getElementById('timer-big').style.color='var(--text)';
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));
+  updateTimerDisplay();updateRing();
+}
+function setCustom(){const v=parseInt(document.getElementById('custom-min').value);if(v&&v>0&&v<=60)setPreset(v);}
+function setTimerActivity(name,min){setPreset(min);document.getElementById('timer-label').textContent=name.toUpperCase();showToast('⏱ '+name+' — '+min+' min timer set!');showScreen('timer',document.querySelectorAll('.nav-btn')[2]);}
+function toggleTimer(){
+  if(timerRunning){clearInterval(timerInterval);timerRunning=false;document.getElementById('start-btn').textContent='▶ Resume';document.getElementById('timer-label').textContent='PAUSED';}
+  else{if(timerRemaining<=0){resetTimer();return;}timerRunning=true;document.getElementById('start-btn').textContent='⏸ Pause';document.getElementById('timer-label').textContent='RUNNING';timerInterval=setInterval(tickTimer,1000);}
+}
+function tickTimer(){
+  timerRemaining--;updateTimerDisplay();updateRing();
+  if(timerRemaining<=0){clearInterval(timerInterval);timerRunning=false;document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='DONE! 🎉';document.getElementById('timer-big').style.color='var(--greenDark)';showToast('🎉 Time is up! Great job, class!');}
+  else if(timerRemaining<=30){document.getElementById('timer-big').style.color='var(--redDark)';}
+}
+function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerRemaining=timerTotal;document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='READY';document.getElementById('timer-big').style.color='var(--text)';updateTimerDisplay();updateRing();}
+function updateTimerDisplay(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;document.getElementById('timer-big').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function updateRing(){const pct=timerRemaining/timerTotal;const ring=document.getElementById('ring-prog');if(ring){ring.style.strokeDashoffset=CIRC*(1-pct);ring.style.stroke=pct>0.33?'var(--red)':'var(--yellow)';}}
+function toggleSound(){soundOn=!soundOn;const tog=document.getElementById('sound-tog');tog.classList.toggle('on',soundOn);document.getElementById('sound-label').textContent=soundOn?'Sound On':'Sound Off';}
+
+// ── SCHEDULE ──
+let schedItems=[
+  {id:1,emoji:'🌅',text:'Morning Meeting',time:'',done:false},
+  {id:2,emoji:'📖',text:'Reading Time',time:'',done:false},
+  {id:3,emoji:'🧮',text:'Math Practice',time:'',done:false},
+  {id:4,emoji:'🧠',text:'Brain Break',time:'',done:false},
+  {id:5,emoji:'🍎',text:'Lunch',time:'',done:false},
+  {id:6,emoji:'📝',text:'Writing Workshop',time:'',done:false},
+  {id:7,emoji:'🏃',text:'Recess / Movement',time:'',done:false},
+  {id:8,emoji:'🏠',text:'Pack Up & Go Home',time:'',done:false},
+];
+const EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸'];
+let emojiIdx=0;
+
+// Save all schedule items to DB (full replace)
+async function saveSchedToDB(){
+  if(!currentUser)return;
+  await sb.from('schedule_items').delete().eq('teacher_id',currentUser.id);
+  if(schedItems.length===0)return;
+  const rows=schedItems.map((item,i)=>({teacher_id:currentUser.id,emoji:item.emoji,text:item.text,time_label:item.time||'',done:item.done,position:i}));
+  await sb.from('schedule_items').insert(rows);
+}
+
+function renderSchedule(){
+  document.getElementById('sched-editor').innerHTML=schedItems.map(item=>`
+    <div class="sched-row">
+      <button class="sched-emoji" onclick="cycleEmoji(${item.id})">${item.emoji}</button>
+      <input type="time" class="sched-time" value="${item.time||''}"
+        onchange="updateSchedTime(${item.id},this.value)"
+        title="Set time">
+      <input class="sched-input" value="${item.text}"
+        onblur="updateSchedText(${item.id},this.value)"
+        onkeydown="if(event.key==='Enter'){this.blur();}"
+        placeholder="Activity name...">
+      <div class="sched-done-check${item.done?' checked':''}" onclick="toggleSchedDone(${item.id})">${item.done?'✓':''}</div>
+      <button class="sched-delete" onclick="deleteSchedItem(${item.id})">×</button>
+    </div>`).join('');
+  updateSchedProgress();
+}
+function updateSchedTime(id,val){
+  const s=schedItems.find(x=>x.id===id);
+  if(s&&s.time!==val){s.time=val;saveSchedToDB();}
+}
+function cycleEmoji(id){const s=schedItems.find(x=>x.id===id);if(!s)return;emojiIdx=(emojiIdx+1)%EMOJIS.length;s.emoji=EMOJIS[emojiIdx];renderSchedule();saveSchedToDB();}
+function updateSchedText(id,val){const s=schedItems.find(x=>x.id===id);if(s&&s.text!==val){s.text=val;saveSchedToDB();}}
+function toggleSchedDone(id){const s=schedItems.find(x=>x.id===id);if(!s)return;s.done=!s.done;renderSchedule();saveSchedToDB();if(s.done)showToast('✅ "'+s.text+'" done!');}
+function deleteSchedItem(id){schedItems=schedItems.filter(x=>x.id!==id);renderSchedule();saveSchedToDB();}
+function addSchedItem(){schedItems.push({id:Date.now(),emoji:'📌',text:'New Activity',time:'',done:false});renderSchedule();saveSchedToDB();}
+function updateSchedProgress(){
+  const done=schedItems.filter(x=>x.done).length,total=schedItems.length,pct=total?Math.round(done/total*100):0;
+  const pt=document.getElementById('prog-text');const pf=document.getElementById('prog-fill');
+  if(pt)pt.textContent=done+' / '+total+' done';if(pf)pf.style.width=pct+'%';
+}
+const TEMPLATES={
+  morning:[{emoji:'🌅',text:'Arrival & Unpack'},{emoji:'📖',text:'Morning Meeting'},{emoji:'🧮',text:'Math Warm-Up'},{emoji:'💨',text:'Breathing Break'},{emoji:'📝',text:'Writing Time'},{emoji:'🧠',text:'Brain Break'}],
+  afternoon:[{emoji:'🍎',text:'Lunch & Recess'},{emoji:'📚',text:'Reading Block'},{emoji:'🎨',text:'Art / Centers'},{emoji:'🧪',text:'Science / SS'},{emoji:'🏠',text:'Pack Up & Dismiss'}],
+  full:[{emoji:'🌅',text:'Morning Meeting'},{emoji:'📖',text:'Reading Block'},{emoji:'🧮',text:'Math Practice'},{emoji:'🧠',text:'Brain Break'},{emoji:'📝',text:'Writing Workshop'},{emoji:'🍎',text:'Lunch'},{emoji:'🎨',text:'Art / Specials'},{emoji:'📚',text:'Science / Social Studies'},{emoji:'🏃',text:'Recess / Movement'},{emoji:'🏠',text:'Pack Up & Go Home'}]
+};
+function loadTemplate(t){schedItems=TEMPLATES[t].map((item,i)=>({id:Date.now()+i,emoji:item.emoji,text:item.text,time:'',done:false}));renderSchedule();saveSchedToDB();showToast('📋 Template loaded!');}
+function clearSched(){schedItems=[];renderSchedule();saveSchedToDB();}
+
+// ── ACTIVITIES ──
+const ACTIVITIES=[
+  {id:1,title:'Simon Says',icon:'🙌',cat:'game',time:'5 min',grades:'K-5',bg:'#E8404A',tc:'#fff',desc:'Classic listening & focus game',steps:['Stand up and push chairs in','Teacher or student leads as Simon','Call "Simon Says touch your nose!"','Anyone who moves without Simon Says sits out','Last one standing wins a star!']},
+  {id:2,title:'Mindful Minute',icon:'🌙',cat:'break',time:'1 min',grades:'K-5',bg:'#4A90C4',tc:'#fff',desc:'Quick calm-down & refocus',steps:['Ask everyone to close or rest eyes','Listen: what sounds do you hear?','Feel your feet on the floor','Take 3 big slow breaths','Open eyes — ready to learn!']},
+  {id:3,title:'Freeze Dance',icon:'🕺',cat:'move',time:'5 min',grades:'K-3',bg:'#F0698A',tc:'#fff',desc:'Move & freeze to music',steps:['Clear a small space in the room','Play fun music — everyone dances!','When music stops, FREEZE completely','Hold until music starts again','Practice 5-6 rounds for a great break']},
+  {id:4,title:'Animal Walk',icon:'🐘',cat:'move',time:'5 min',grades:'K-2',bg:'#5BAD5A',tc:'#fff',desc:'Move like different animals',steps:['Call out an animal (elephant, crab, frog)','Students walk around the room that way','Switch animals every 30 seconds','Try: bear crawl, bunny hop, snake slide','End by slithering back to seats']},
+  {id:5,title:'20 Questions',icon:'🤔',cat:'game',time:'5 min',grades:'2-5',bg:'#F5C842',tc:'#3A2800',desc:'Guessing game for critical thinking',steps:['One student thinks of an object or animal','Class asks yes or no questions only','Keep score — must guess in 20 questions','Award a star to the winner','Great for language arts connection!']},
+  {id:6,title:'Pass the Clap',icon:'👏',cat:'break',time:'3 min',grades:'K-5',bg:'#9B6DFF',tc:'#fff',desc:'Rhythm & attention warm-up',steps:['Sit in a circle or rows','Teacher claps once to student beside them','That student passes the clap along','Try to keep a steady rhythm','Speed up for a challenge!']},
+  {id:7,title:'Yoga Poses',icon:'🧘',cat:'break',time:'5 min',grades:'1-5',bg:'#5BAD5A',tc:'#fff',desc:'Calming poses for focus & calm',steps:['Stand beside desks with space','Try Tree Pose: balance on one foot','Try Mountain Pose: tall and still','Try Warrior: big strong stance','End with a deep breath seated']},
+  {id:8,title:'Brain Teasers',icon:'🧩',cat:'game',time:'5 min',grades:'3-5',bg:'#E8404A',tc:'#fff',desc:'Riddles & puzzles to engage',steps:['Read a riddle aloud to the class','Give 60 seconds of think time','Students whisper answer to neighbor','Reveal the answer together','First correct guesser gets a star!']},
+  {id:9,title:'Shake It Out',icon:'🤸',cat:'move',time:'3 min',grades:'K-5',bg:'#F0698A',tc:'#fff',desc:'Wiggle away restless energy',steps:['Stand by desks with space','Shake right hand 8 times!','Shake left hand 8 times!','Shake right foot 8 times!','Shake left foot 8 times!','Try 4, then 2, then 1!']},
+  {id:10,title:'Category Race',icon:'📝',cat:'game',time:'5 min',grades:'2-5',bg:'#4A90C4',tc:'#fff',desc:'Name things in a category',steps:['Choose a category (animals, foods, etc.)','Go around — each student names one','If you repeat or pause, sit down','Keep going until one student is left','Give that student a star!']},
+  {id:11,title:'Wall Push-Ups',icon:'💪',cat:'move',time:'3 min',grades:'1-5',bg:'#F5C842',tc:'#3A2800',desc:'Proprioception for focus',steps:['Stand arms-length from the wall','Place palms flat on the wall','Slowly do 10 push-ups against wall','These provide calming deep pressure','Perfect for students needing sensory input!']},
+  {id:12,title:'Draw & Share',icon:'🎨',cat:'break',time:'5 min',grades:'K-5',bg:'#9B6DFF',tc:'#fff',desc:'Creative expression break',steps:['Hand out paper or whiteboards','Give a prompt: Draw your happy place','Students draw quietly for 3 minutes','Invite 2-3 to share their drawing','Display drawings to celebrate creativity']},
+];
+function renderActivities(filter='all'){
+  const list=filter==='all'?ACTIVITIES:ACTIVITIES.filter(a=>a.cat===filter);
+  document.getElementById('activity-grid').innerHTML=list.map(a=>`
+    <div class="activity-card" style="background:${a.bg};color:${a.tc||'#fff'};border-color:rgba(0,0,0,0.15)" onclick="openActivity(${a.id})">
+      <span class="ac-time-badge">${a.time}</span>
+      <span class="ac-icon">${a.icon}</span>
+      <div class="ac-title">${a.title}</div>
+      <div class="ac-desc">${a.desc}</div>
+      <span class="ac-grade">Gr ${a.grades}</span>
+    </div>`).join('');
+}
+function filterActivities(cat,btn){
+  document.querySelectorAll('#activities > div:nth-child(2) button').forEach(b=>{b.style.background='#fff';b.style.color='var(--muted)';b.style.borderColor='#E8D5C0';b.style.boxShadow='none';});
+  btn.style.background='var(--blueLight)';btn.style.color='var(--blueDark)';btn.style.borderColor='var(--blue)';btn.style.boxShadow='0 3px 0 var(--blue)';
+  renderActivities(cat);
+}
+function openActivity(id){
+  const a=ACTIVITIES.find(x=>x.id===id);if(!a)return;
+  document.getElementById('m-icon').textContent=a.icon;
+  document.getElementById('m-title').textContent=a.title;
+  document.getElementById('m-sub').textContent=a.desc+' · '+a.time+' · Grades '+a.grades;
+  document.getElementById('m-steps').innerHTML=a.steps.map((s,i)=>`<li><div class="step-num">${i+1}</div>${s}</li>`).join('');
+  document.getElementById('activity-modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('activity-modal').classList.add('hidden');}
+function startActivityTimer(){closeModal();showScreen('timer',document.querySelectorAll('.nav-btn')[2]);setPreset(5);showToast('⏱ 5-minute timer started!');setTimeout(toggleTimer,300);}
+
+// ── BREATHING ──
+const BREATH_METHODS=[
+  {id:'belly',name:'Belly Breathing',icon:'🐻',desc:'Deep belly breaths — great for all ages',pattern:[{label:'Breathe In',dur:4},{label:'Breathe Out',dur:6}]},
+  {id:'star',name:'Star Breathing',icon:'⭐',desc:'Trace the star — perfect for K-2!',pattern:[{label:'Up the star',dur:4},{label:'Down the star',dur:4},{label:'Up the star',dur:4},{label:'Down the star',dur:4},{label:'Up the star',dur:4}]},
+  {id:'box',name:'Box Breathing',icon:'📦',desc:'4-4-4-4 pattern for focus & calm',pattern:[{label:'Breathe In',dur:4},{label:'Hold',dur:4},{label:'Breathe Out',dur:4},{label:'Hold',dur:4}]},
+  {id:'478',name:'4-7-8 Calm',icon:'🌊',desc:'Relaxing for anxiety & big feelings',pattern:[{label:'Breathe In',dur:4},{label:'Hold',dur:7},{label:'Breathe Out',dur:8}]},
+  {id:'dino',name:'Dino Breathing',icon:'🦕',desc:'Silly roar exhale — fun for little ones!',pattern:[{label:'Big breathe in',dur:3},{label:'ROAR it out!',dur:3}]},
+  {id:'flower',name:'Smell the Flower',icon:'🌸',desc:'Smell and blow — calming for K-3',pattern:[{label:'Smell the flower',dur:4},{label:'Blow the petals',dur:6}]},
+];
+function renderBreathing(){
+  document.getElementById('breathing-grid').innerHTML=BREATH_METHODS.map(m=>`
+    <div class="breath-card" id="bc-${m.id}" onclick="selectBreath('${m.id}')">
+      <div class="breath-icon">${m.icon}</div>
+      <div class="breath-name">${m.name}</div>
+      <div class="breath-desc">${m.desc}</div>
+    </div>`).join('');
+}
+function selectBreath(id){
+  breathMethod=BREATH_METHODS.find(m=>m.id===id);
+  document.querySelectorAll('.breath-card').forEach(c=>c.classList.remove('active-breath'));
+  const el=document.getElementById('bc-'+id);if(el)el.classList.add('active-breath');
+  document.getElementById('breath-phase').textContent=breathMethod.name;
+  document.getElementById('breath-count').textContent='Press Start to begin';
+  document.getElementById('breath-circle').textContent=breathMethod.icon;
+  document.getElementById('cycle-count').textContent='';stopBreath();
+}
+function toggleBreath(){if(!breathMethod){showToast('Choose a breathing method first!');return;}breathRunning?stopBreath():startBreath();}
+function startBreath(){breathRunning=true;breathStep=0;breathCycles=0;document.getElementById('breath-start').textContent='⏸ Pause';runBreathStep();}
+function runBreathStep(){
+  if(!breathRunning)return;
+  const phase=breathMethod.pattern[breathStep%breathMethod.pattern.length];
+  document.getElementById('breath-phase').textContent=phase.label;
+  document.getElementById('breath-circle').textContent=breathMethod.icon;
+  const circle=document.getElementById('breath-circle');circle.className='breath-circle';
+  const lbl=phase.label.toLowerCase();
+  if(lbl.includes('in')||lbl.includes('smell')||lbl.includes('up'))circle.classList.add('inhale');
+  else if(lbl.includes('hold'))circle.classList.add('hold');
+  else circle.classList.add('exhale');
+  let count=phase.dur;document.getElementById('breath-count').textContent=count;
+  const tick=setInterval(()=>{
+    if(!breathRunning){clearInterval(tick);return;}
+    count--;document.getElementById('breath-count').textContent=count>0?count:'';
+    if(count<=0){clearInterval(tick);breathStep++;
+      if(breathStep%breathMethod.pattern.length===0){breathCycles++;document.getElementById('cycle-count').textContent='Completed '+breathCycles+' cycle'+(breathCycles>1?'s':'');}
+      setTimeout(()=>{if(breathRunning)runBreathStep();},350);}
+  },1000);
+}
+function stopBreath(){breathRunning=false;document.getElementById('breath-start').textContent='▶ Start';document.getElementById('breath-circle').className='breath-circle';document.getElementById('breath-circle').textContent=breathMethod?breathMethod.icon:'🌱';document.getElementById('breath-phase').textContent=breathMethod?breathMethod.name:'Pick a method above!';document.getElementById('breath-count').textContent=breathMethod?'Press Start to begin':'Then press Start';}
+
+// ── TOOLS ──
+const NOISE_LABELS=['','🤫 Silent Work','🤏 Whisper Only','💬 Partner Talk','👥 Group Work','📣 Loud / Outside'];
+const NOISE_DESCS=['','Eyes on your work. No talking.','Quiet voices only. Stay focused.','Talk softly with your partner.','Work together in your group.','Outside voices — enjoy the energy!'];
+const NOISE_COLORS=['','#347A33','#6A9A00','#C49A00','#B85A00','#B52830'];
+const NOISE_BORDER=['','#5BAD5A','#A8CC44','#F5C842','#F0903D','#E8404A'];
+let currentNoise=1;
+function setNoise(level){
+  currentNoise=level;
+  const bigLabel=document.getElementById('noise-big-label');
+  const bigDesc=document.getElementById('noise-big-desc');
+  if(bigLabel){bigLabel.textContent=NOISE_LABELS[level];bigLabel.style.color=NOISE_COLORS[level];}
+  if(bigDesc)bigDesc.textContent=NOISE_DESCS[level];
+  for(let i=1;i<=5;i++){
+    const btn=document.getElementById('nsb'+i);
+    if(!btn)continue;
+    btn.classList.remove('ns-active','ns-below','ns-inactive');
+    if(i===level)btn.classList.add('ns-active');
+    else if(i<level)btn.classList.add('ns-below');
+    else btn.classList.add('ns-inactive');
+  }
+  const card=document.querySelector('.noise-fullscreen-card');
+  if(card)card.style.borderColor=NOISE_BORDER[level];
+}
+// ── MOOD CHECK-IN SYSTEM ──
+const EMOTION_SUGGESTIONS={Happy:'Keep up the great energy! Consider a reward star.',Calm:'Perfect for focused work time!',Sad:'Offer a quiet check-in or buddy system today.',Frustrated:'Try a short breathing break or movement activity.',Worried:'Review the visual schedule and offer quiet reassurance.'};
+const MOOD_EMOJI={Happy:'😄',Calm:'😌',Sad:'😢',Frustrated:'😤',Worried:'😟'};
+const moodData={}; // { studentId: 'Happy' }
+let moodWho=null;
+
+function renderMoodWhoButtons(){
+  const wrap=document.getElementById('mood-who-btns');
+  if(!wrap)return;
+  if(students.length===0){
+    wrap.innerHTML='<div style="font-size:13px;color:var(--muted);font-weight:700;padding:6px 0">Add students to the Star Board first to use Mood Check-In.</div>';
+    return;
+  }
+  wrap.innerHTML=students.map(s=>`<button class="sensory-who-btn${moodWho===s.id?' active':''}" id="mwb-${s.id}" onclick="selectMoodWho(${s.id})" style="${moodWho===s.id?'background:'+s.color+';border-color:'+s.color+';color:#fff':''}">${s.name.slice(0,2).toUpperCase()} ${s.name}${moodData[s.id]?' '+MOOD_EMOJI[moodData[s.id]]:''}</button>`).join('');
+}
+
+function selectMoodWho(id){
+  moodWho=id;
+  renderMoodWhoButtons();
+  const s=students.find(x=>x.id===id);
+  const bar=document.getElementById('mood-selected-bar');
+  const nameEl=document.getElementById('mood-selected-name');
+  const grid=document.getElementById('mood-grid');
+  if(bar)bar.style.display='flex';
+  if(nameEl&&s){nameEl.textContent='👤 '+s.name;nameEl.style.color=s.color;}
+  if(grid){grid.style.opacity='1';grid.style.pointerEvents='auto';}
+  // Restore current mood selection for this student
+  const cur=moodData[id];
+  document.querySelectorAll('#mood-grid .emotion-btn').forEach(b=>b.classList.remove('sel'));
+  if(cur){
+    const match=[...document.querySelectorAll('#mood-grid .emotion-btn')].find(b=>b.querySelector('.em')&&b.querySelector('.em').parentElement===b&&b.textContent.includes(cur));
+    if(match)match.classList.add('sel');
+  }
+  const sug=document.getElementById('mood-suggestion');
+  if(sug)sug.textContent=cur?'💡 '+EMOTION_SUGGESTIONS[cur]:'';
+}
+
+async function selectMood(el,name){
+  if(!moodWho){showToast('Select a student first!');return;}
+  document.querySelectorAll('#mood-grid .emotion-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  moodData[moodWho]=name;
+  const sug=document.getElementById('mood-suggestion');
+  if(sug)sug.textContent='💡 '+EMOTION_SUGGESTIONS[name];
+  renderMoodWhoButtons();
+  renderMoodSummary();
+  // Log to DB with timestamp
+  if(currentUser&&typeof moodWho==='number'){
+    const{data:saved}=await sb.from('mood_logs').insert({teacher_id:currentUser.id,student_id:moodWho,mood:name}).select().single();
+    if(saved)moodLogs.unshift({id:saved.id,studentId:moodWho,mood:name,loggedAt:saved.logged_at});
+  }
+}
+
+function renderMoodSummary(){
+  const el=document.getElementById('mood-summary');
+  if(!el)return;
+  const entries=students.filter(s=>moodData[s.id]);
+  if(entries.length===0){el.innerHTML='';return;}
+  el.innerHTML='<div class="sensory-sum-title">📋 Today\'s Moods</div>'
+    +entries.map(s=>`<div class="sensory-sum-row"><span class="sensory-sum-who" style="color:${s.color}">${s.name}</span><span class="sensory-sum-needs">${MOOD_EMOJI[moodData[s.id]]} ${moodData[s.id]} — ${EMOTION_SUGGESTIONS[moodData[s.id]]}</span></div>`).join('');
+}
+
+// legacy shim
+function selectEmotion(el,name){selectMood(el,name);}
+// ── SENSORY NEEDS SYSTEM ──
+// sensoryData: { 'class': Set, studentId: Set, ... }
+const sensoryData={class:new Set()};
+let sensoryWho='class';
+
+function renderSensoryWhoButtons(){
+  const wrap=document.getElementById('sensory-who-btns');
+  if(!wrap)return;
+  // Build buttons: Whole Class + each student
+  wrap.innerHTML=`<button class="sensory-who-btn sw-class${sensoryWho==='class'?' active':''}" id="swb-class" onclick="selectSensoryWho('class')">🏫 Whole Class</button>`
+    +students.map(s=>`<button class="sensory-who-btn${sensoryWho===s.id?' active':''}" id="swb-${s.id}" onclick="selectSensoryWho(${s.id})" style="--who-color:${s.color}">${s.name.slice(0,2).toUpperCase()} ${s.name}</button>`).join('');
+  // Ensure sensoryData exists for each student
+  students.forEach(s=>{if(!sensoryData[s.id])sensoryData[s.id]=new Set();});
+}
+
+function selectSensoryWho(who){
+  sensoryWho=who;
+  renderSensoryWhoButtons();
+  // Update selected bar name
+  const nameEl=document.getElementById('sensory-selected-name');
+  if(nameEl){
+    if(who==='class'){nameEl.textContent='🏫 Whole Class';}
+    else{const s=students.find(x=>x.id===who);nameEl.textContent=s?'👤 '+s.name:'Selected';}
+  }
+  renderSensoryTags();
+}
+
+function renderSensoryTags(){
+  const activeSet=sensoryData[sensoryWho]||new Set();
+  document.querySelectorAll('#sensory-tags-grid .sensory-tag').forEach(btn=>{
+    const need=btn.dataset.need;
+    const on=activeSet.has(need);
+    btn.classList.toggle('sen-active',on);
+    btn.style.opacity=on?'1':'0.75';
+    btn.style.fontWeight=on?'900':'700';
+  });
+  renderSensorySummary();
+}
+
+async function toggleSensoryNeed(btn){
+  const need=btn.dataset.need;
+  if(!sensoryData[sensoryWho])sensoryData[sensoryWho]=new Set();
+  const set=sensoryData[sensoryWho];
+  const adding=!set.has(need);
+  if(adding){set.add(need);}else{set.delete(need);}
+  renderSensoryTags();
+  // Log to DB for student (not whole class)
+  if(currentUser&&sensoryWho!=='class'&&typeof sensoryWho==='number'){
+    const{data:saved}=await sb.from('sensory_logs').insert({teacher_id:currentUser.id,student_id:sensoryWho,need,active:adding}).select().single();
+    if(saved)sensoryLogs.unshift({id:saved.id,studentId:sensoryWho,need,active:adding,loggedAt:saved.logged_at});
+  }
+}
+
+function renderSensorySummary(){
+  const el=document.getElementById('sensory-summary');
+  if(!el)return;
+  // Build summary of ALL students + class that have active needs
+  const lines=[];
+  if(sensoryData['class']&&sensoryData['class'].size>0){
+    lines.push('<div class="sensory-sum-row"><span class="sensory-sum-who">🏫 Whole Class</span><span class="sensory-sum-needs">'+[...sensoryData['class']].join(', ')+'</span></div>');
+  }
+  students.forEach(s=>{
+    const set=sensoryData[s.id];
+    if(set&&set.size>0){
+      lines.push('<div class="sensory-sum-row"><span class="sensory-sum-who" style="color:'+s.color+'">'+s.name+'</span><span class="sensory-sum-needs">'+[...set].join(', ')+'</span></div>');
+    }
+  });
+  if(lines.length===0){el.innerHTML='';return;}
+  el.innerHTML='<div class="sensory-sum-title">📋 Active Needs</div>'+lines.join('');
+}
+
+// old toggleSensory shim (not used but kept safe)
+function toggleSensory(el){el.classList.toggle('sen-active');el.style.opacity=el.classList.contains('sen-active')?'1':'0.75';}
+const notes=[];
+let editingNoteId=null;
+
+function renderNotesLog(){
+  const el=document.getElementById('notes-log');
+  if(!el)return;
+  if(notes.length===0){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px;text-align:center;font-weight:700">Your notes will appear here</div>';
+    return;
+  }
+  el.innerHTML=notes.map(n=>`
+    <div class="note-item" id="note-${n.id}">
+      <div class="note-item-header">
+        <div class="note-time">${n.time}</div>
+        <div class="note-actions">
+          <button class="note-action-btn note-edit-btn" onclick="openEditNote(${n.id})" title="Edit note">✏️</button>
+          <button class="note-action-btn note-del-btn" onclick="deleteNote(${n.id})" title="Delete note">🗑</button>
+        </div>
+      </div>
+      <div class="note-body">${n.text}</div>
+    </div>`).join('');
+}
+
+async function saveNote(){
+  const ta=document.getElementById('note-input');const text=ta.value.trim();
+  if(!text){showToast('Write a note first!');return;}
+  const sel=document.getElementById('notes-student-sel');
+  const studentId=sel&&sel.value?parseInt(sel.value):null;
+  const now=new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(currentUser){
+    const row={teacher_id:currentUser.id,text};
+    if(studentId)row.student_id=studentId;
+    const{data:saved}=await sb.from('teacher_notes').insert(row).select().single();
+    notes.unshift({id:saved?.id||Date.now(),text,studentId,time:now,created_at:saved?.created_at||new Date().toISOString()});
+  }else{
+    notes.unshift({id:Date.now(),text,studentId,time:now,created_at:new Date().toISOString()});
+  }
+  renderNotesLog();
+  ta.value='';showToast('📝 Note saved!');
+}
+function renderNotesStudentDropdown(){
+  const sel=document.getElementById('notes-student-sel');
+  if(!sel)return;
+  sel.innerHTML='<option value="">📋 General note (no student)</option>'
+    +students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function openEditNote(id){
+  const n=notes.find(x=>x.id===id);if(!n)return;
+  editingNoteId=id;
+  document.getElementById('edit-note-input').value=n.text;
+  document.getElementById('edit-note-modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('edit-note-input').focus(),100);
+}
+function closeEditNote(){
+  document.getElementById('edit-note-modal').classList.add('hidden');
+  editingNoteId=null;
+}
+async function saveEditNote(){
+  const text=document.getElementById('edit-note-input').value.trim();
+  if(!text){showToast('Note cannot be empty!');return;}
+  const n=notes.find(x=>x.id===editingNoteId);
+  if(!n){closeEditNote();return;}
+  n.text=text;
+  if(currentUser&&typeof editingNoteId==='number'&&editingNoteId>1000000){
+    await sb.from('teacher_notes').update({text}).eq('id',editingNoteId);
+  }
+  renderNotesLog();
+  closeEditNote();
+  showToast('✅ Note updated!');
+}
+async function deleteNote(id){
+  notes.splice(notes.findIndex(x=>x.id===id),1);
+  renderNotesLog();
+  if(currentUser){await sb.from('teacher_notes').delete().eq('id',id);}
+  showToast('🗑 Note deleted.');
+}
+
+// ── QUICK ACTIONS ──
+function quickBreath(){showScreen('breathing',document.querySelectorAll('.nav-btn')[5]);if(!breathMethod){selectBreath('belly');}startBreath();}
+function quickBreak(){openActivity(1);}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── TUTORIAL ──
+function openTutorial(){
+  document.getElementById('tutorial-overlay').classList.remove('hidden');
+}
+function closeTutorial(){
+  document.getElementById('tutorial-overlay').classList.add('hidden');
+  localStorage.setItem('bs_tutorial_seen','1');
+}
+
+
+
+// ── PAYWALL (disabled — everything is free) ──
+function openPaywall(){}
+function closePaywall(){}
+
+// ── STUDENT PROFILE ──
+function openProfile(studentId){
+  const s=students.find(x=>x.id===studentId);
+  if(!s)return;
+  document.getElementById('profile-avatar').textContent=s.name.slice(0,2).toUpperCase();
+  document.getElementById('profile-avatar').style.background=s.color;
+  document.getElementById('profile-name').textContent=s.name;
+  document.getElementById('profile-grade').textContent='Grade '+s.grade;
+  document.getElementById('profile-stars-big').textContent='⭐ '+s.stars+' stars earned';
+
+  // Moods for this student
+  const sMoods=moodLogs.filter(m=>m.studentId===studentId);
+  const mEl=document.getElementById('profile-moods');
+  if(mEl){
+    mEl.innerHTML=sMoods.length?sMoods.map(m=>`
+      <div class="profile-log-item">
+        <div class="profile-log-time">${new Date(m.loggedAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="profile-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div>
+      </div>`).join(''):'<div class="profile-empty">No mood check-ins recorded yet.</div>';
+  }
+
+  // Sensory for this student
+  const sSens=sensoryLogs.filter(l=>l.studentId===studentId&&l.active);
+  const sEl=document.getElementById('profile-sensory');
+  if(sEl){
+    sEl.innerHTML=sSens.length?sSens.map(l=>`
+      <div class="profile-log-item">
+        <div class="profile-log-time">${new Date(l.loggedAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="profile-log-val">🫁 ${l.need}</div>
+      </div>`).join(''):'<div class="profile-empty">No sensory needs logged yet.</div>';
+  }
+
+  // Notes for this student
+  const sNotes=notes.filter(n=>n.studentId===studentId);
+  const nEl=document.getElementById('profile-notes');
+  if(nEl){
+    nEl.innerHTML=sNotes.length?sNotes.map(n=>`
+      <div class="profile-log-item">
+        <div class="profile-log-time">${n.time}</div>
+        <div class="profile-log-val">${n.text}</div>
+      </div>`).join(''):'<div class="profile-empty">No notes for this student yet.</div>';
+  }
+
+  document.getElementById('profile-overlay').classList.remove('hidden');
+}
+function closeProfile(){document.getElementById('profile-overlay').classList.add('hidden');}
+
+// ── WEEKLY REPORT ──
+function openReport(){
+  const sel=document.getElementById('report-student-sel');
+  if(sel){
+    sel.innerHTML='<option value="">— Select a student —</option>'
+      +students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  }
+  const now=new Date();
+  const weekStart=new Date(now);weekStart.setDate(now.getDate()-now.getDay());
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
+  const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});
+  const wl=document.getElementById('report-week-label');
+  if(wl)wl.textContent='Week of '+fmt(weekStart)+' – '+fmt(weekEnd);
+  document.getElementById('report-overlay').classList.remove('hidden');
+  document.getElementById('report-body').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above to view their weekly report.</div>';
+}
+function closeReport(){document.getElementById('report-overlay').classList.add('hidden');}
+
+function renderReportForStudent(idStr){
+  if(!idStr){document.getElementById('report-body').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above.</div>';return;}
+  const studentId=parseInt(idStr);
+  const s=students.find(x=>x.id===studentId);
+  if(!s)return;
+
+  // 7-day window
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
+  const inWeek=d=>new Date(d)>=cutoff;
+
+  const wMoods=moodLogs.filter(m=>m.studentId===studentId&&inWeek(m.loggedAt));
+  const wSens=sensoryLogs.filter(l=>l.studentId===studentId&&l.active&&inWeek(l.loggedAt));
+  const wNotes=notes.filter(n=>n.studentId===studentId&&n.created_at&&inWeek(n.created_at));
+
+  const fmtDT=d=>new Date(d).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  const moodRows=wMoods.length?wMoods.map(m=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(m.loggedAt)}</div><div class="report-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div></div>`).join(''):'<div class="report-empty">No mood check-ins this week.</div>';
+  const sensRows=wSens.length?wSens.map(l=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(l.loggedAt)}</div><div class="report-log-val">🫁 ${l.need}</div></div>`).join(''):'<div class="report-empty">No sensory needs logged this week.</div>';
+  const noteRows=wNotes.length?wNotes.map(n=>`<div class="report-log-row"><div class="report-log-time">${n.time}</div><div class="report-log-val">${n.text}</div></div>`).join(''):'<div class="report-empty">No notes this week.</div>';
+
+  document.getElementById('report-body').innerHTML=`
+    <div class="report-student-header">
+      <div class="report-s-avatar" style="background:${s.color}">${s.name.slice(0,2).toUpperCase()}</div>
+      <div>
+        <div class="report-s-name">${s.name}</div>
+        <div class="report-s-stars">⭐ ${s.stars} total stars · Grade ${s.grade}</div>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">⭐ Stars Earned This Week</div>
+      <div style="font-size:28px;font-weight:900;color:var(--red);padding:8px 0">${s.stars} ⭐ total</div>
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">😊 Mood Check-Ins</div>${moodRows}
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">🫁 Sensory Needs</div>${sensRows}
+    </div>
+    <div class="report-section">
+      <div class="report-section-title">📝 Teacher Notes</div>${noteRows}
+    </div>`;
+}
+
+function emailReport(){
+  const sel=document.getElementById('report-student-sel');
+  if(!sel||!sel.value){showToast('Select a student first!');return;}
+  const s=students.find(x=>x.id===parseInt(sel.value));
+  if(!s)return;
+  const subject=encodeURIComponent('BrainSprout Weekly Report — '+s.name);
+  const body=encodeURIComponent('Please find the weekly report for '+s.name+' attached from BrainSprout. Use the Print or Download option in the app for a formatted copy.');
+  window.open('mailto:?subject='+subject+'&body='+body);
+}
+function downloadReport(){
+  const sel=document.getElementById('report-student-sel');
+  if(!sel||!sel.value){showToast('Select a student first!');return;}
+  window.print();
+}
+
+// ── REFERRAL ──
+function copyReferralCode(){
+  const code=document.getElementById('my-referral-code')?.textContent;
+  if(!code||code==='---'){showToast('No referral code found.');return;}
+  navigator.clipboard.writeText(code).then(()=>showToast('📋 Code copied: '+code));
+}
+async function applyReferralCode(){
+  const code=document.getElementById('referral-input')?.value.trim().toUpperCase();
+  if(!code){showToast('Enter a referral code first.');return;}
+  if(teacherProfile?.referred_by){showToast('You have already used a referral code.');return;}
+  // Find the referrer
+  const{data:referrer}=await sb.from('teachers').select('id,plan').eq('referral_code',code).single();
+  if(!referrer){showToast('Code not found. Check the code and try again.');return;}
+  if(referrer.id===currentUser.id){showToast("You can't use your own referral code!");return;}
+  // Check referrer hasn't already referred someone
+  const{data:existingRef}=await sb.from('referrals').select('id').eq('referrer_id',referrer.id);
+  if(existingRef&&existingRef.length>0){showToast('That teacher has already used their referral. One referral per teacher.');return;}
+  // Apply: give both teachers 1 month credit (set plan to 'plus' for 1 month)
+  // In production this would be done server-side; here we flag it for manual review
+  await sb.from('referrals').insert({referrer_id:referrer.id,referred_id:currentUser.id,credit_applied:false});
+  await sb.from('teachers').update({referred_by:code}).eq('id',currentUser.id);
+  teacherProfile.referred_by=code;
+  document.getElementById('referral-status').textContent='🎉 Code applied! Both you and the referring teacher will receive 1 free month. Our team will apply the credit within 24 hours.';
+  document.getElementById('referral-input').value='';
+  showToast('🎉 Referral code applied!');
+}
+
+// ── INIT ──
+init();
+</script>
+
+
+
+<!-- STUDENT PROFILE MODAL -->
+<div class="profile-overlay hidden" id="profile-overlay">
+  <div class="profile-modal">
+    <div class="profile-header" id="profile-header">
+      <div class="profile-avatar" id="profile-avatar"></div>
+      <div>
+        <div class="profile-name" id="profile-name"></div>
+        <div class="profile-grade" id="profile-grade"></div>
+        <div class="profile-stars-big" id="profile-stars-big"></div>
+      </div>
+      <button class="profile-close" onclick="closeProfile()">✕</button>
+    </div>
+    <div class="profile-body">
+      <div class="profile-section">
+        <div class="profile-section-title">😊 Mood Check-In History</div>
+        <div id="profile-moods"></div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">🫁 Sensory Needs History</div>
+        <div id="profile-sensory"></div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-section-title">📝 Teacher Notes</div>
+        <div id="profile-notes"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY REPORT MODAL -->
+<div class="report-overlay hidden" id="report-overlay">
+  <div class="report-modal">
+    <div class="report-header">
+      <div>
+        <h2>📊 Weekly Report</h2>
+        <p id="report-week-label">Week of —</p>
+      </div>
+      <button class="report-close" onclick="closeReport()">✕</button>
+    </div>
+    <div class="report-student-select">
+      <label style="font-size:13px;font-weight:900;color:#fff;white-space:nowrap">Student:</label>
+      <select class="report-sel" id="report-student-sel" onchange="renderReportForStudent(this.value)">
+        <option value="">— Select a student —</option>
+      </select>
+    </div>
+    <div class="report-body" id="report-body">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above to view their weekly report.</div>
+    </div>
+    <div class="report-actions">
+      <button class="report-btn report-btn-print" onclick="window.print()">🖨 Print Report</button>
+      <button class="report-btn report-btn-email" onclick="emailReport()">📧 Email Report</button>
+      <button class="report-btn report-btn-dl" onclick="downloadReport()">⬇️ Download PDF</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT NOTE MODAL -->
+<div class="modal-overlay hidden" id="edit-note-modal" style="z-index:400">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="closeEditNote()">✕</button>
+    <div class="modal-title" style="font-size:22px;margin-bottom:16px">✏️ Edit Note</div>
+    <textarea class="note-area" id="edit-note-input" rows="4" style="font-size:15px"></textarea>
+    <button class="save-note" style="width:100%;margin-top:10px;border-radius:16px;font-size:15px" onclick="saveEditNote()">💾 Save Changes</button>
+  </div>
+</div>
+</body>
+</html>
