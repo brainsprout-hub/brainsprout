@@ -605,7 +605,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div><div class="logo-text">BrainSprout</div><div class="logo-sub">Supporting Every Learner</div></div>
     </div>
     <div class="header-right">
-      <span class="beta-pill">FREE BETA</span>
+      <span id="plan-badge" style="background:var(--blueLight);color:var(--blueDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--blue)">Free Plan</span>
+      <button onclick="openPaywall()" id="upgrade-header-btn" style="background:var(--yellow);color:var(--yellowDark);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;border:3px solid var(--yellowDark);cursor:pointer;font-family:'Baloo 2',cursive;white-space:nowrap;box-shadow:0 3px 0 var(--yellowDark)">⬆ Upgrade</button>
       <div class="teacher-pill-wrap">
         <div class="teacher-pill" id="teacher-pill" onclick="startEditTeacher()" title="Click to edit">
           <span id="teacher-display">🍎 My Class</span>
@@ -631,6 +632,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="screen active">
+    <div id="trial-banner" style="display:none;background:var(--yellow);border:3px solid var(--yellowDark);border-radius:14px;padding:10px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:800;color:var(--yellowDark)">⏳ <span id="trial-days-text">Your 7-day free trial is active!</span> Upgrade before it ends to keep all features.</div>
+      <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--redDark)">🌟 Upgrade Now</button>
+    </div>
     <div class="dash-hero">
       <div class="dash-hero-text">
         <div class="dash-hero-greeting">🌱 Good Morning, <span id="dash-teacher-name">Teacher</span>!</div>
@@ -879,6 +884,12 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <textarea class="note-area" id="note-input" rows="3" placeholder="Add a quick observation about a student's behavior, mood, or needs today..."></textarea>
         <button class="save-note" onclick="saveNote()">💾 Save Note</button>
         <div class="notes-log" id="notes-log"><div style="font-size:13px;color:var(--muted);padding:8px;text-align:center;font-weight:700">Your notes will appear here</div></div>
+        <div class="feat-lock-overlay hidden" id="notes-lock-overlay" onclick="openPaywall()" style="position:absolute;inset:0;background:rgba(255,248,240,0.92);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;cursor:pointer;padding:16px;text-align:center">
+          <div style="font-size:36px;margin-bottom:8px">📝</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px">Pro Plus Feature</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px">Teacher Notes &amp; Weekly Reports require the $5.99/mo Pro Plus plan.</div>
+          <button style="background:#9B6DFF;color:#fff;border:3px solid #6A4DCC;border-radius:12px;padding:8px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #6A4DCC">Upgrade to Pro Plus</button>
+        </div>
       </div>
 <!-- REFERRAL -->
       <div class="tool-card" id="referral-card" style="grid-column:1/-1;position:relative">
@@ -1043,11 +1054,21 @@ function getStripe(){
 }
 
 // ── PLAN HELPERS ──
-// ── PLAN HELPERS (everything free) ──
-function getPlan(){return "plus";}
-function isInTrial(){return false;}
-function canAccessPro(){return true;}
-function canAccessPlus(){return true;}
+// ── PLAN HELPERS ──
+function getPlan(){
+  const p=teacherProfile?.plan||'free';
+  if(p==='free'&&teacherProfile?.is_pro===true)return 'pro';
+  return p;
+}
+function getTrialDaysLeft(){
+  if(!teacherProfile?.trial_start)return 0;
+  const start=new Date(teacherProfile.trial_start);
+  const diff=7-Math.floor((Date.now()-start.getTime())/(1000*60*60*24));
+  return Math.max(0,diff);
+}
+function isInTrial(){return getTrialDaysLeft()>0&&getPlan()==='free';}
+function canAccessPro(){return getPlan()==='pro'||getPlan()==='plus'||isInTrial();}
+function canAccessPlus(){return getPlan()==='plus'||isInTrial();}
 
 // ── STARTUP ──
 async function init(){
@@ -1107,8 +1128,53 @@ function showAuth(){
   document.getElementById('auth-screen').classList.remove('hidden');
 }
 
-// ── APPLY PLAN UI (no-op — everything free) ──
-function applyPlanUI(){}
+// ── APPLY PLAN UI ──
+function applyPlanUI(){
+  const plan=getPlan();
+  const trial=isInTrial();
+  const daysLeft=getTrialDaysLeft();
+
+  // Header badge
+  const badge=document.getElementById('plan-badge');
+  if(badge){
+    if(plan==='plus'){badge.textContent='⭐ Pro Plus';badge.style.cssText='background:#EDE8FF;color:#4A00CC;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid #9B6DFF';}
+    else if(plan==='pro'){badge.textContent='⭐ Pro';badge.style.cssText='background:var(--greenLight);color:var(--greenDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--green)';}
+    else if(trial){badge.textContent='🕐 Trial: '+daysLeft+'d';badge.style.cssText='background:var(--yellowLight);color:var(--yellowDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--yellow)';}
+    else{badge.textContent='Free Plan';badge.style.cssText='background:var(--blueLight);color:var(--blueDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--blue)';}
+  }
+
+  // Upgrade button — hide if on plus
+  const upgradeBtn=document.getElementById('upgrade-header-btn');
+  if(upgradeBtn){upgradeBtn.style.display=plan==='plus'?'none':'inline-block';}
+
+  // Trial banner
+  const banner=document.getElementById('trial-banner');
+  if(banner){
+    if(trial){
+      banner.style.display='flex';
+      const td=document.getElementById('trial-days-text');
+      if(td)td.textContent=daysLeft===1?'1 day left in your free trial!':daysLeft+' days left in your free trial!';
+    }else{banner.style.display='none';}
+  }
+
+  // Lock overlays
+  const moodLock=document.getElementById('mood-lock-overlay');
+  if(moodLock)moodLock.classList.toggle('hidden',canAccessPro());
+  const sensLock=document.getElementById('sensory-lock-overlay');
+  if(sensLock)sensLock.classList.toggle('hidden',canAccessPro());
+  const notesLock=document.getElementById('notes-lock-overlay');
+  if(notesLock)notesLock.classList.toggle('hidden',canAccessPlus());
+  const refLock=document.getElementById('referral-lock-overlay');
+  if(refLock)refLock.classList.toggle('hidden',canAccessPlus());
+  const reportBtn=document.querySelector('[onclick="openReport()"]');
+  if(reportBtn)reportBtn.style.display=canAccessPlus()?'':'none';
+
+  // Re-render gated content
+  const actGrid=document.getElementById('activity-grid');
+  if(actGrid&&actGrid.children.length>0)renderActivities();
+  const breathGrid=document.getElementById('breathing-grid');
+  if(breathGrid&&breathGrid.children.length>0)renderBreathing();
+}
 
 // ── LOAD DATA ──
 async function loadProfile(){
@@ -1542,16 +1608,20 @@ const ACTIVITIES=[
   {id:11,title:'Wall Push-Ups',icon:'💪',cat:'move',time:'3 min',grades:'1-5',bg:'#F5C842',tc:'#3A2800',desc:'Proprioception for focus',steps:['Stand arms-length from the wall','Place palms flat on the wall','Slowly do 10 push-ups against wall','These provide calming deep pressure','Perfect for students needing sensory input!']},
   {id:12,title:'Draw & Share',icon:'🎨',cat:'break',time:'5 min',grades:'K-5',bg:'#9B6DFF',tc:'#fff',desc:'Creative expression break',steps:['Hand out paper or whiteboards','Give a prompt: Draw your happy place','Students draw quietly for 3 minutes','Invite 2-3 to share their drawing','Display drawings to celebrate creativity']},
 ];
+const FREE_ACTIVITY_IDS=[1,2,3];
 function renderActivities(filter='all'){
   const list=filter==='all'?ACTIVITIES:ACTIVITIES.filter(a=>a.cat===filter);
-  document.getElementById('activity-grid').innerHTML=list.map(a=>`
-    <div class="activity-card" style="background:${a.bg};color:${a.tc||'#fff'};border-color:rgba(0,0,0,0.15)" onclick="openActivity(${a.id})">
+  document.getElementById('activity-grid').innerHTML=list.map(a=>{
+    const locked=!canAccessPro()&&!FREE_ACTIVITY_IDS.includes(a.id);
+    return`<div class="activity-card" style="background:${a.bg};color:${a.tc||'#fff'};border-color:rgba(0,0,0,0.15);${locked?'opacity:.75':''}" onclick="${locked?'openPaywall()':'openActivity('+a.id+')'}">
       <span class="ac-time-badge">${a.time}</span>
+      ${locked?'<span style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,.92);color:#C49A00;border:2px solid #F5C842;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:900">🔒 Pro</span>':''}
       <span class="ac-icon">${a.icon}</span>
       <div class="ac-title">${a.title}</div>
       <div class="ac-desc">${a.desc}</div>
       <span class="ac-grade">Gr ${a.grades}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function filterActivities(cat,btn){
   document.querySelectorAll('#activities > div:nth-child(2) button').forEach(b=>{b.style.background='#fff';b.style.color='var(--muted)';b.style.borderColor='#E8D5C0';b.style.boxShadow='none';});
@@ -1578,13 +1648,17 @@ const BREATH_METHODS=[
   {id:'dino',name:'Dino Breathing',icon:'🦕',desc:'Silly roar exhale — fun for little ones!',pattern:[{label:'Big breathe in',dur:3},{label:'ROAR it out!',dur:3}]},
   {id:'flower',name:'Smell the Flower',icon:'🌸',desc:'Smell and blow — calming for K-3',pattern:[{label:'Smell the flower',dur:4},{label:'Blow the petals',dur:6}]},
 ];
+const FREE_BREATH_IDS=['belly','star'];
 function renderBreathing(){
-  document.getElementById('breathing-grid').innerHTML=BREATH_METHODS.map(m=>`
-    <div class="breath-card" id="bc-${m.id}" onclick="selectBreath('${m.id}')">
+  document.getElementById('breathing-grid').innerHTML=BREATH_METHODS.map(m=>{
+    const locked=!canAccessPro()&&!FREE_BREATH_IDS.includes(m.id);
+    return`<div class="breath-card" id="bc-${m.id}" onclick="${locked?'openPaywall()':"selectBreath('"+m.id+"')"}">
       <div class="breath-icon">${m.icon}</div>
       <div class="breath-name">${m.name}</div>
       <div class="breath-desc">${m.desc}</div>
-    </div>`).join('');
+      ${locked?'<div style="position:absolute;top:8px;right:8px;background:var(--yellowLight);color:var(--yellowDark);border:2px solid var(--yellow);border-radius:8px;padding:2px 8px;font-size:10px;font-weight:900">🔒 Pro</div>':''}
+    </div>`;
+  }).join('');
 }
 function selectBreath(id){
   breathMethod=BREATH_METHODS.find(m=>m.id===id);
@@ -1875,9 +1949,41 @@ function closeTutorial(){
 
 
 
-// ── PAYWALL (disabled — everything is free) ──
-function openPaywall(){}
-function closePaywall(){}
+// ── PAYWALL ──
+function openPaywall(){
+  const el=document.getElementById('paywall-overlay');
+  if(el){el.style.display='flex';}
+}
+function closePaywall(){
+  const el=document.getElementById('paywall-overlay');
+  if(el){el.style.display='none';}
+}
+// Close paywall when clicking outside the box
+document.addEventListener('click',function(e){
+  const overlay=document.getElementById('paywall-overlay');
+  if(overlay&&e.target===overlay)closePaywall();
+});
+
+async function manualPlanRefresh(){
+  if(!currentUser){showToast('Please log in first.');return;}
+  closePaywall();
+  showToast('🔄 Checking your subscription...');
+  const{data:profile}=await sb.from('teachers')
+    .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+    .eq('id',currentUser.id).single();
+  if(profile){
+    teacherProfile=profile;
+    applyPlanUI();
+    renderActivities();
+    renderBreathing();
+    const plan=getPlan();
+    if(plan==='plus'||plan==='pro'){
+      showToast('✅ '+(plan==='plus'?'Pro Plus':'Pro')+' features unlocked!');
+    }else{
+      showToast('No paid plan found yet. If you just paid, wait a moment and try again.');
+    }
+  }
+}
 
 // ── STUDENT PROFILE ──
 function openProfile(studentId){
@@ -2099,6 +2205,70 @@ init();
     <div class="modal-title" style="font-size:22px;margin-bottom:16px">✏️ Edit Note</div>
     <textarea class="note-area" id="edit-note-input" rows="4" style="font-size:15px"></textarea>
     <button class="save-note" style="width:100%;margin-top:10px;border-radius:16px;font-size:15px" onclick="saveEditNote()">💾 Save Changes</button>
+  </div>
+</div>
+
+<!-- PAYWALL MODAL -->
+<div id="paywall-overlay" style="display:none;position:fixed;inset:0;background:rgba(42,31,26,0.7);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--white);border-radius:28px;max-width:560px;width:100%;overflow:hidden;border:5px solid var(--yellow);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)">
+    <div style="background:var(--red);padding:24px 28px;text-align:center;color:#fff;position:relative">
+      <button onclick="closePaywall()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,.3);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:#fff;font-weight:900">✕</button>
+      <div style="font-size:42px">🌟</div>
+      <h2 style="font-size:26px;font-weight:900;text-shadow:2px 2px 0 var(--redDark);margin-top:8px">Upgrade BrainSprout</h2>
+      <p style="font-size:14px;opacity:.9;font-weight:700;margin-top:4px">Unlock more tools for your classroom</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:3px solid #E8D5C0">
+
+      <!-- FREE -->
+      <div style="padding:20px 16px;text-align:center;border-right:3px solid #E8D5C0">
+        <div style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Free</div>
+        <div style="font-size:30px;font-weight:900;color:var(--text)">$0</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px">forever</div>
+        <ul style="list-style:none;padding:0;text-align:left;font-size:12px;font-weight:700;color:var(--text)">
+          <li style="padding:3px 0">✓ Star Reward Board</li>
+          <li style="padding:3px 0">✓ Visual Schedule</li>
+          <li style="padding:3px 0">✓ Timer &amp; Noise Level</li>
+          <li style="padding:3px 0">✓ 1 game, 1 brain break, 1 movement</li>
+          <li style="padding:3px 0">✓ 2 breathing methods</li>
+        </ul>
+        <button style="background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;width:100%;margin-top:8px;cursor:default;box-shadow:0 4px 0 #E8D5C0">Current Plan</button>
+      </div>
+
+      <!-- PRO -->
+      <div style="padding:20px 16px;text-align:center;border-right:3px solid #E8D5C0;background:#FFF8F0">
+        <div style="background:var(--yellow);color:var(--yellowDark);font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:6px">⭐ Most Popular</div>
+        <div style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Pro</div>
+        <div style="font-size:30px;font-weight:900;color:var(--text)">$3.99</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px">per month</div>
+        <ul style="list-style:none;padding:0;text-align:left;font-size:12px;font-weight:700;color:var(--text)">
+          <li style="padding:3px 0">✓ Everything in Free</li>
+          <li style="padding:3px 0">✓ All 12 activities</li>
+          <li style="padding:3px 0">✓ All 6 breathing methods</li>
+          <li style="padding:3px 0">✓ Mood Check-In per student</li>
+          <li style="padding:3px 0">✓ Sensory Needs tracker</li>
+        </ul>
+        <button onclick="startCheckout('pro')" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;width:100%;box-shadow:0 4px 0 var(--redDark);transition:all .2s;margin-top:8px">Upgrade to Pro</button>
+      </div>
+
+      <!-- PRO PLUS -->
+      <div style="padding:20px 16px;text-align:center">
+        <div style="font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Pro Plus</div>
+        <div style="font-size:30px;font-weight:900;color:var(--text)">$5.99</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px">per month</div>
+        <ul style="list-style:none;padding:0;text-align:left;font-size:12px;font-weight:700;color:var(--text)">
+          <li style="padding:3px 0">✓ Everything in Pro</li>
+          <li style="padding:3px 0">✓ Teacher Notes</li>
+          <li style="padding:3px 0">✓ Student Profiles</li>
+          <li style="padding:3px 0">✓ Weekly Reports</li>
+          <li style="padding:3px 0">✓ Referral Rewards</li>
+        </ul>
+        <button onclick="startCheckout('plus')" style="background:#9B6DFF;color:#fff;border:3px solid #6A4DCC;border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;width:100%;box-shadow:0 4px 0 #6A4DCC;transition:all .2s;margin-top:8px">Upgrade to Pro Plus</button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);font-weight:700;padding:14px;border-top:2px solid #E8D5C0">
+      🔒 Secured by Stripe · Cancel anytime · 7-day free trial for new accounts
+      <br><button onclick="manualPlanRefresh()" style="background:none;border:none;font-family:'Baloo 2',cursive;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;margin-top:6px;text-decoration:underline">Already paid? Click here to refresh your plan</button>
+    </div>
   </div>
 </div>
 </body>
