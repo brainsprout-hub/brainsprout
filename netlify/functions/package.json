@@ -1,0 +1,9 @@
+{
+  "name": "brainsprout-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for BrainSprout",
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
