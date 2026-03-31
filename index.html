@@ -655,9 +655,167 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <button class="qa-btn qa6" onclick="showScreen('tools',document.querySelectorAll('.nav-btn')[6])"><span class="qa-icon">😊</span>Mood Check</button>
     </div>
     <div class="today-card">
-    <!-- TOOLS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <h3>🏫 Today's Flow</h3>
+        <button onclick="addDashItem()" style="background:var(--green);border:3px solid var(--greenDark);border-radius:14px;padding:7px 16px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)">+ Add Item</button>
+      </div>
+      <div id="dash-schedule"></div>
+      <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Click any item to edit · Check ✓ to mark done · × to remove</div>
+    </div>
+  </div>
+
+  <!-- REWARDS -->
+  <div id="rewards" class="screen">
+    <div class="sec-title">⭐ Star Board</div>
+    <div class="reward-toolbar">
+      <button class="add-student-btn" onclick="openAddStudent()">+ Add Student</button>
+      <div class="class-total">🏆 Class Stars: <span id="total-stars">0</span></div>
+      <select class="filter-select" onchange="filterStudents(this.value)">
+        <option value="all">All Students</option>
+        <option value="top">Top Stars ⬆</option>
+        <option value="low">Needs Encouragement ❤️</option>
+      </select>
+    </div>
+    <div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:12px">💡 Click a name to edit · Click avatar to change color · ✕ to remove</div>
+    <div class="student-grid" id="student-grid"></div>
+  </div>
+
+  <!-- TIMER -->
+  <div id="timer" class="screen">
+    <div class="sec-title">⏱ Classroom Timer</div>
+    <div class="card">
+      <div class="timer-wrapper">
+        <div class="timer-ring">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle class="bg" cx="100" cy="100" r="86"/>
+            <circle class="prog" id="ring-prog" cx="100" cy="100" r="86" stroke-dasharray="540" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-inner"><div class="timer-big" id="timer-big">05:00</div><div class="timer-sub" id="timer-label">READY</div></div>
+        </div>
+        <div class="preset-grid">
+          <button class="preset-btn" onclick="setPreset(1)"><span class="preset-icon">⚡</span>1 min</button>
+          <button class="preset-btn sel" onclick="setPreset(5)"><span class="preset-icon">⏱</span>5 min</button>
+          <button class="preset-btn" onclick="setPreset(10)"><span class="preset-icon">📖</span>10 min</button>
+          <button class="preset-btn" onclick="setPreset(15)"><span class="preset-icon">✏️</span>15 min</button>
+          <button class="preset-btn" onclick="setPreset(20)"><span class="preset-icon">🎨</span>20 min</button>
+          <button class="preset-btn" onclick="setPreset(30)"><span class="preset-icon">🏫</span>30 min</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin:10px 0">
+          <label style="font-size:13px;font-weight:900;color:var(--muted)">Custom:</label>
+          <input type="number" id="custom-min" min="1" max="60" placeholder="min" style="width:70px;border:3px solid #E8D5C0;border-radius:12px;padding:8px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;text-align:center;color:var(--text);background:var(--cream);outline:none">
+          <button onclick="setCustom()" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:12px;padding:8px 14px;font-family:'Baloo 2',cursive;font-weight:900;cursor:pointer;font-size:13px;box-shadow:0 3px 0 var(--blueDark)">Set</button>
+        </div>
+        <div class="timer-controls">
+          <button class="tc-btn tc-reset" onclick="resetTimer()">↺ Reset</button>
+          <button class="tc-btn tc-start" id="start-btn" onclick="toggleTimer()">▶ Start</button>
+        </div>
+        <div class="sound-row"><button class="toggle on" id="sound-tog" onclick="toggleSound()"></button><span id="sound-label">Sound On</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="font-size:20px;margin-bottom:14px">🎯 Quick Activity Timers</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+        <button onclick="setTimerActivity('Work Time',20)" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--blueDark);font-size:13px;box-shadow:0 3px 0 var(--blue)">📝 Work Time<br><small>20 min</small></button>
+        <button onclick="setTimerActivity('Reading',15)" style="background:var(--greenLight);border:3px solid var(--green);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--greenDark);font-size:13px;box-shadow:0 3px 0 var(--green)">📚 Reading<br><small>15 min</small></button>
+        <button onclick="setTimerActivity('Brain Break',5)" style="background:var(--pinkLight);border:3px solid var(--pink);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--pinkDark);font-size:13px;box-shadow:0 3px 0 var(--pink)">🧠 Brain Break<br><small>5 min</small></button>
+        <button onclick="setTimerActivity('Cleanup',3)" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--yellowDark);font-size:13px;box-shadow:0 3px 0 var(--yellow)">🧹 Cleanup<br><small>3 min</small></button>
+        <button onclick="setTimerActivity('Snack',10)" style="background:var(--redLight);border:3px solid var(--red);border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:var(--redDark);font-size:13px;box-shadow:0 3px 0 var(--red)">🍎 Snack<br><small>10 min</small></button>
+        <button onclick="setTimerActivity('Transition',2)" style="background:#EDE8FF;border:3px solid #9B6DFF;border-radius:16px;padding:12px;cursor:pointer;font-family:'Baloo 2',cursive;font-weight:900;color:#4A00CC;font-size:13px;box-shadow:0 3px 0 #9B6DFF">🔄 Transition<br><small>2 min</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="schedule" class="screen">
+    <div class="sec-title">📋 Visual Schedule</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:20px;font-weight:900">Today's Plan</div>
+        <button onclick="window.print()" style="background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--text);box-shadow:0 3px 0 #E8D5C0">🖨 Print</button>
+      </div>
+      <div class="sched-editor" id="sched-editor"></div>
+      <button class="add-sched-btn" onclick="addSchedItem()">+ Add Activity</button>
+  <p style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Set a time · Click the emoji to change it · Click text to rename · ✓ to mark done</p>
+      <div style="margin-top:14px">
+        <div style="font-size:13px;font-weight:900;color:var(--muted)">Progress: <span id="prog-text">0 / 0 done</span></div>
+        <div class="sched-prog-bar"><div class="sched-prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="font-size:20px;margin-bottom:14px">⚡ Quick Templates</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button onclick="loadTemplate('morning')" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellow)">🌅 Morning</button>
+        <button onclick="loadTemplate('afternoon')" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--blueDark);box-shadow:0 3px 0 var(--blue)">☀️ Afternoon</button>
+        <button onclick="loadTemplate('full')" style="background:var(--greenLight);border:3px solid var(--green);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--greenDark);box-shadow:0 3px 0 var(--green)">📅 Full Day</button>
+        <button onclick="clearSched()" style="background:var(--redLight);border:3px solid var(--red);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--redDark);box-shadow:0 3px 0 var(--red)">🗑 Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITIES -->
+  <div id="activities" class="screen">
+    <div class="sec-title">🎮 Brain Breaks &amp; Games</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button onclick="filterActivities('all',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid var(--blue);background:var(--blueLight);color:var(--blueDark);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive;box-shadow:0 3px 0 var(--blue)">All</button>
+      <button onclick="filterActivities('game',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🎮 Games</button>
+      <button onclick="filterActivities('break',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🧠 Brain Breaks</button>
+      <button onclick="filterActivities('move',this)" style="padding:8px 16px;font-size:13px;cursor:pointer;border:3px solid #E8D5C0;background:#fff;color:var(--muted);border-radius:22px;font-weight:900;font-family:'Baloo 2',cursive">🏃 Movement</button>
+    </div>
+    <div class="activity-grid" id="activity-grid"></div>
+  </div>
+
+  <!-- BREATHING -->
+  <div id="breathing" class="screen">
+    <div class="sec-title">💨 Breathing Methods</div>
+    <div class="breathing-grid" id="breathing-grid"></div>
+    <div class="breath-player">
+      <div class="breath-circle" id="breath-circle">🌱</div>
+      <div class="breath-phase" id="breath-phase">Pick a method above!</div>
+      <div class="breath-count" id="breath-count">Then press Start</div>
+      <div class="breath-controls">
+        <button class="bc-btn bc-start" id="breath-start" onclick="toggleBreath()">▶ Start</button>
+        <button class="bc-btn bc-stop" onclick="stopBreath()">⏹ Stop</button>
+      </div>
+      <div class="cycle-count" id="cycle-count"></div>
+    </div>
+  </div>
+
+  <!-- NOISE LEVEL -->
+  <div id="noise" class="screen">
+    <div class="sec-title">🔊 Noise Expectation</div>
+    <div class="noise-fullscreen-card">
+      <div class="noise-big-label" id="noise-big-label">🤫 Silent Work</div>
+      <div class="noise-big-desc" id="noise-big-desc">Eyes on your work. No talking.</div>
+      <div class="noise-stair-wrap">
+        <div class="noise-stair-btn nsb1 ns-active" id="nsb1" onclick="setNoise(1)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">🤫 Silent</div>
+        </div>
+        <div class="noise-stair-btn nsb2 ns-inactive" id="nsb2" onclick="setNoise(2)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">🤏 Whisper</div>
+        </div>
+        <div class="noise-stair-btn nsb3 ns-inactive" id="nsb3" onclick="setNoise(3)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">💬 Partner</div>
+        </div>
+        <div class="noise-stair-btn nsb4 ns-inactive" id="nsb4" onclick="setNoise(4)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">👥 Group</div>
+        </div>
+        <div class="noise-stair-btn nsb5 ns-inactive" id="nsb5" onclick="setNoise(5)">
+          <div class="noise-stair-bar"></div>
+          <div class="noise-stair-label">📣 Loud</div>
+        </div>
+      </div>
+      <div class="noise-tip">👆 Tap a level to set the expectation for your whole class</div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
   <div id="tools" class="screen">
     <div class="sec-title">🛠 Classroom Tools</div>
+
     <div class="tools-grid">
 
       <!-- MOOD CHECK-IN -->
@@ -885,8 +1043,8 @@ function getStripe(){
 }
 
 // ── PLAN HELPERS ──
-// ── PLAN HELPERS (all features free) ──
-function getPlan(){return 'plus';}
+// ── PLAN HELPERS (everything free) ──
+function getPlan(){return "plus";}
 function isInTrial(){return false;}
 function canAccessPro(){return true;}
 function canAccessPlus(){return true;}
@@ -949,7 +1107,7 @@ function showAuth(){
   document.getElementById('auth-screen').classList.remove('hidden');
 }
 
-// ── APPLY PLAN UI (no-op — all features free) ──
+// ── APPLY PLAN UI (no-op — everything free) ──
 function applyPlanUI(){}
 
 // ── LOAD DATA ──
@@ -1093,7 +1251,7 @@ function showScreen(id,btn){
   if(id==='activities')renderActivities();
   if(id==='breathing')renderBreathing();
   if(id==='schedule')renderSchedule();
-  if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();applyPlanUI();}
+  if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();}
 }
 
 // ── DASHBOARD FLOW ──
@@ -1395,7 +1553,6 @@ function renderActivities(filter='all'){
       <span class="ac-grade">Gr ${a.grades}</span>
     </div>`).join('');
 }
-
 function filterActivities(cat,btn){
   document.querySelectorAll('#activities > div:nth-child(2) button').forEach(b=>{b.style.background='#fff';b.style.color='var(--muted)';b.style.borderColor='#E8D5C0';b.style.boxShadow='none';});
   btn.style.background='var(--blueLight)';btn.style.color='var(--blueDark)';btn.style.borderColor='var(--blue)';btn.style.boxShadow='0 3px 0 var(--blue)';
@@ -1429,7 +1586,6 @@ function renderBreathing(){
       <div class="breath-desc">${m.desc}</div>
     </div>`).join('');
 }
-
 function selectBreath(id){
   breathMethod=BREATH_METHODS.find(m=>m.id===id);
   document.querySelectorAll('.breath-card').forEach(c=>c.classList.remove('active-breath'));
@@ -1719,10 +1875,9 @@ function closeTutorial(){
 
 
 
-// ── PAYWALL (disabled) ──
+// ── PAYWALL (disabled — everything is free) ──
 function openPaywall(){}
 function closePaywall(){}
-async function manualPlanRefresh(){showToast("All features are free during beta!");}
 
 // ── STUDENT PROFILE ──
 function openProfile(studentId){
@@ -1930,8 +2085,6 @@ init();
     </div>
     <div class="report-actions">
       <button class="report-btn report-btn-print" onclick="window.print()">🖨 Print Report</button>
-      <button class="report-btn report-btn-email" onclick="emailReport()">📧 Email Report</button>
-      <button class="report-btn report-btn-dl" onclick="downloadReport()">⬇️ Download PDF</button>
     </div>
   </div>
 </div>
@@ -1946,6 +2099,5 @@ init();
     <button class="save-note" style="width:100%;margin-top:10px;border-radius:16px;font-size:15px" onclick="saveEditNote()">💾 Save Changes</button>
   </div>
 </div>
-
 </body>
 </html>
