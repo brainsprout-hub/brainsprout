@@ -6,6 +6,7 @@
 <title>BrainSprout — Supporting Every Learner</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -597,7 +598,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="header-right">
       <span id="plan-badge" style="background:var(--blueLight);color:var(--blueDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--blue)">Free Plan</span>
       <button onclick="openPaywall()" id="upgrade-header-btn" style="background:var(--yellow);color:var(--yellowDark);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;border:3px solid var(--yellowDark);cursor:pointer;font-family:'Baloo 2',cursive;white-space:nowrap;box-shadow:0 3px 0 var(--yellowDark)">⬆ Upgrade</button>
-      <button onclick="openCustomerPortal()" id="manage-sub-btn" style="display:none;background:rgba(255,255,255,0.2);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;border:2px solid rgba(255,255,255,0.35);cursor:pointer;font-family:'Baloo 2',cursive;white-space:nowrap">⚙️ Manage Plan</button>
+      <button onclick="showScreen('account',document.querySelectorAll('.nav-btn')[document.querySelectorAll('.nav-btn').length-2])" id="manage-sub-btn" style="display:none;background:rgba(255,255,255,0.2);color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;border:2px solid rgba(255,255,255,0.35);cursor:pointer;font-family:'Baloo 2',cursive;white-space:nowrap">⚙️ Manage Plan</button>
       <div class="teacher-pill-wrap">
         <div class="teacher-pill" id="teacher-pill" onclick="startEditTeacher()" title="Click to edit">
           <span id="teacher-display">🍎 My Class</span>
@@ -926,7 +927,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <!-- Contact card -->
     <div class="card">
       <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">✉️ Contact Support</h3>
-      <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:16px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
+      <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
+      <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span style="color:var(--blue)">brainsprouthelp@gmail.com</span></p>
       <div class="auth-field"><label>Your Name</label><input class="auth-input" id="help-name" type="text" placeholder="Your name"></div>
       <div class="auth-field"><label>Subject</label><input class="auth-input" id="help-subject" type="text" placeholder="e.g. I can't log in, billing question..."></div>
       <div class="auth-field"><label>Message</label><textarea class="note-area" id="help-message" rows="5" placeholder="Describe your issue or question..." style="margin-top:0"></textarea></div>
@@ -1095,6 +1097,9 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── SUPABASE ──
+// ── EMAILJS ──
+emailjs.init('4g-KcfAo4gykPDQbobrPy');
+
 const{createClient}=supabase;
 const sb=createClient(
   'https://qxsyxemaxlgrqyksqnpe.supabase.co',
@@ -2288,10 +2293,58 @@ async function updateEmail(){
 }
 
 function openCustomerPortal(){
-  // Stripe customer portal — set your portal URL in Stripe Dashboard
-  // Settings → Billing → Customer portal → copy the portal link
-  const portalUrl='https://billing.stripe.com/p/login/14A8wP5fo2zL3lr0rKenS00';
-  window.open(portalUrl,'_blank');
+  // Kept as fallback — redirect to account screen instead
+  showScreen('account', document.querySelectorAll('.nav-btn')[document.querySelectorAll('.nav-btn').length-2]);
+}
+function showCancelConfirm(){
+  document.getElementById('cancel-confirm-box').style.display='block';
+}
+function hideCancelConfirm(){
+  document.getElementById('cancel-confirm-box').style.display='none';
+  const msg=document.getElementById('cancel-result-msg');
+  if(msg)msg.style.display='none';
+}
+async function confirmCancel(){
+  const btn=document.getElementById('confirm-cancel-btn');
+  const msg=document.getElementById('cancel-result-msg');
+  if(btn){btn.disabled=true;btn.textContent='Canceling...';}
+  try{
+    const res=await fetch('/.netlify/functions/cancel-subscription',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId:currentUser.id,userEmail:currentUser.email})
+    });
+    const data=await res.json();
+    if(data.success){
+      if(msg){
+        msg.style.display='block';
+        msg.style.color='var(--greenDark)';
+        msg.style.background='var(--greenLight)';
+        msg.style.padding='10px';
+        msg.style.borderRadius='10px';
+        msg.style.border='2px solid var(--green)';
+        msg.textContent='✅ Subscription canceled. You keep Pro access until '+data.periodEnd+'.';
+      }
+      // Update local state
+      if(teacherProfile)teacherProfile.plan='canceling';
+      if(btn){btn.disabled=true;btn.textContent='Canceled';}
+      showToast('Subscription canceled. Pro access continues until billing period ends.');
+    } else {
+      if(msg){
+        msg.style.display='block';
+        msg.style.color='var(--redDark)';
+        msg.textContent='Error: '+(data.error||'Could not cancel. Please email brainsprouthelp@gmail.com');
+      }
+      if(btn){btn.disabled=false;btn.textContent='Yes, Cancel';}
+    }
+  }catch(e){
+    if(msg){
+      msg.style.display='block';
+      msg.style.color='var(--redDark)';
+      msg.textContent='Something went wrong. Please email brainsprouthelp@gmail.com to cancel.';
+    }
+    if(btn){btn.disabled=false;btn.textContent='Yes, Cancel';}
+  }
 }
 
 async function updatePassword(){
@@ -2323,29 +2376,46 @@ async function sendHelpEmail(){
   const subject=document.getElementById('help-subject').value.trim();
   const message=document.getElementById('help-message').value.trim();
   const sentEl=document.getElementById('help-sent-msg');
+  const btn=document.querySelector('[onclick="sendHelpEmail()"]');
   if(!message){showToast('Please write a message first.');return;}
   if(!subject){showToast('Please add a subject.');return;}
-  // Save to Supabase support_messages table
+  // Disable button while sending
+  if(btn){btn.disabled=true;btn.textContent='Sending...';}
   try{
-    await sb.from('support_messages').insert({
-      name:name||'Unknown',
-      email:currentUser?.email||'Unknown',
-      subject:subject,
-      message:message,
-      plan:getPlan(),
-      sent_at:new Date().toISOString()
+    // Send via EmailJS directly to brainsprouthelp@gmail.com
+    await emailjs.send('service_iadblll','template_u7i08t7',{
+      from_name: name||'A BrainSprout Teacher',
+      from_email: currentUser?.email||'Unknown',
+      subject: '[BrainSprout] '+subject,
+      message: message,
+      plan: getPlan(),
+      reply_to: currentUser?.email||''
     });
+    // Also save to Supabase as a backup record
+    try{
+      await sb.from('support_messages').insert({
+        name:name||'Unknown',
+        email:currentUser?.email||'Unknown',
+        subject:subject,
+        message:message,
+        plan:getPlan(),
+        sent_at:new Date().toISOString()
+      });
+    }catch(e){console.log('Supabase backup failed:',e);}
+    // Show success
+    if(sentEl){
+      sentEl.style.display='block';
+      sentEl.textContent="✅ Message sent! We'll reply to "+(currentUser?.email||"your email")+" within 1-2 business days.";
+    }
+    document.getElementById('help-message').value='';
+    document.getElementById('help-subject').value='';
+    showToast('✅ Message sent!');
   }catch(e){
-    console.log('Support table not set up yet, logging message:', message);
+    showToast('Failed to send. Please email brainsprouthelp@gmail.com directly.');
+    console.error('EmailJS error:',e);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='📧 Send Message';}
   }
-  // Show success message only after submission
-  if(sentEl){
-    sentEl.style.display='block';
-    sentEl.textContent="✅ Message sent! We'll reply to "+(currentUser?.email||"your email")+" within 1-2 business days.";
-  }
-  document.getElementById('help-message').value='';
-  document.getElementById('help-subject').value='';
-  showToast('✅ Message sent!');
 }
 
 // ── INIT ──
