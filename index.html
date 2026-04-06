@@ -890,7 +890,16 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       </div>
       <div id="account-cancel-row" style="display:none">
         <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">To cancel your subscription, click below. You'll keep Pro access until the end of your billing period.</p>
-        <a id="account-cancel-link" href="#" onclick="openCustomerPortal();return false;" target="_blank" style="display:inline-block;background:var(--cream);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;text-decoration:none;box-shadow:0 3px 0 var(--redDark)">🚫 Cancel Subscription</button></a>
+        <button onclick="showCancelConfirm()" style="background:var(--cream);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--red)">🚫 Cancel Subscription</button>
+        <div id="cancel-confirm-box" style="display:none;margin-top:14px;background:var(--redLight);border:3px solid var(--red);border-radius:16px;padding:16px">
+          <div style="font-size:15px;font-weight:900;color:var(--redDark);margin-bottom:8px">Are you sure you want to cancel?</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px">You'll keep Pro access until the end of your billing period. After that, only free features will be available.</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="confirmCancel()" id="confirm-cancel-btn" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--redDark)">Yes, Cancel My Subscription</button>
+            <button onclick="hideCancelConfirm()" style="background:var(--white);color:var(--text);border:3px solid #E8D5C0;border-radius:12px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 #E8D5C0">Keep My Subscription</button>
+          </div>
+          <div id="cancel-result-msg" style="margin-top:10px;font-size:13px;font-weight:700;display:none;padding:10px;border-radius:10px"></div>
+        </div>
       </div>
     </div>
 
@@ -928,7 +937,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="card">
       <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">✉️ Contact Support</h3>
       <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
-      <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span style="color:var(--blue)">brainsprouthelp@gmail.com</span></p>
+      <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span style="color:var(--blue)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="670515060e091417150812130f020b1727000a060e0b4904080a">[email&#160;protected]</a></span></p>
       <div class="auth-field"><label>Your Name</label><input class="auth-input" id="help-name" type="text" placeholder="Your name"></div>
       <div class="auth-field"><label>Subject</label><input class="auth-input" id="help-subject" type="text" placeholder="e.g. I can't log in, billing question..."></div>
       <div class="auth-field"><label>Message</label><textarea class="note-area" id="help-message" rows="5" placeholder="Describe your issue or question..." style="margin-top:0"></textarea></div>
@@ -1095,7 +1104,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── SUPABASE ──
 // ── EMAILJS ──
 emailjs.init('4g-KcfAo4gykPDQbobrPy');
@@ -2383,9 +2392,10 @@ async function sendHelpEmail(){
   if(btn){btn.disabled=true;btn.textContent='Sending...';}
   try{
     // Send via EmailJS directly to brainsprouthelp@gmail.com
-    await emailjs.send('service_iadblll','template_u7i08t7',{
+    await emailjs.send('service_skf9s0a','template_u7i08t7',{
       from_name: name||'A BrainSprout Teacher',
       from_email: currentUser?.email||'Unknown',
+      to_email: 'brainsprouthelp@gmail.com',
       subject: '[BrainSprout] '+subject,
       message: message,
       plan: getPlan(),
@@ -2512,5 +2522,4 @@ init();
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Weekly Reports</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
       </div>
-      <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s">🎉 Start 7-Day Free Trial</button>
-      <div 
+      <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid 
