@@ -466,17 +466,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .report-btn-dl{background:var(--yellow);color:var(--yellowDark);border-color:var(--yellowDark);box-shadow:0 4px 0 var(--yellowDark)}
 .report-btn:hover{transform:translateY(-2px)}
 
-/* ── REFERRAL ── */
-.referral-box{background:var(--yellowLight);border:3px solid var(--yellow);border-radius:16px;padding:16px;margin-top:16px}
-.referral-title{font-size:15px;font-weight:900;color:var(--yellowDark);margin-bottom:6px}
-.referral-desc{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;line-height:1.4}
-.referral-code-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.referral-code{background:var(--white);border:3px solid var(--yellow);border-radius:12px;padding:10px 16px;font-size:18px;font-weight:900;color:var(--yellowDark);letter-spacing:2px;flex:1;text-align:center}
-.referral-copy{background:var(--yellow);color:var(--yellowDark);border:3px solid var(--yellowDark);border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--yellowDark)}
-.referral-input-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.referral-input{flex:1;border:3px solid #E8D5C0;border-radius:12px;padding:10px 14px;font-family:'Baloo 2',cursive;font-size:14px;font-weight:700;background:var(--cream);color:var(--text);outline:none;min-width:120px}
-.referral-input:focus{border-color:var(--yellow)}
-.referral-apply{background:var(--green);color:#fff;border:3px solid var(--greenDark);border-radius:12px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)}
+
 
 /* ── NOTES STUDENT DROPDOWN ── */
 .notes-student-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
@@ -628,12 +618,14 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <button class="nav-btn" onclick="showScreen('breathing',this)"><span>💨</span> Breathing</button>
     <button class="nav-btn" onclick="showScreen('noise',this)"><span>🔊</span> Noise</button>
     <button class="nav-btn" onclick="showScreen('tools',this)"><span>🛠</span> Tools</button>
+    <button class="nav-btn" onclick="showScreen('account',this)"><span>👤</span> My Account</button>
+    <button class="nav-btn" onclick="showScreen('help',this)"><span>❓</span> Help</button>
   </nav>
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="screen active">
     <div id="trial-banner" style="display:none;background:var(--yellow);border:3px solid var(--yellowDark);border-radius:14px;padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div style="font-size:13px;font-weight:800;color:var(--yellowDark)">⏳ <span id="trial-days-text">Your 7-day free trial is active!</span> Upgrade to keep all features.</div>
+      <div style="font-size:13px;font-weight:800;color:var(--yellowDark)">🎉 <span id="trial-days-text">Your 7-day free trial is active — no payment needed!</span> Upgrade after your trial to keep all features.</div>
       <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--redDark)">🌟 Upgrade Now</button>
     </div>
     <div class="dash-hero">
@@ -871,30 +863,118 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <div class="feat-lock-overlay" id="notes-lock-overlay" style="position:absolute;inset:0;background:rgba(255,248,240,0.93);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:16px;text-align:center;display:flex">
           <div style="font-size:36px;margin-bottom:8px">📝</div>
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px">Pro Feature</div>
-          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px">Teacher Notes &amp; Weekly Reports are included in the Pro plan ($4.99/mo).</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px">Free for 7 days, then requires the Pro plan ($4.99/mo).</div>
           <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:9px 22px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--redDark);margin-bottom:10px">Upgrade to Pro — $4.99/mo</button>
           <button onclick="forceUnlockCheck()" style="background:var(--white);color:var(--blue);border:2px solid var(--blue);border-radius:12px;padding:8px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer">✅ Already subscribed? Tap to unlock</button>
         </div>
       </div>
-<!-- REFERRAL -->
-      <div class="tool-card" id="referral-card" style="grid-column:1/-1;position:relative">
-        <h3>🎁 Refer a Teacher</h3>
-        <p style="font-size:13px;color:var(--muted);font-weight:700;margin-bottom:10px">Share your code with another teacher — you both get 1 free month!</p>
-        <div class="referral-box">
-          <div class="referral-title">Your Referral Code</div>
-          <div class="referral-desc">One referral per teacher. Both teachers must have an account for the credit to apply.</div>
-          <div class="referral-code-row">
-            <div class="referral-code" id="my-referral-code">Loading...</div>
-            <button class="referral-copy" onclick="copyReferralCode()">📋 Copy</button>
-          </div>
-          <div class="referral-input-row">
-            <input class="referral-input" id="referral-input" placeholder="Enter a friend's code..." maxlength="8">
-            <button class="referral-apply" onclick="applyReferralCode()">Apply Code</button>
-          </div>
-          <div id="referral-status" style="font-size:13px;font-weight:700;margin-top:8px;color:var(--greenDark)"></div>
-        </div>
-      </div>
 </div>
+  </div>
+
+
+  <!-- MY ACCOUNT -->
+  <div id="account" class="screen">
+    <div class="sec-title">👤 My Account</div>
+
+    <!-- Subscription card -->
+    <div class="card" id="account-subscription-card">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:14px">📋 Subscription</h3>
+      <div id="account-plan-info" style="background:var(--cream);border-radius:14px;padding:16px;border:3px solid #E8D5C0;margin-bottom:16px">
+        <div id="account-plan-name" style="font-size:20px;font-weight:900;color:var(--text);margin-bottom:4px">Loading...</div>
+        <div id="account-plan-desc" style="font-size:13px;font-weight:700;color:var(--muted)"></div>
+      </div>
+      <div id="account-upgrade-row" style="display:none;margin-bottom:12px">
+        <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:12px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--redDark);width:100%">🌟 Upgrade to Pro — $4.99/mo</button>
+      </div>
+      <div id="account-cancel-row" style="display:none">
+        <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">To cancel your subscription, click below. You'll keep Pro access until the end of your billing period.</p>
+        <a id="account-cancel-link" href="https://billing.stripe.com/p/login/test_00000000" target="_blank" style="display:inline-block;background:var(--cream);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;text-decoration:none;box-shadow:0 3px 0 var(--redDark)">🚫 Cancel Subscription</button></a>
+      </div>
+    </div>
+
+    <!-- Update email card -->
+    <div class="card">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:14px">✉️ Update Email</h3>
+      <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px">Current email: <span id="account-current-email" style="color:var(--text);font-weight:900"></span></div>
+      <div class="auth-field"><label>New Email Address</label><input class="auth-input" id="new-email-input" type="email" placeholder="new@email.com"></div>
+      <button onclick="updateEmail()" style="background:var(--blue);color:#fff;border:4px solid var(--blueDark);border-radius:16px;padding:12px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--blueDark);margin-top:6px;width:100%">✉️ Update Email</button>
+      <div id="email-update-msg" style="font-size:13px;font-weight:700;margin-top:10px;display:none"></div>
+    </div>
+
+    <!-- Update password card -->
+    <div class="card">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:14px">🔒 Update Password</h3>
+      <div class="auth-field"><label>New Password</label><input class="auth-input" id="new-password-input" type="password" placeholder="At least 6 characters"></div>
+      <div class="auth-field"><label>Confirm New Password</label><input class="auth-input" id="confirm-password-input" type="password" placeholder="Repeat new password"></div>
+      <button onclick="updatePassword()" style="background:var(--green);color:#fff;border:4px solid var(--greenDark);border-radius:16px;padding:12px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--greenDark);margin-top:6px;width:100%">🔒 Update Password</button>
+      <div id="password-update-msg" style="font-size:13px;font-weight:700;margin-top:10px;display:none"></div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="card" style="border-color:var(--redLight)">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:8px;color:var(--redDark)">⚠️ Sign Out</h3>
+      <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px">Sign out of your BrainSprout account on this device.</p>
+      <button onclick="doLogout()" style="background:var(--redLight);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 22px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--red)">↩ Sign Out</button>
+    </div>
+  </div>
+
+  <!-- HELP -->
+  <div id="help" class="screen">
+    <div class="sec-title">❓ Help &amp; Support</div>
+
+    <!-- Contact card -->
+    <div class="card">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">✉️ Contact Support</h3>
+      <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:16px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
+      <div class="auth-field"><label>Your Name</label><input class="auth-input" id="help-name" type="text" placeholder="Your name"></div>
+      <div class="auth-field"><label>Subject</label><input class="auth-input" id="help-subject" type="text" placeholder="e.g. I can't log in, billing question..."></div>
+      <div class="auth-field"><label>Message</label><textarea class="note-area" id="help-message" rows="5" placeholder="Describe your issue or question..." style="margin-top:0"></textarea></div>
+      <button onclick="sendHelpEmail()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:13px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--redDark);width:100%;margin-top:6px">📧 Send Message</button>
+      <div id="help-sent-msg" style="display:none;background:var(--greenLight);border:2px solid var(--green);border-radius:12px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark);margin-top:12px">✅ Message sent! We'll reply to your email within 1-2 business days.</div>
+    </div>
+
+    <!-- FAQ card -->
+    <div class="card">
+      <h3 style="font-size:20px;font-weight:900;margin-bottom:16px">📚 Frequently Asked Questions</h3>
+
+      <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">How does the free trial work?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Every new account gets 7 days of full access — no credit card needed. After 7 days, the app switches to the free tier. Upgrade to Pro at any time to keep all features.</div>
+      </div>
+
+      <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">What's included in the free plan?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">The free plan includes: Star Reward Board, Visual Schedule, Noise Expectations, 1 game, 1 brain break, 1 movement activity, and 2 breathing exercises.</div>
+      </div>
+
+      <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">What does Pro include?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Pro ($4.99/mo) unlocks everything: all 12 activities, all 6 breathing methods, Mood Check-In, Sensory Needs tracker, Teacher Notes, Weekly Reports, Student Profiles, and Referral Rewards.</div>
+      </div>
+
+      <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">How do I cancel my subscription?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to My Account → Subscription and click "Cancel Subscription". You'll keep Pro access until the end of your current billing period.</div>
+      </div>
+
+      <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">I paid but my features are still locked. What do I do?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to Tools → scroll to any locked feature → tap "Already subscribed? Tap to unlock". If that doesn't work, contact support at brainsprouthelp@gmail.com with your account email.</div>
+      </div>
+
+      <div style="padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">My students' data isn't showing. What happened?</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Make sure you're logged in with the same email you used when adding students. If the issue persists, contact us at brainsprouthelp@gmail.com.</div>
+      </div>
+    </div>
+
+    <!-- Direct email link -->
+    <div class="card" style="text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">📬</div>
+      <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:6px">Email us directly</div>
+      <a href="mailto:brainsprouthelp@gmail.com" style="color:var(--blue);font-size:15px;font-weight:800;text-decoration:none">brainsprouthelp@gmail.com</a>
+      <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:6px">We respond within 1-2 business days</div>
+    </div>
   </div>
 
 </div><!-- end .app -->
@@ -1026,7 +1106,7 @@ let currentUser=null,students=[],selectedAvatar=0,pendingDeleteId=null;
 let timerInterval=null,timerRunning=false,timerTotal=300,timerRemaining=300,soundOn=true;
 const CIRC=2*Math.PI*86;
 let breathRunning=false,breathMethod=null,breathStep=0,breathCycles=0;
-let teacherProfile=null; // stores plan, trial_start, referral_code etc.
+let teacherProfile=null;
 // Mood/sensory logs stored with timestamps
 const moodLogs=[];    // {studentId, mood, loggedAt}
 const sensoryLogs=[];  // {studentId, need, active, loggedAt}
@@ -1051,8 +1131,14 @@ function getTrialDaysLeft(){
   const diff=7-Math.floor((Date.now()-start.getTime())/(1000*60*60*24));
   return Math.max(0,diff);
 }
-function isInTrial(){return getTrialDaysLeft()>0&&getPlan()==='free';}
-function canAccessPro(){return getPlan()==='pro'||isInTrial();}
+function isInTrial(){
+  // Trial is active for first 7 days regardless of plan — no payment needed
+  return getTrialDaysLeft()>0;
+}
+function canAccessPro(){
+  // Full access during trial OR if paid
+  return getPlan()==='pro'||isInTrial();
+}
 
 // ── STARTUP ──
 async function init(){
@@ -1084,7 +1170,7 @@ async function init(){
       .eq('id',currentUser.id);
     // Re-read from DB to confirm it saved
     const{data:updated}=await sb.from('teachers')
-      .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+      .select('id,class_name,is_pro,plan,trial_start')
       .eq('id',currentUser.id).single();
     if(updated)teacherProfile=updated;
     console.log('Plan after upgrade:',teacherProfile?.plan);
@@ -1126,7 +1212,7 @@ function applyPlanUI(){
       badge.textContent='⭐ Pro';
       badge.style.cssText='background:var(--greenLight);color:var(--greenDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--green)';
     } else if(trial){
-      badge.textContent='🕐 Trial: '+daysLeft+'d left';
+      badge.textContent='🆓 Free Trial: '+daysLeft+'d left';
       badge.style.cssText='background:var(--yellowLight);color:var(--yellowDark);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:900;border:2px solid var(--yellow)';
     } else {
       badge.textContent='Free Plan';
@@ -1151,7 +1237,7 @@ function applyPlanUI(){
   }
 
   // Lock overlays — everything behind Pro
-  ['mood-lock-overlay','sensory-lock-overlay','referral-lock-overlay'].forEach(id=>{
+  ['mood-lock-overlay','sensory-lock-overlay'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.classList.toggle('hidden',canAccessPro());
   });
@@ -1181,17 +1267,15 @@ function applyPlanUI(){
 // ── LOAD DATA ──
 async function loadProfile(){
   let{data:profile,error:profErr}=await sb.from('teachers')
-    .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+    .select('id,class_name,is_pro,plan,trial_start')
     .eq('id',currentUser.id).single();
   if(!profile){
     const name=currentUser.user_metadata?.name||'My Class';
-    const code=Math.random().toString(36).substring(2,8).toUpperCase();
     const{data:np}=await sb.from('teachers').insert({
       id:currentUser.id,class_name:name+"'s Class",
       is_pro:false,plan:'free',
-      trial_start:new Date().toISOString(),
-      referral_code:code
-    }).select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by').single();
+      trial_start:new Date().toISOString()
+    }).select('id,class_name,is_pro,plan,trial_start').single();
     profile=np;
   }
   teacherProfile=profile;
@@ -1202,8 +1286,6 @@ async function loadProfile(){
   document.getElementById('dash-teacher-name').textContent=firstName||'Teacher';
 
   // Show referral code
-  const rcEl=document.getElementById('my-referral-code');
-  if(rcEl)rcEl.textContent=profile?.referral_code||'---';
 
   // Load students
   const{data:studentRows}=await sb.from('students').select('*').eq('teacher_id',currentUser.id).order('created_at');
@@ -1320,6 +1402,7 @@ function showScreen(id,btn){
   if(id==='breathing')renderBreathing();
   if(id==='schedule')renderSchedule();
   if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();applyPlanUI();}
+  if(id==='account'||id==='help')renderAccountScreen();
 }
 
 // ── DASHBOARD FLOW ──
@@ -1986,7 +2069,7 @@ async function forceUnlockCheck(){
   if(!currentUser){showToast('Please log in first.');return;}
   showToast('🔄 Checking your subscription...');
   const{data:profile}=await sb.from('teachers')
-    .select('id,class_name,is_pro,plan,trial_start,referral_code,referred_by')
+    .select('id,class_name,is_pro,plan,trial_start')
     .eq('id',currentUser.id).single();
   if(profile){
     teacherProfile=profile;
@@ -2135,31 +2218,102 @@ function downloadReport(){
   window.print();
 }
 
-// ── REFERRAL ──
-function copyReferralCode(){
-  const code=document.getElementById('my-referral-code')?.textContent;
-  if(!code||code==='---'){showToast('No referral code found.');return;}
-  navigator.clipboard.writeText(code).then(()=>showToast('📋 Code copied: '+code));
+
+
+// ── MY ACCOUNT ──
+function renderAccountScreen(){
+  if(!currentUser||!teacherProfile)return;
+  // Email
+  const emailEl=document.getElementById('account-current-email');
+  if(emailEl)emailEl.textContent=currentUser.email||'';
+
+  // Plan info
+  const plan=getPlan();
+  const trial=isInTrial();
+  const daysLeft=getTrialDaysLeft();
+  const planName=document.getElementById('account-plan-name');
+  const planDesc=document.getElementById('account-plan-desc');
+  const upgradeRow=document.getElementById('account-upgrade-row');
+  const cancelRow=document.getElementById('account-cancel-row');
+
+  if(plan==='pro'){
+    if(planName)planName.innerHTML='⭐ <span style="color:var(--greenDark)">Pro Plan — Active</span>';
+    if(planDesc)planDesc.textContent='$4.99/month · All features unlocked';
+    if(upgradeRow)upgradeRow.style.display='none';
+    if(cancelRow)cancelRow.style.display='block';
+  } else if(trial){
+    if(planName)planName.innerHTML='🆓 <span style="color:var(--yellowDark)">Free Trial — '+daysLeft+' day'+(daysLeft!==1?'s':'')+' remaining</span>';
+    if(planDesc)planDesc.textContent='Full access during your trial. No payment needed.';
+    if(upgradeRow)upgradeRow.style.display='block';
+    if(cancelRow)cancelRow.style.display='none';
+  } else {
+    if(planName)planName.innerHTML='📋 <span style="color:var(--blueDark)">Free Plan</span>';
+    if(planDesc)planDesc.textContent='Upgrade to Pro to unlock all features.';
+    if(upgradeRow)upgradeRow.style.display='block';
+    if(cancelRow)cancelRow.style.display='none';
+  }
+
+  // Pre-fill help name
+  const helpName=document.getElementById('help-name');
+  if(helpName&&!helpName.value){
+    const name=document.getElementById('teacher-display')?.textContent?.replace('🍎 ','');
+    if(name)helpName.value=name;
+  }
+  // Pre-fill help email in subject hint
+  const helpSubject=document.getElementById('help-subject');
+  if(helpSubject&&!helpSubject.value)helpSubject.placeholder='e.g. I need help with my account ('+currentUser.email+')';
 }
-async function applyReferralCode(){
-  const code=document.getElementById('referral-input')?.value.trim().toUpperCase();
-  if(!code){showToast('Enter a referral code first.');return;}
-  if(teacherProfile?.referred_by){showToast('You have already used a referral code.');return;}
-  // Find the referrer
-  const{data:referrer}=await sb.from('teachers').select('id,plan').eq('referral_code',code).single();
-  if(!referrer){showToast('Code not found. Check the code and try again.');return;}
-  if(referrer.id===currentUser.id){showToast("You can't use your own referral code!");return;}
-  // Check referrer hasn't already referred someone
-  const{data:existingRef}=await sb.from('referrals').select('id').eq('referrer_id',referrer.id);
-  if(existingRef&&existingRef.length>0){showToast('That teacher has already used their referral. One referral per teacher.');return;}
-  // Apply: give both teachers 1 month credit (set plan to 'plus' for 1 month)
-  // In production this would be done server-side; here we flag it for manual review
-  await sb.from('referrals').insert({referrer_id:referrer.id,referred_id:currentUser.id,credit_applied:false});
-  await sb.from('teachers').update({referred_by:code}).eq('id',currentUser.id);
-  teacherProfile.referred_by=code;
-  document.getElementById('referral-status').textContent='🎉 Code applied! Both you and the referring teacher will receive 1 free month. Our team will apply the credit within 24 hours.';
-  document.getElementById('referral-input').value='';
-  showToast('🎉 Referral code applied!');
+
+async function updateEmail(){
+  const newEmail=document.getElementById('new-email-input').value.trim();
+  const msgEl=document.getElementById('email-update-msg');
+  if(!newEmail){showMsg2(msgEl,'Please enter a new email address.','error');return;}
+  const{error}=await sb.auth.updateUser({email:newEmail});
+  if(error){showMsg2(msgEl,'Error: '+error.message,'error');return;}
+  showMsg2(msgEl,'✅ Confirmation sent to '+newEmail+'. Check your inbox to confirm the change.','success');
+  document.getElementById('new-email-input').value='';
+}
+
+async function updatePassword(){
+  const newPw=document.getElementById('new-password-input').value;
+  const confirmPw=document.getElementById('confirm-password-input').value;
+  const msgEl=document.getElementById('password-update-msg');
+  if(!newPw||newPw.length<6){showMsg2(msgEl,'Password must be at least 6 characters.','error');return;}
+  if(newPw!==confirmPw){showMsg2(msgEl,'Passwords do not match.','error');return;}
+  const{error}=await sb.auth.updateUser({password:newPw});
+  if(error){showMsg2(msgEl,'Error: '+error.message,'error');return;}
+  showMsg2(msgEl,'✅ Password updated successfully!','success');
+  document.getElementById('new-password-input').value='';
+  document.getElementById('confirm-password-input').value='';
+}
+
+function showMsg2(el,msg,type){
+  if(!el)return;
+  el.textContent=msg;
+  el.style.display='block';
+  el.style.color=type==='error'?'var(--redDark)':'var(--greenDark)';
+  el.style.background=type==='error'?'var(--redLight)':'var(--greenLight)';
+  el.style.padding='10px 14px';
+  el.style.borderRadius='12px';
+  el.style.border='2px solid '+(type==='error'?'var(--red)':'var(--green)');
+}
+
+function sendHelpEmail(){
+  const name=document.getElementById('help-name').value.trim();
+  const subject=document.getElementById('help-subject').value.trim();
+  const message=document.getElementById('help-message').value.trim();
+  if(!message){showToast('Please write a message first.');return;}
+  const email='brainsprouthelp@gmail.com';
+  const fullSubject=encodeURIComponent('[BrainSprout Help] '+(subject||'Support Request'));
+  const body=encodeURIComponent('Name: '+(name||'Not provided')+
+    '\nEmail: '+(currentUser?.email||'Not provided')+
+    '\nPlan: '+getPlan()+
+    '\n\nMessage:\n'+message);
+  window.open('mailto:'+email+'?subject='+fullSubject+'&body='+body);
+  const sentEl=document.getElementById('help-sent-msg');
+  if(sentEl)sentEl.style.display='block';
+  document.getElementById('help-message').value='';
+  document.getElementById('help-subject').value='';
 }
 
 // ── INIT ──
@@ -2255,10 +2409,9 @@ init();
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Teacher Notes</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Weekly Reports</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Referral Rewards</div>
       </div>
       <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s">🎉 Start 7-Day Free Trial</button>
-      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:10px">Then $4.99/month · Cancel anytime · 🔒 Secured by Stripe</div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:10px">$4.99/month · Cancel anytime · 🔒 Secured by Stripe</div>
       <button onclick="manualPlanRefresh()" style="display:block;width:100%;background:none;border:none;font-family:'Baloo 2',cursive;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;margin-top:10px;text-decoration:underline;text-align:center">Already paid? Click here to refresh your plan</button>
     </div>
   </div>
