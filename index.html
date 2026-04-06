@@ -937,7 +937,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="card">
       <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">✉️ Contact Support</h3>
       <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
-      <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span style="color:var(--blue)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="670515060e091417150812130f020b1727000a060e0b4904080a">[email&#160;protected]</a></span></p>
+      <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span id="support-email-display" style="color:var(--blue);font-weight:900">brainsprouthelp&#64;gmail.com</span></p>
       <div class="auth-field"><label>Your Name</label><input class="auth-input" id="help-name" type="text" placeholder="Your name"></div>
       <div class="auth-field"><label>Subject</label><input class="auth-input" id="help-subject" type="text" placeholder="e.g. I can't log in, billing question..."></div>
       <div class="auth-field"><label>Message</label><textarea class="note-area" id="help-message" rows="5" placeholder="Describe your issue or question..." style="margin-top:0"></textarea></div>
@@ -971,12 +971,12 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
       <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
         <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">I paid but my features are still locked. What do I do?</div>
-        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to Tools → scroll to any locked feature → tap "Already subscribed? Tap to unlock". If that doesn't work, contact support at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c1a3b3a0a8afb2b1b3aeb4b5a9a4adb181a6aca0a8adefa2aeac">[email&#160;protected]</a> with your account email.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to Tools → scroll to any locked feature → tap "Already subscribed? Tap to unlock". If that doesn't work, contact support at brainsprouthelp@gmail.com with your account email.</div>
       </div>
 
       <div style="padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
         <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">My students' data isn't showing. What happened?</div>
-        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Make sure you're logged in with the same email you used when adding students. If the issue persists, contact us at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="accedecdc5c2dfdcdec3d9d8c4c9c0dceccbc1cdc5c082cfc3c1">[email&#160;protected]</a>.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Make sure you're logged in with the same email you used when adding students. If the issue persists, contact us at brainsprouthelp@gmail.com.</div>
       </div>
     </div>
 
@@ -984,7 +984,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="card" style="text-align:center">
       <div style="font-size:32px;margin-bottom:8px">📬</div>
       <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:6px">Email us directly</div>
-      <a href="/cdn-cgi/l/email-protection#6c0e1e0d05021f1c1e0319180409001c2c0b010d0500420f0301" style="color:var(--blue);font-size:15px;font-weight:800;text-decoration:none"><span class="__cf_email__" data-cfemail="6d0f1f0c04031e1d1f0218190508011d2d0a000c0401430e0200">[email&#160;protected]</span></a>
+      brainsprouthelp@gmail.com
       <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:6px">We respond within 1-2 business days</div>
     </div>
   </div>
@@ -2393,12 +2393,11 @@ async function sendHelpEmail(){
   try{
     // Send via EmailJS directly to brainsprouthelp@gmail.com
     await emailjs.send('service_skf9s0a','template_u7i08t7',{
-      from_name: name||'A BrainSprout Teacher',
-      from_email: currentUser?.email||'Unknown',
-      to_email: 'brainsprouthelp@gmail.com',
-      subject: '[BrainSprout] '+subject,
-      message: message,
-      plan: getPlan(),
+      user_name: name||'A BrainSprout Teacher',
+      user_email: currentUser?.email||'Unknown',
+      subject: '[BrainSprout Support] '+subject,
+      message: 'From: '+(name||'Unknown')+' ('+(currentUser?.email||'Unknown')+') | Plan: '+getPlan()+'\n\n'+message,
+      to_name: 'BrainSprout Support',
       reply_to: currentUser?.email||''
     });
     // Also save to Supabase as a backup record
