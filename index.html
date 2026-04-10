@@ -500,8 +500,9 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .morning-q-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--yellowDark)}
 .morning-q-used{font-size:11px;font-weight:700;color:var(--yellowDark);margin-top:6px;opacity:.8}
 
-.dash-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-@media(max-width:600px){.dash-two-col{grid-template-columns:1fr}}
+.dash-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;align-items:start}
+.dash-left-col{display:flex;flex-direction:column;gap:14px}
+@media(max-width:600px){.dash-two-col{grid-template-columns:1fr}.dash-left-col{gap:14px}}
 
 .dash-mini-timer{background:var(--white);border:4px solid var(--blue);border-radius:var(--rad);box-shadow:0 5px 0 var(--blueDark);padding:18px;text-align:center}
 .dash-mini-timer h3{font-size:14px;font-weight:900;color:var(--blueDark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
@@ -514,10 +515,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .dmt-preset{background:var(--blueLight);color:var(--blueDark);border:2px solid var(--blue);border-radius:10px;padding:4px 10px;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer}
 .dmt-preset:hover{background:var(--blue);color:#fff}
 
-.dash-flow-card{background:var(--white);border:4px solid var(--green);border-radius:var(--rad);box-shadow:0 5px 0 var(--greenDark);padding:18px}
+.dash-flow-card{background:var(--white);border:4px solid var(--green);border-radius:var(--rad);box-shadow:0 5px 0 var(--greenDark);padding:18px;height:100%}
 .dash-flow-card h3{font-size:14px;font-weight:900;color:var(--greenDark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 
-.brain-break-card{background:var(--pink);border:4px solid var(--pinkDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--pinkDark);padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden}
+.brain-break-card{background:var(--pink);border:4px solid var(--pinkDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--pinkDark);padding:20px 24px;position:relative;overflow:hidden}
 .brain-break-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.15) 2px,transparent 2px);background-size:24px 24px;pointer-events:none}
 .bb-label{font-size:11px;font-weight:900;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;position:relative;z-index:1}
 .bb-icon{font-size:36px;position:relative;z-index:1;margin-bottom:4px}
@@ -706,36 +707,38 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
     <!-- TIMER + TODAY'S FLOW -->
     <div class="dash-two-col">
-      <div class="dash-mini-timer">
-        <h3>⏱ Quick Timer</h3>
-        <div class="dash-mini-time" id="dash-timer-display">05:00</div>
-        <div class="dash-mini-presets">
-          <button class="dmt-preset" onclick="setDashTimer(1)">1m</button>
-          <button class="dmt-preset" onclick="setDashTimer(3)">3m</button>
-          <button class="dmt-preset" onclick="setDashTimer(5)">5m</button>
-          <button class="dmt-preset" onclick="setDashTimer(10)">10m</button>
-          <button class="dmt-preset" onclick="setDashTimer(15)">15m</button>
+      <!-- LEFT COL: Timer stacked on top of Brain Break -->
+      <div class="dash-left-col">
+        <div class="dash-mini-timer">
+          <h3>⏱ Quick Timer</h3>
+          <div class="dash-mini-time" id="dash-timer-display">05:00</div>
+          <div class="dash-mini-presets">
+            <button class="dmt-preset" onclick="setDashTimer(1)">1m</button>
+            <button class="dmt-preset" onclick="setDashTimer(3)">3m</button>
+            <button class="dmt-preset" onclick="setDashTimer(5)">5m</button>
+            <button class="dmt-preset" onclick="setDashTimer(10)">10m</button>
+            <button class="dmt-preset" onclick="setDashTimer(15)">15m</button>
+          </div>
+          <div class="dash-mini-btns">
+            <button class="dmt-btn dmt-reset" onclick="resetDashTimer()">↺ Reset</button>
+            <button class="dmt-btn dmt-start" id="dash-timer-btn" onclick="toggleDashTimer()">▶ Start</button>
+          </div>
         </div>
-        <div class="dash-mini-btns">
-          <button class="dmt-btn dmt-reset" onclick="resetDashTimer()">↺ Reset</button>
-          <button class="dmt-btn dmt-start" id="dash-timer-btn" onclick="toggleDashTimer()">▶ Start</button>
+        <div class="brain-break-card">
+          <div class="bb-label">🧠 Today's Brain Break</div>
+          <div class="bb-icon" id="bb-icon">🎮</div>
+          <div class="bb-title" id="bb-title">Loading...</div>
+          <div class="bb-desc" id="bb-desc"></div>
+          <div class="bb-btns">
+            <button class="bb-btn" onclick="openDashActivity()">▶ Start Activity</button>
+            <button class="bb-shuffle" onclick="shuffleBrainBreak()">🔀 New Break</button>
+          </div>
         </div>
       </div>
+      <!-- RIGHT COL: Today's Flow tall -->
       <div class="dash-flow-card">
         <h3>🏫 Today's Flow <button onclick="addDashItem()" style="background:var(--green);border:2px solid var(--greenDark);border-radius:10px;padding:4px 10px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer;box-shadow:0 2px 0 var(--greenDark)">+</button></h3>
-        <div id="dash-schedule" style="max-height:220px;overflow-y:auto"></div>
-      </div>
-    </div>
-
-    <!-- RANDOM BRAIN BREAK -->
-    <div class="brain-break-card">
-      <div class="bb-label">🧠 Today's Brain Break</div>
-      <div class="bb-icon" id="bb-icon">🎮</div>
-      <div class="bb-title" id="bb-title">Loading...</div>
-      <div class="bb-desc" id="bb-desc"></div>
-      <div class="bb-btns">
-        <button class="bb-btn" onclick="openDashActivity()">▶ Start Activity</button>
-        <button class="bb-shuffle" onclick="shuffleBrainBreak()">🔀 New Break</button>
+        <div id="dash-schedule" style="height:calc(100% - 50px);overflow-y:auto;max-height:400px"></div>
       </div>
     </div>
   </div>
