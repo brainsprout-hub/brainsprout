@@ -1138,6 +1138,19 @@ function getStripe(){
 function getPlan(){
   const p=teacherProfile?.plan||'free';
   if(p==='free'&&teacherProfile?.is_pro===true)return 'pro';
+  // If canceling, check if cancel date has passed
+  if(p==='canceling'){
+    if(teacherProfile?.cancel_at){
+      const cancelDate=new Date(teacherProfile.cancel_at);
+      if(new Date()>cancelDate){
+        // Access has expired — update to free automatically
+        sb.from('teachers').update({plan:'free',is_pro:false}).eq('id',currentUser?.id);
+        if(teacherProfile)teacherProfile.plan='free';
+        return 'free';
+      }
+    }
+    return 'pro'; // Still within paid period
+  }
   return p;
 }
 function getTrialDaysLeft(){
@@ -1185,7 +1198,7 @@ async function init(){
       .eq('id',currentUser.id);
     // Re-read from DB to confirm it saved
     const{data:updated}=await sb.from('teachers')
-      .select('id,class_name,is_pro,plan,trial_start')
+      .select('id,class_name,is_pro,plan,trial_start,cancel_at')
       .eq('id',currentUser.id).single();
     if(updated)teacherProfile=updated;
     console.log('Plan after upgrade:',teacherProfile?.plan);
@@ -1286,7 +1299,7 @@ function applyPlanUI(){
 // ── LOAD DATA ──
 async function loadProfile(){
   let{data:profile,error:profErr}=await sb.from('teachers')
-    .select('id,class_name,is_pro,plan,trial_start')
+    .select('id,class_name,is_pro,plan,trial_start,cancel_at')
     .eq('id',currentUser.id).single();
   if(!profile){
     const name=currentUser.user_metadata?.name||'My Class';
@@ -1294,7 +1307,7 @@ async function loadProfile(){
       id:currentUser.id,class_name:name+"'s Class",
       is_pro:false,plan:'free',
       trial_start:new Date().toISOString()
-    }).select('id,class_name,is_pro,plan,trial_start').single();
+    }).select('id,class_name,is_pro,plan,trial_start,cancel_at').single();
     profile=np;
   }
   teacherProfile=profile;
@@ -2093,7 +2106,7 @@ async function forceUnlockCheck(){
   if(!currentUser){showToast('Please log in first.');return;}
   showToast('🔄 Checking your subscription...');
   const{data:profile}=await sb.from('teachers')
-    .select('id,class_name,is_pro,plan,trial_start')
+    .select('id,class_name,is_pro,plan,trial_start,cancel_at')
     .eq('id',currentUser.id).single();
   if(profile){
     teacherProfile=profile;
@@ -2261,10 +2274,20 @@ function renderAccountScreen(){
   const cancelRow=document.getElementById('account-cancel-row');
 
   if(plan==='pro'){
-    if(planName)planName.innerHTML='⭐ <span style="color:var(--greenDark)">Pro Plan — Active</span>';
-    if(planDesc)planDesc.textContent='$4.99/month · All features unlocked';
-    if(upgradeRow)upgradeRow.style.display='none';
-    if(cancelRow)cancelRow.style.display='block';
+    if(teacherProfile?.plan==='canceling'&&teacherProfile?.cancel_at){
+      const cancelDate=new Date(teacherProfile.cancel_at);
+      const daysLeft=Math.max(0,Math.ceil((cancelDate-new Date())/(1000*60*60*24)));
+      const dateStr=cancelDate.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
+      if(planName)planName.innerHTML='⚠️ <span style="color:var(--yellowDark)">Pro Plan — Canceled</span>';
+      if(planDesc)planDesc.innerHTML='Your Pro access ends on <strong>'+dateStr+'</strong> ('+daysLeft+' day'+(daysLeft!==1?'s':'')+' remaining). After that you will switch to the free plan.';
+      if(upgradeRow)upgradeRow.style.display='none';
+      if(cancelRow)cancelRow.style.display='none';
+    } else {
+      if(planName)planName.innerHTML='⭐ <span style="color:var(--greenDark)">Pro Plan — Active</span>';
+      if(planDesc)planDesc.textContent='$4.99/month · All features unlocked';
+      if(upgradeRow)upgradeRow.style.display='none';
+      if(cancelRow)cancelRow.style.display='block';
+    }
   } else if(trial){
     if(planName)planName.innerHTML='🆓 <span style="color:var(--yellowDark)">Free Trial — '+daysLeft+' day'+(daysLeft!==1?'s':'')+' remaining</span>';
     if(planDesc)planDesc.textContent='Full access during your trial. No payment needed.';
@@ -2316,38 +2339,66 @@ function hideCancelConfirm(){
 async function confirmCancel(){
   const btn=document.getElementById('confirm-cancel-btn');
   const msg=document.getElementById('cancel-result-msg');
-  if(btn){btn.disabled=true;btn.textContent='Sending request...';}
+  if(btn){btn.disabled=true;btn.textContent='Canceling...';}
+
+  // Calculate end of current billing period (30 days from now if we don't know exact date)
+  // In a real setup this comes from Stripe — for now we use 30 days from today
+  const cancelAt=new Date();
+  cancelAt.setDate(cancelAt.getDate()+30);
+  const cancelAtStr=cancelAt.toISOString();
+  const cancelDateDisplay=cancelAt.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
+
   try{
-    // Send cancellation request email via EmailJS
-    await emailjs.send('service_skf9s0a','template_u7i08t7',{
-      user_name: teacherProfile?.class_name||'Teacher',
-      user_email: currentUser?.email||'Unknown',
-      subject: '[BrainSprout] Cancellation Request',
-      message: 'CANCELLATION REQUEST\n\nTeacher: '+(teacherProfile?.class_name||'Unknown')+'\nEmail: '+(currentUser?.email||'Unknown')+'\nUser ID: '+currentUser?.id+'\n\nThis teacher has requested to cancel their Pro subscription. Please cancel in Stripe.',
-      reply_to: currentUser?.email||''
-    });
+    // Save cancellation date to Supabase
+    await sb.from('teachers')
+      .update({plan:'canceling', cancel_at: cancelAtStr})
+      .eq('id', currentUser.id);
+
+    // Update local state
+    if(teacherProfile){
+      teacherProfile.plan='canceling';
+      teacherProfile.cancel_at=cancelAtStr;
+    }
+
+    // Send cancellation request email to admin
+    try{
+      await emailjs.send('service_skf9s0a','template_u7i08t7',{
+        user_name: teacherProfile?.class_name||'Teacher',
+        user_email: currentUser?.email||'Unknown',
+        subject: '[BrainSprout] Cancellation Request',
+        message: 'CANCELLATION REQUEST\n\nTeacher: '+(teacherProfile?.class_name||'Unknown')+'\nEmail: '+(currentUser?.email||'Unknown')+'\nUser ID: '+currentUser?.id+'\nAccess ends: '+cancelDateDisplay+'\n\nPlease cancel this subscription in Stripe.',
+        reply_to: currentUser?.email||''
+      });
+    }catch(emailErr){console.log('Email notification failed:',emailErr);}
+
     // Show success message
     if(msg){
       msg.style.display='block';
       msg.style.color='var(--greenDark)';
       msg.style.background='var(--greenLight)';
-      msg.style.padding='12px';
-      msg.style.borderRadius='10px';
+      msg.style.padding='14px';
+      msg.style.borderRadius='12px';
       msg.style.border='2px solid var(--green)';
-      msg.textContent='✅ Cancellation request sent! We will cancel your subscription within 1 business day and confirm by email. You keep full Pro access until then.';
+      msg.style.lineHeight='1.6';
+      msg.innerHTML='✅ <strong>Subscription Canceled</strong><br>You have Pro access until <strong>'+cancelDateDisplay+'</strong>. After that your account will switch to the free plan automatically.';
     }
-    if(btn){btn.disabled=true;btn.textContent='Request Sent ✓';}
-    showToast('Cancellation request sent!');
+    if(btn){btn.style.display='none';}
+    document.getElementById('cancel-confirm-box').querySelector('[onclick="hideCancelConfirm()"]').style.display='none';
+
+    // Update account screen
+    renderAccountScreen();
+    showToast('Subscription canceled. Pro access until '+cancelDateDisplay);
+
   }catch(e){
-    // Fallback — show email address so they can cancel manually
+    console.error('Cancel error:',e);
     if(msg){
       msg.style.display='block';
-      msg.style.color='var(--text)';
-      msg.style.background='var(--yellowLight)';
+      msg.style.color='var(--redDark)';
+      msg.style.background='var(--redLight)';
       msg.style.padding='12px';
       msg.style.borderRadius='10px';
-      msg.style.border='2px solid var(--yellow)';
-      msg.textContent='To cancel, please email brainsprouthelp@gmail.com with subject "Cancel Subscription" and include your account email. We will process it within 1 business day.';
+      msg.style.border='2px solid var(--red)';
+      msg.textContent='Something went wrong. Please email brainsprouthelp@gmail.com to cancel.';
     }
     if(btn){btn.disabled=false;btn.textContent='Yes, Cancel My Subscription';}
   }
