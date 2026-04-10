@@ -2940,8 +2940,9 @@ init();
 
 
 <!-- PAYWALL MODAL -->
+<!-- PAYWALL MODAL -->
 <div id="paywall-overlay" style="display:none;position:fixed;inset:0;background:rgba(42,31,26,0.72);z-index:500;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--white);border-radius:28px;max-width:480px;width:100%;overflow:hidden;border:5px solid var(--yellow);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)">
+  <div style="background:var(--white);border-radius:28px;max-width:480px;width:100%;overflow:hidden;border:5px solid var(--yellow);animation:popIn .35s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto">
     <div style="background:var(--red);padding:28px;text-align:center;color:#fff;position:relative">
       <button onclick="closePaywall()" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,.3);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:#fff;font-weight:900">✕</button>
       <div style="font-size:48px">🌟</div>
@@ -2956,4 +2957,39 @@ init();
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Mood Check-In</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Sensory Needs</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Teacher Notes</div>
-  
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Weekly Reports</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Timer &amp; all tools</div>
+      </div>
+      <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s">💳 Subscribe Now — $4.99/mo</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:10px">$4.99/month · Cancel anytime · 🔒 Secured by Stripe</div>
+      <button onclick="closePaywall();showScreen('help',document.querySelectorAll('.nav-btn')[document.querySelectorAll('.nav-btn').length-1])" style="display:block;width:100%;background:none;border:none;font-family:'Baloo 2',cursive;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:8px;text-decoration:underline;text-align:center">Having issues? Send us a message 💬</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT NOTE MODAL -->
+<div class="modal-overlay hidden" id="edit-note-modal" style="z-index:400">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="closeEditNote()">✕</button>
+    <div class="modal-title" style="font-size:22px;margin-bottom:16px">✏️ Edit Note</div>
+    <textarea class="note-area" id="edit-note-input" rows="4" style="font-size:15px"></textarea>
+    <button class="save-note" style="width:100%;margin-top:10px;border-radius:16px;font-size:15px" onclick="saveEditNote()">💾 Save Changes</button>
+  </div>
+</div>
+
+<script>
+// Fill in email addresses that Cloudflare might obfuscate
+(function(){
+  var e=['brainsprouthelp','gmail.com'].join('@');
+  document.querySelectorAll('.cf-email-fix').forEach(function(el){
+    el.textContent=e;
+    el.style.color='var(--blue)';
+    el.style.fontWeight='800';
+  });
+  var main=document.getElementById('support-email-display');
+  if(main&&!main.textContent)main.textContent=e;
+})();
+</script>
+</body>
+</html>
