@@ -971,12 +971,12 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
       <div style="margin-bottom:16px;padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
         <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">I paid but my features are still locked. What do I do?</div>
-        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to Tools → scroll to any locked feature → tap "Already subscribed? Tap to unlock". If that doesn't work, contact support at brainsprouthelp@gmail.com with your account email.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Go to Tools → scroll to any locked feature → tap "Already subscribed? Tap to unlock". If that doesn't work, contact support at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a2c0d0c3cbccd1d2d0cdd7d6cac7ced2e2c5cfc3cbce8cc1cdcf">[email&#160;protected]</a> with your account email.</div>
       </div>
 
       <div style="padding:14px;background:var(--cream);border-radius:14px;border:3px solid #E8D5C0">
         <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:6px">My students' data isn't showing. What happened?</div>
-        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Make sure you're logged in with the same email you used when adding students. If the issue persists, contact us at brainsprouthelp@gmail.com.</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Make sure you're logged in with the same email you used when adding students. If the issue persists, contact us at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f5e5f6fef9e4e7e5f8e2e3fff2fbe7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a>.</div>
       </div>
     </div>
 
@@ -984,7 +984,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="card" style="text-align:center">
       <div style="font-size:32px;margin-bottom:8px">📬</div>
       <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:6px">Email us directly</div>
-      brainsprouthelp@gmail.com
+      <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2d4f5f4c44435e5d5f4258594548415d6d4a404c4441034e4240">[email&#160;protected]</a>
       <div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:6px">We respond within 1-2 business days</div>
     </div>
   </div>
@@ -1104,10 +1104,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── SUPABASE ──
 // ── EMAILJS ──
-emailjs.init('4g-KcfAo4gykPDQbobrPy');
+emailjs.init('uYYVaqx8Z0lVfT42j');
 
 const{createClient}=supabase;
 const sb=createClient(
@@ -2316,43 +2316,40 @@ function hideCancelConfirm(){
 async function confirmCancel(){
   const btn=document.getElementById('confirm-cancel-btn');
   const msg=document.getElementById('cancel-result-msg');
-  if(btn){btn.disabled=true;btn.textContent='Canceling...';}
+  if(btn){btn.disabled=true;btn.textContent='Sending request...';}
   try{
-    const res=await fetch('/.netlify/functions/cancel-subscription',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({userId:currentUser.id,userEmail:currentUser.email})
+    // Send cancellation request email via EmailJS
+    await emailjs.send('service_skf9s0a','template_u7i08t7',{
+      user_name: teacherProfile?.class_name||'Teacher',
+      user_email: currentUser?.email||'Unknown',
+      subject: '[BrainSprout] Cancellation Request',
+      message: 'CANCELLATION REQUEST\n\nTeacher: '+(teacherProfile?.class_name||'Unknown')+'\nEmail: '+(currentUser?.email||'Unknown')+'\nUser ID: '+currentUser?.id+'\n\nThis teacher has requested to cancel their Pro subscription. Please cancel in Stripe.',
+      reply_to: currentUser?.email||''
     });
-    const data=await res.json();
-    if(data.success){
-      if(msg){
-        msg.style.display='block';
-        msg.style.color='var(--greenDark)';
-        msg.style.background='var(--greenLight)';
-        msg.style.padding='10px';
-        msg.style.borderRadius='10px';
-        msg.style.border='2px solid var(--green)';
-        msg.textContent='✅ Subscription canceled. You keep Pro access until '+data.periodEnd+'.';
-      }
-      // Update local state
-      if(teacherProfile)teacherProfile.plan='canceling';
-      if(btn){btn.disabled=true;btn.textContent='Canceled';}
-      showToast('Subscription canceled. Pro access continues until billing period ends.');
-    } else {
-      if(msg){
-        msg.style.display='block';
-        msg.style.color='var(--redDark)';
-        msg.textContent='Error: '+(data.error||'Could not cancel. Please email brainsprouthelp@gmail.com');
-      }
-      if(btn){btn.disabled=false;btn.textContent='Yes, Cancel';}
-    }
-  }catch(e){
+    // Show success message
     if(msg){
       msg.style.display='block';
-      msg.style.color='var(--redDark)';
-      msg.textContent='Something went wrong. Please email brainsprouthelp@gmail.com to cancel.';
+      msg.style.color='var(--greenDark)';
+      msg.style.background='var(--greenLight)';
+      msg.style.padding='12px';
+      msg.style.borderRadius='10px';
+      msg.style.border='2px solid var(--green)';
+      msg.textContent='✅ Cancellation request sent! We will cancel your subscription within 1 business day and confirm by email. You keep full Pro access until then.';
     }
-    if(btn){btn.disabled=false;btn.textContent='Yes, Cancel';}
+    if(btn){btn.disabled=true;btn.textContent='Request Sent ✓';}
+    showToast('Cancellation request sent!');
+  }catch(e){
+    // Fallback — show email address so they can cancel manually
+    if(msg){
+      msg.style.display='block';
+      msg.style.color='var(--text)';
+      msg.style.background='var(--yellowLight)';
+      msg.style.padding='12px';
+      msg.style.borderRadius='10px';
+      msg.style.border='2px solid var(--yellow)';
+      msg.textContent='To cancel, please email brainsprouthelp@gmail.com with subject "Cancel Subscription" and include your account email. We will process it within 1 business day.';
+    }
+    if(btn){btn.disabled=false;btn.textContent='Yes, Cancel My Subscription';}
   }
 }
 
@@ -2518,7 +2515,4 @@ init();
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Mood Check-In</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Sensory Needs</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Teacher Notes</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Weekly Reports</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
-      </div>
-      <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid 
+  
