@@ -483,6 +483,49 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   .report-modal{max-height:none;border:none;box-shadow:none}
 }
 
+
+/* ── NEW DASHBOARD LAYOUT ── */
+.dash-date-bar{background:var(--red);border-radius:var(--rad);border:4px solid var(--redDark);box-shadow:0 5px 0 var(--redDark);padding:18px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.dash-date-text{font-size:22px;font-weight:900;color:#fff;text-shadow:1px 1px 0 var(--redDark)}
+.dash-date-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);margin-top:2px}
+.dash-greeting{font-size:15px;font-weight:900;color:rgba(255,255,255,.9)}
+
+.morning-q-card{background:var(--yellow);border:4px solid var(--yellowDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--yellowDark);padding:20px 24px;margin-bottom:16px;position:relative}
+.morning-q-label{font-size:11px;font-weight:900;color:var(--yellowDark);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.morning-q-text{font-size:20px;font-weight:900;color:var(--text);line-height:1.3;margin-bottom:12px}
+.morning-q-btns{display:flex;gap:8px;flex-wrap:wrap}
+.morning-q-btn{background:var(--white);border:3px solid var(--yellowDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellowDark);transition:all .2s}
+.morning-q-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--yellowDark)}
+.morning-q-used{font-size:11px;font-weight:700;color:var(--yellowDark);margin-top:6px;opacity:.8}
+
+.dash-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.dash-two-col{grid-template-columns:1fr}}
+
+.dash-mini-timer{background:var(--white);border:4px solid var(--blue);border-radius:var(--rad);box-shadow:0 5px 0 var(--blueDark);padding:18px;text-align:center}
+.dash-mini-timer h3{font-size:14px;font-weight:900;color:var(--blueDark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.dash-mini-time{font-size:44px;font-weight:900;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.dash-mini-btns{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.dmt-btn{border:3px solid transparent;border-radius:12px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;transition:all .2s}
+.dmt-start{background:var(--green);color:#fff;border-color:var(--greenDark);box-shadow:0 3px 0 var(--greenDark)}
+.dmt-reset{background:var(--cream);color:var(--text);border-color:#E8D5C0;box-shadow:0 3px 0 #E8D5C0}
+.dash-mini-presets{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.dmt-preset{background:var(--blueLight);color:var(--blueDark);border:2px solid var(--blue);border-radius:10px;padding:4px 10px;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer}
+.dmt-preset:hover{background:var(--blue);color:#fff}
+
+.dash-flow-card{background:var(--white);border:4px solid var(--green);border-radius:var(--rad);box-shadow:0 5px 0 var(--greenDark);padding:18px}
+.dash-flow-card h3{font-size:14px;font-weight:900;color:var(--greenDark);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+
+.brain-break-card{background:var(--pink);border:4px solid var(--pinkDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--pinkDark);padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden}
+.brain-break-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.15) 2px,transparent 2px);background-size:24px 24px;pointer-events:none}
+.bb-label{font-size:11px;font-weight:900;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;position:relative;z-index:1}
+.bb-icon{font-size:36px;position:relative;z-index:1;margin-bottom:4px}
+.bb-title{font-size:22px;font-weight:900;color:#fff;text-shadow:1px 1px 0 var(--pinkDark);position:relative;z-index:1;margin-bottom:4px}
+.bb-desc{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);position:relative;z-index:1;margin-bottom:12px}
+.bb-btns{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
+.bb-btn{background:var(--white);color:var(--pinkDark);border:3px solid var(--pinkDark);border-radius:12px;padding:8px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--pinkDark);transition:all .2s}
+.bb-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--pinkDark)}
+.bb-shuffle{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:12px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -630,36 +673,68 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div style="font-size:13px;font-weight:800;color:var(--yellowDark)">🎉 <span id="trial-days-text">Your 7-day free trial is active — no payment needed!</span> Upgrade after your trial to keep all features.</div>
       <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--redDark)">🌟 Upgrade Now</button>
     </div>
-    <div class="dash-hero">
-      <div class="dash-hero-text">
-        <div class="dash-hero-greeting">🌱 Good Morning, <span id="dash-teacher-name">Teacher</span>!</div>
-        <div class="dash-hero-sub">Your classroom engagement dashboard — track moods, reward stars, run brain breaks, and keep the day on track, all in one place.</div>
-        <button class="dash-hero-btn" onclick="openTutorial()">🎬 How It Works</button>
+    <!-- DATE BAR -->
+    <div class="dash-date-bar">
+      <div>
+        <div class="dash-greeting">🌱 Good <span id="dash-greeting-time">Morning</span>, <span id="dash-teacher-name">Teacher</span>!</div>
+        <div class="dash-date-text" id="dash-today-date">—</div>
       </div>
-      <div class="dash-hero-emoji">🏫</div>
-    </div>
-    <div class="dash-grid">
-      <div class="stat-card sc1" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><h3>Students</h3><div class="big" id="dash-students">0</div><p>in your class</p><span class="blob">👧</span></div>
-      <div class="stat-card sc2" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><h3>Stars Today</h3><div class="big" id="dash-stars">0</div><p>awesome job!</p><span class="blob">⭐</span></div>
-      <div class="stat-card sc3" onclick="showScreen('timer',document.querySelectorAll('.nav-btn')[2])"><h3>Timer</h3><div class="big">⏱</div><p>start a countdown</p><span class="blob">⏰</span></div>
-      <div class="stat-card sc4" onclick="showScreen('activities',document.querySelectorAll('.nav-btn')[4])"><h3>Activities</h3><div class="big">🎮</div><p>brain breaks &amp; games</p><span class="blob">🎯</span></div>
-    </div>
-    <div class="sec-title" style="font-size:20px;margin-bottom:14px">⚡ Quick Actions</div>
-    <div class="quick-actions">
-      <button class="qa-btn qa1" onclick="quickBreath()"><span class="qa-icon">💨</span>Breathing Break</button>
-      <button class="qa-btn qa2" onclick="quickBreak()"><span class="qa-icon">🧠</span>Brain Break</button>
-      <button class="qa-btn qa3" onclick="showScreen('timer',document.querySelectorAll('.nav-btn')[2]);setPreset(5)"><span class="qa-icon">⏱</span>5 Min Timer</button>
-      <button class="qa-btn qa4" onclick="showScreen('rewards',document.querySelectorAll('.nav-btn')[1])"><span class="qa-icon">⭐</span>Give Stars</button>
-      <button class="qa-btn qa5" onclick="showScreen('schedule',document.querySelectorAll('.nav-btn')[3])"><span class="qa-icon">📋</span>Schedule</button>
-      <button class="qa-btn qa6" onclick="showScreen('tools',document.querySelectorAll('.nav-btn')[6])"><span class="qa-icon">😊</span>Mood Check</button>
-    </div>
-    <div class="today-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <h3>🏫 Today's Flow</h3>
-        <button onclick="addDashItem()" style="background:var(--green);border:3px solid var(--greenDark);border-radius:14px;padding:7px 16px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)">+ Add Item</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px 14px;text-align:center">
+          <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px">Students</div>
+          <div style="font-size:24px;font-weight:900;color:#fff" id="dash-students">0</div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px 14px;text-align:center">
+          <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px">Stars</div>
+          <div style="font-size:24px;font-weight:900;color:var(--yellow)" id="dash-stars">0</div>
+        </div>
       </div>
-      <div id="dash-schedule"></div>
-      <p style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Click the emoji to change it · Click text to rename · ✓ to mark done</p>
+    </div>
+
+    <!-- MORNING QUESTION -->
+    <div class="morning-q-card">
+      <div class="morning-q-label">🌅 Morning Meeting Question</div>
+      <div class="morning-q-text" id="morning-q-text">Loading today's question...</div>
+      <div class="morning-q-btns">
+        <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
+        <button class="morning-q-btn" onclick="skipMorningQ()">⏭ Skip</button>
+      </div>
+      <div class="morning-q-used" id="morning-q-used"></div>
+    </div>
+
+    <!-- TIMER + TODAY'S FLOW -->
+    <div class="dash-two-col">
+      <div class="dash-mini-timer">
+        <h3>⏱ Quick Timer</h3>
+        <div class="dash-mini-time" id="dash-timer-display">05:00</div>
+        <div class="dash-mini-presets">
+          <button class="dmt-preset" onclick="setDashTimer(1)">1m</button>
+          <button class="dmt-preset" onclick="setDashTimer(3)">3m</button>
+          <button class="dmt-preset" onclick="setDashTimer(5)">5m</button>
+          <button class="dmt-preset" onclick="setDashTimer(10)">10m</button>
+          <button class="dmt-preset" onclick="setDashTimer(15)">15m</button>
+        </div>
+        <div class="dash-mini-btns">
+          <button class="dmt-btn dmt-reset" onclick="resetDashTimer()">↺ Reset</button>
+          <button class="dmt-btn dmt-start" id="dash-timer-btn" onclick="toggleDashTimer()">▶ Start</button>
+        </div>
+      </div>
+      <div class="dash-flow-card">
+        <h3>🏫 Today's Flow <button onclick="addDashItem()" style="background:var(--green);border:2px solid var(--greenDark);border-radius:10px;padding:4px 10px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer;box-shadow:0 2px 0 var(--greenDark)">+</button></h3>
+        <div id="dash-schedule" style="max-height:220px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- RANDOM BRAIN BREAK -->
+    <div class="brain-break-card">
+      <div class="bb-label">🧠 Today's Brain Break</div>
+      <div class="bb-icon" id="bb-icon">🎮</div>
+      <div class="bb-title" id="bb-title">Loading...</div>
+      <div class="bb-desc" id="bb-desc"></div>
+      <div class="bb-btns">
+        <button class="bb-btn" onclick="openDashActivity()">▶ Start Activity</button>
+        <button class="bb-shuffle" onclick="shuffleBrainBreak()">🔀 New Break</button>
+      </div>
     </div>
   </div>
 
@@ -1453,7 +1528,314 @@ let dashItems=[
 const DASH_EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸','💨','🎮'];
 let dashEmojiIdx=0;
 
-function initDashboard(){renderDashFlow();updateDashStats();}
+// ── 150 MORNING MEETING QUESTIONS ──
+const MORNING_QUESTIONS=[
+  "What animal would make the best teacher?",
+  "If you could have any superpower, what would it be?",
+  "What is your favorite thing about school?",
+  "If you could visit anywhere in the world, where would you go?",
+  "What is the best book you have ever read?",
+  "Would you rather be able to fly or be invisible?",
+  "What is your favorite season and why?",
+  "If you were a superhero, what would your name be?",
+  "What is something you are really good at?",
+  "What is your favorite meal of all time?",
+  "If you had a pet dragon, what would you name it?",
+  "What is the funniest thing that has ever happened to you?",
+  "If you could live in any time period in history, when would it be?",
+  "What is one thing you want to learn this year?",
+  "Would you rather explore the deep ocean or outer space?",
+  "What is your favorite thing to do on a rainy day?",
+  "If you could swap lives with a cartoon character, who would it be?",
+  "What is the most amazing thing you have ever seen?",
+  "If you could invent something, what would it be?",
+  "What is your favorite holiday and why?",
+  "Would you rather be a famous musician or a famous athlete?",
+  "What is one thing that always makes you smile?",
+  "If you could talk to any animal, which one would you choose?",
+  "What is your favorite thing to do with your family?",
+  "If you found a treasure chest, what would you hope was inside?",
+  "What is the best dream you have ever had?",
+  "If you could change one rule at school, what would it be?",
+  "What is something you are curious about right now?",
+  "Would you rather be a chef or a scientist?",
+  "What is your favorite way to be kind to someone?",
+  "If you could design the perfect playground, what would it have?",
+  "What is the most interesting thing you have ever learned?",
+  "If you had a time machine, would you go to the past or the future?",
+  "What is your favorite thing about your best friend?",
+  "If you could rename any color, what would you call it?",
+  "What is something that makes your town special?",
+  "Would you rather have a robot helper or a magic wand?",
+  "If animals could vote, which animal would win an election?",
+  "What is one word that describes how you feel today?",
+  "If you were a teacher for a day, what would you teach?",
+  "What is your favorite type of weather?",
+  "If you could only eat one food forever, what would it be?",
+  "What is something you have never done but want to try?",
+  "Would you rather explore a haunted house or a sunken ship?",
+  "What is the best compliment you have ever received?",
+  "If you could be any age for a whole year, what age would you choose?",
+  "What is your favorite game to play with friends?",
+  "If you could make up a new holiday, what would it celebrate?",
+  "What is one thing you appreciate about your classroom?",
+  "If you could only keep three toys, which would you choose?",
+  "Would you rather be really good at drawing or really good at singing?",
+  "What is the most creative thing you have ever made?",
+  "If clouds were made of something else, what would you want them to be?",
+  "What is a skill you wish you had?",
+  "If you could meet any historical figure, who would it be?",
+  "What is something small that makes your day better?",
+  "Would you rather be able to run super fast or jump super high?",
+  "If you could ask any question and get the right answer, what would you ask?",
+  "What is the most adventurous thing you have ever done?",
+  "If you could live inside any video game, which one would you choose?",
+  "What is your favorite thing about learning something new?",
+  "If you could speak any language perfectly, which would you choose?",
+  "What is the best surprise you have ever gotten?",
+  "Would you rather always be warm or always be cool?",
+  "If you designed a new sport, what would it look like?",
+  "What is one thing you would tell your younger self?",
+  "If you could have dinner with any fictional character, who would it be?",
+  "What is something you think every kid should experience?",
+  "If you could be the world's best at one thing, what would it be?",
+  "What is your favorite way to show someone you care?",
+  "Would you rather live by the ocean or in the mountains?",
+  "If today had a theme song, what would it be?",
+  "What is something you are proud of accomplishing?",
+  "If you could change the weather for a whole week, what would you make it?",
+  "What is the most important quality in a good friend?",
+  "If you had your own restaurant, what would be on the menu?",
+  "What is a place in your community you love to visit?",
+  "Would you rather be able to breathe underwater or teleport?",
+  "If you were writing a book, what would it be about?",
+  "What is something you do that helps the Earth?",
+  "If you had to describe yourself as a flavor of ice cream, what would you be?",
+  "What is one thing you love about your family?",
+  "Would you rather have a pet unicorn or a pet dinosaur?",
+  "What is the most useful thing you have ever learned?",
+  "If you could add one class to your school day, what would it be?",
+  "What is something that inspires you?",
+  "If you found a magic door, where would you hope it led?",
+  "What is one thing you do every morning to get ready for the day?",
+  "Would you rather visit the moon or the bottom of the ocean?",
+  "What is your go-to way to calm down when you feel stressed?",
+  "If you could plant a garden, what would you grow?",
+  "What is something you wish more people knew about you?",
+  "If school had no homework, how would you spend your evenings?",
+  "What is one thing you want to be remembered for?",
+  "Would you rather be the fastest person alive or the smartest?",
+  "If you could paint your school any color, what would you choose?",
+  "What is something that has gotten easier the more you practiced it?",
+  "If animals held the Olympics, which sport would each animal win?",
+  "What is something that makes learning fun for you?",
+  "If you could redesign the school lunch menu, what would you add?",
+  "What is one way you made someone feel good this week?",
+  "Would you rather be a movie director or a video game designer?",
+  "If you could solve one problem in the world, what would it be?",
+  "What is your favorite thing about being your age?",
+  "If you could trade places with a character from history for a day, who would it be?",
+  "What is something new you have tried recently?",
+  "If your house could be anywhere, where would you put it?",
+  "Would you rather always tell the truth or always be kind?",
+  "What is one thing you are looking forward to this week?",
+  "If you could make everyone in the world do one thing, what would it be?",
+  "What is your favorite way to spend a Saturday?",
+  "If you could be a scientist and discover something, what would you discover?",
+  "What is a random act of kindness you could do today?",
+  "Would you rather have the ability to pause time or rewind it?",
+  "If you could explore any planet, which one would you choose?",
+  "What is something you have changed your mind about?",
+  "If you could write a letter to your future self, what would it say?",
+  "What is one thing you would add to make our classroom better?",
+  "If you had to eat breakfast food for every meal, what would you eat?",
+  "Would you rather be able to see the future or change the past?",
+  "What is the best piece of advice you have ever been given?",
+  "If you could have any job in the world, what would it be?",
+  "What is one thing that surprised you recently?",
+  "If today was your birthday, how would you celebrate?",
+  "Would you rather have a treehouse or an underground clubhouse?",
+  "What is something you are grateful for right now?",
+  "If you could be any type of weather, what would you be?",
+  "What is the kindest thing a teacher has ever done for you?",
+  "If you could give everyone in the world one gift, what would it be?",
+  "Would you rather live in a city or on a farm?",
+  "What is something you want to accomplish before the end of the school year?",
+  "If school had a mascot, what animal should it be?",
+  "What is one thing that makes you unique?",
+  "If you could have a robot do one thing for you, what would it be?",
+  "What is your favorite memory from this school year so far?",
+  "Would you rather go camping or stay in a fancy hotel?",
+  "If you could design a dream bedroom, what would be in it?",
+  "What is something you believe that most people might disagree with?",
+  "If you could be a professional at any sport, which would you choose?",
+  "What is one habit you would like to build this year?",
+  "Would you rather explore a jungle or a desert?",
+  "If your pet could talk, what do you think it would say?",
+  "What is something that takes courage that you have done?",
+  "If you could eat lunch anywhere in the world today, where would you go?",
+  "What is something you would teach other kids if you had the chance?",
+  "Would you rather have unlimited books or unlimited movies?",
+  "If you could bring back any extinct animal, which would it be?",
+  "What is a funny tradition your family has?",
+  "If you could only use three apps on a phone, which would you keep?",
+  "What is one thing that always cheers you up?",
+  "Would you rather fly on a dragon or ride on a whale?",
+  "If you could rename yourself, what name would you choose?",
+  "What is something you are really looking forward to in the future?"
+];
+
+// ── MORNING QUESTION LOGIC ──
+function getMQStorageKey(){return 'bs_mq_'+currentUser?.id;}
+function getMQState(){
+  try{
+    const raw=localStorage.getItem(getMQStorageKey());
+    if(raw)return JSON.parse(raw);
+  }catch(e){}
+  return {usedIndexes:[],currentIndex:null,lastDate:null};
+}
+function saveMQState(state){
+  try{localStorage.setItem(getMQStorageKey(),JSON.stringify(state));}catch(e){}
+}
+function getTodayStr(){return new Date().toISOString().slice(0,10);}
+
+function initMorningQuestion(){
+  const state=getMQState();
+  const today=getTodayStr();
+  // If we already have a question for today, show it
+  if(state.lastDate===today&&state.currentIndex!==null){
+    showMorningQuestion(state.currentIndex,state.usedIndexes.length);
+    return;
+  }
+  // If all questions used, reset
+  if(state.usedIndexes.length>=MORNING_QUESTIONS.length){
+    state.usedIndexes=[];
+  }
+  // Pick a random unused question
+  const unused=MORNING_QUESTIONS.map((_,i)=>i).filter(i=>!state.usedIndexes.includes(i));
+  const pick=unused[Math.floor(Math.random()*unused.length)];
+  state.currentIndex=pick;
+  state.usedIndexes.push(pick);
+  state.lastDate=today;
+  saveMQState(state);
+  showMorningQuestion(pick,state.usedIndexes.length);
+}
+
+function showMorningQuestion(index,usedCount){
+  const el=document.getElementById('morning-q-text');
+  const used=document.getElementById('morning-q-used');
+  if(el)el.textContent='"'+MORNING_QUESTIONS[index]+'"';
+  if(used)used.textContent=usedCount+' of '+MORNING_QUESTIONS.length+' questions used';
+}
+
+function shuffleMorningQ(){
+  const state=getMQState();
+  if(state.usedIndexes.length>=MORNING_QUESTIONS.length){state.usedIndexes=[];}
+  const unused=MORNING_QUESTIONS.map((_,i)=>i).filter(i=>!state.usedIndexes.includes(i)&&i!==state.currentIndex);
+  if(!unused.length){showToast('All questions used! Starting over.');state.usedIndexes=[];}
+  const available=MORNING_QUESTIONS.map((_,i)=>i).filter(i=>i!==state.currentIndex&&!state.usedIndexes.includes(i));
+  const pick=available.length?available[Math.floor(Math.random()*available.length)]:Math.floor(Math.random()*MORNING_QUESTIONS.length);
+  state.currentIndex=pick;
+  state.usedIndexes.push(pick);
+  state.lastDate=getTodayStr();
+  saveMQState(state);
+  showMorningQuestion(pick,state.usedIndexes.length);
+  showToast('🔀 New question!');
+}
+
+function skipMorningQ(){
+  // Skip counts as used
+  shuffleMorningQ();
+  showToast('⏭ Question skipped!');
+}
+
+// ── DASH MINI TIMER ──
+let dashTimerInterval=null,dashTimerRunning=false,dashTimerTotal=300,dashTimerRemaining=300;
+function setDashTimer(min){
+  dashTimerTotal=min*60;dashTimerRemaining=dashTimerTotal;
+  clearInterval(dashTimerInterval);dashTimerRunning=false;
+  document.getElementById('dash-timer-btn').textContent='▶ Start';
+  updateDashTimerDisplay();
+}
+function updateDashTimerDisplay(){
+  const m=Math.floor(dashTimerRemaining/60),s=dashTimerRemaining%60;
+  const el=document.getElementById('dash-timer-display');
+  if(el)el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function toggleDashTimer(){
+  if(dashTimerRunning){
+    clearInterval(dashTimerInterval);dashTimerRunning=false;
+    document.getElementById('dash-timer-btn').textContent='▶ Start';
+  }else{
+    dashTimerRunning=true;
+    document.getElementById('dash-timer-btn').textContent='⏸ Pause';
+    dashTimerInterval=setInterval(()=>{
+      dashTimerRemaining--;updateDashTimerDisplay();
+      if(dashTimerRemaining<=0){
+        clearInterval(dashTimerInterval);dashTimerRunning=false;
+        document.getElementById('dash-timer-btn').textContent='▶ Start';
+        document.getElementById('dash-timer-display').textContent='DONE! 🎉';
+        showToast('🎉 Time is up!');
+      }
+    },1000);
+  }
+}
+function resetDashTimer(){
+  clearInterval(dashTimerInterval);dashTimerRunning=false;
+  dashTimerRemaining=dashTimerTotal;
+  document.getElementById('dash-timer-btn').textContent='▶ Start';
+  updateDashTimerDisplay();
+}
+
+// ── RANDOM BRAIN BREAK ──
+// Only games, breaks, movements — NO breathing (cats: game, break, move)
+let currentBBId=null;
+function initBrainBreak(){
+  const available=canAccessPro()?ACTIVITIES:ACTIVITIES.filter(a=>FREE_ACTIVITY_IDS.includes(a.id));
+  // Use date as seed so it changes daily but is consistent within a day
+  const today=getTodayStr();
+  const seed=today.split('-').reduce((a,b)=>a+parseInt(b),0);
+  const idx=seed%available.length;
+  currentBBId=available[idx].id;
+  showBrainBreak(available[idx]);
+}
+function showBrainBreak(activity){
+  const icon=document.getElementById('bb-icon');
+  const title=document.getElementById('bb-title');
+  const desc=document.getElementById('bb-desc');
+  if(icon)icon.textContent=activity.icon;
+  if(title)title.textContent=activity.title;
+  if(desc)desc.textContent=activity.desc+' · '+activity.time+' · Grades '+activity.grades;
+}
+function shuffleBrainBreak(){
+  const available=canAccessPro()?ACTIVITIES:ACTIVITIES.filter(a=>FREE_ACTIVITY_IDS.includes(a.id));
+  let newIdx;
+  do{newIdx=Math.floor(Math.random()*available.length);}
+  while(available[newIdx].id===currentBBId&&available.length>1);
+  currentBBId=available[newIdx].id;
+  showBrainBreak(available[newIdx]);
+  showToast('🔀 New brain break!');
+}
+function openDashActivity(){
+  if(!currentBBId)return;
+  showScreen('activities',document.querySelectorAll('.nav-btn')[4]);
+  setTimeout(()=>openActivity(currentBBId),200);
+}
+
+// ── INIT DASHBOARD ──
+function initDashboard(){
+  // Set date and greeting
+  const now=new Date();
+  const dateEl=document.getElementById('dash-today-date');
+  if(dateEl)dateEl.textContent=now.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const hour=now.getHours();
+  const greetEl=document.getElementById('dash-greeting-time');
+  if(greetEl)greetEl.textContent=hour<12?'Morning':hour<17?'Afternoon':'Evening';
+  renderDashFlow();
+  updateDashStats();
+  initMorningQuestion();
+  initBrainBreak();
+}
 
 function renderDashFlow(){
   const el=document.getElementById('dash-schedule');
