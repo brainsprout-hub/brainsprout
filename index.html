@@ -893,7 +893,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <button onclick="showCancelConfirm()" style="background:var(--cream);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--red)">🚫 Cancel Subscription</button>
         <div id="cancel-confirm-box" style="display:none;margin-top:14px;background:var(--redLight);border:3px solid var(--red);border-radius:16px;padding:16px">
           <div style="font-size:15px;font-weight:900;color:var(--redDark);margin-bottom:8px">Are you sure you want to cancel?</div>
-          <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px">You'll keep Pro access until the end of your billing period. After that, only free features will be available.</div>
+          <div style="font-size:13px;font-weight:700;color:var(--redDark);margin-bottom:14px;background:var(--redLight);padding:10px;border-radius:10px;border:2px solid var(--red)">⚠️ Warning: You will lose access to ALL Pro features immediately upon canceling. This includes Teacher Notes, Mood Check-In, Sensory Needs, and all activities. This cannot be undone.</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button onclick="confirmCancel()" id="confirm-cancel-btn" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--redDark)">Yes, Cancel My Subscription</button>
             <button onclick="hideCancelConfirm()" style="background:var(--white);color:var(--text);border:3px solid #E8D5C0;border-radius:12px;padding:10px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 #E8D5C0">Keep My Subscription</button>
@@ -2371,23 +2371,28 @@ async function confirmCancel(){
       });
     }catch(emailErr){console.log('Email notification failed:',emailErr);}
 
+    // Apply free plan UI immediately
+    applyPlanUI();
+    renderActivities();
+    renderBreathing();
+
     // Show success message
     if(msg){
       msg.style.display='block';
-      msg.style.color='var(--greenDark)';
-      msg.style.background='var(--greenLight)';
+      msg.style.color='var(--text)';
+      msg.style.background='var(--cream)';
       msg.style.padding='14px';
       msg.style.borderRadius='12px';
-      msg.style.border='2px solid var(--green)';
+      msg.style.border='3px solid #E8D5C0';
       msg.style.lineHeight='1.6';
-      msg.innerHTML='✅ <strong>Subscription Canceled</strong><br>You have Pro access until <strong>'+cancelDateDisplay+'</strong>. After that your account will switch to the free plan automatically.';
+      msg.innerHTML='✅ <strong>Subscription Canceled</strong><br>Your Pro subscription has been canceled as of today, <strong>'+cancelDateDisplay+'</strong>. You now have access to free features only. Thank you for using BrainSprout!';
     }
     if(btn){btn.style.display='none';}
     document.getElementById('cancel-confirm-box').querySelector('[onclick="hideCancelConfirm()"]').style.display='none';
 
     // Update account screen
     renderAccountScreen();
-    showToast('Subscription canceled. Pro access until '+cancelDateDisplay);
+    showToast('Subscription canceled. Free plan is now active.');
 
   }catch(e){
     console.error('Cancel error:',e);
