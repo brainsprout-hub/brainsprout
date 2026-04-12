@@ -1216,13 +1216,8 @@ const moodLogs=[];    // {studentId, mood, loggedAt}
 const sensoryLogs=[];  // {studentId, need, active, loggedAt}
 
 
-let stripeClient=null;
-function getStripe(){
-  if(!stripeClient)stripeClient=Stripe('pk_live_51TFkrMI3RU9VVJJmD32lKFIJjTVNNvFVAoE2yy8l5RPkF7FGXLql5dPsbj2MSL0fWulb6Km5byClQH4SKVVU8vnL00JnE7775f');
-  return stripeClient;
-}
+// Stripe payment handled via payment links
 
-// ── PLAN HELPERS ──
 // ── PLAN HELPERS ──
 function getPlan(){
   const p=teacherProfile?.plan||'free';
@@ -1868,23 +1863,34 @@ function initDashboard(){
   initBrainBreak();
 }
 
+function buildEmojiGrid(id,fn){
+  if(typeof ALL_EMOJIS==='undefined')return '';
+  return ALL_EMOJIS.map(function(e,i){
+    return '<button style="background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px" onclick="'+fn+'('+id+','+i+')">'+e+'</button>';
+  }).join('');
+}
+
 function renderDashFlow(){
   const el=document.getElementById('dash-schedule');
+  if(!el)return;
   if(dashItems.length===0){
-    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:14px">No items yet — click "+ Add Item" to build today's flow!</div>`;
+    el.innerHTML="<div style='text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:14px'>No items yet. Click + to add activities.</div>";
     return;
   }
-  el.innerHTML=dashItems.map(item=>{
-    const grid=typeof ALL_EMOJIS!=='undefined'?ALL_EMOJIS.map(e=>'<button onclick="pickEmojiDash('+item.id+',''+e+'')">'+e+'</button>').join(''):'';
+  el.innerHTML=dashItems.map(function(item){
+    var grid=buildEmojiGrid(item.id,'pickEmojiDash');
+    var timeVal=item.time||'';
+    var checked=item.done?' df-checked':'';
+    var checkMark=item.done?'&#10003;':'';
     return '<div class="dash-flow-row" id="dfrow-'+item.id+'">'+
       '<div class="emoji-picker-wrap">'+
         '<button class="df-emoji" onclick="toggleEmojiPickerDash('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
-        '<div class="emoji-picker-dropdown" id="dep-'+item.id+'" style="display:none">'+grid+'</div>'+
+        '<div class="emoji-picker-dropdown" id="dep-'+item.id+'" style="display:none;grid-template-columns:repeat(5,1fr)">'+grid+'</div>'+
       '</div>'+
-      '<input type="time" class="df-time-input" value="'+(item.time||'')+'" onchange="updateDashTime('+item.id+',this.value)" title="Set time">'+
-      '<input class="df-text" type="text" value="'+item.text+'" maxlength="30" placeholder="Activity..." onblur="updateDashText('+item.id+',this.value)" onkeydown="if(event.key==='Enter'){this.blur();}">'+
-      '<button class="df-check'+(item.done?' df-checked':'')+'" onclick="toggleDashDone('+item.id+')" title="Mark done">'+(item.done?'✓':'')+'</button>'+
-      '<button class="df-del" onclick="deleteDashItem('+item.id+')" title="Remove">×</button>'+
+      '<input type="time" class="df-time-input" value="'+timeVal+'" onchange="updateDashTime('+item.id+',this.value)">'+
+      '<input class="df-text" type="text" value="'+item.text+'" maxlength="30" placeholder="Activity..." onblur="updateDashText('+item.id+',this.value)">'+
+      '<button class="df-check'+checked+'" onclick="toggleDashDone('+item.id+')" title="Mark done">'+checkMark+'</button>'+
+      '<button class="df-del" onclick="deleteDashItem('+item.id+')" title="Remove">&times;</button>'+
     '</div>';
   }).join('');
 }
@@ -1907,10 +1913,11 @@ function toggleEmojiPickerDash(id,e){
   const dp=document.getElementById('dep-'+id);
   if(dp)dp.style.display=dp.style.display==='none'?'grid':'none';
 }
-function pickEmojiDash(id,emoji){
-  const s=schedItems.find(function(x){return x.id===id;});
+function pickEmojiDash(id,idx){
+  var emoji=ALL_EMOJIS[idx];
+  var s=schedItems.find(function(x){return x.id===id;});
   if(s){s.emoji=emoji;}
-  const dp=document.getElementById('dep-'+id);
+  var dp=document.getElementById('dep-'+id);
   if(dp)dp.style.display='none';
   renderDashFlow();
   if(document.getElementById('schedule')&&document.getElementById('schedule').classList.contains('active')){renderSchedule();}
@@ -2110,16 +2117,15 @@ async function saveSchedToDB(){
 
 const ALL_EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸','💨','🎮','✏️','🔬','🎯','🎪','🏫','📐','📓','🎒','🌈','🌻','🦋','🎈','🏅','🎤','🖌','📏','🔭','🎸','🏆'];
 function renderSchedule(){
-  const emojiGrid=ALL_EMOJIS.map(e=>'<button onclick="pickEmoji('+'{id}'+',''+e+'')">'+e+'</button>').join('');
-  document.getElementById('sched-editor').innerHTML=schedItems.map(item=>{
-    const grid=ALL_EMOJIS.map(e=>'<button onclick="pickEmoji('+item.id+',''+e+'')">'+e+'</button>').join('');
+  document.getElementById('sched-editor').innerHTML=schedItems.map(function(item){
+    var grid=buildEmojiGrid(item.id,'pickEmoji');
     return '<div class="sched-row">'+
       '<div class="emoji-picker-wrap">'+
         '<button class="sched-emoji" onclick="toggleEmojiPicker('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
         '<div class="emoji-picker-dropdown" id="ep-'+item.id+'" style="display:none">'+grid+'</div>'+
       '</div>'+
       '<input type="time" class="sched-time" value="'+(item.time||'')+'" onchange="updateSchedTime('+item.id+',this.value)" title="Set time">'+
-      '<input class="sched-input" value="'+item.text+'" onblur="updateSchedText('+item.id+',this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" placeholder="Activity name...">'+
+      '<input class="sched-input" value="'+item.text+'" onblur="updateSchedText('+item.id+',this.value)" onkeydown="if(event.keyCode===13){this.blur();}" placeholder="Activity name...">'+
       '<div class="sched-done-check'+(item.done?' checked':'')+'" onclick="toggleSchedDone('+item.id+')">'+(item.done?'✓':'')+'</div>'+
       '<button class="sched-delete" onclick="deleteSchedItem('+item.id+')">×</button>'+
     '</div>';
@@ -2132,10 +2138,11 @@ function toggleEmojiPicker(id,e){
   const dp=document.getElementById('ep-'+id);
   if(dp)dp.style.display=dp.style.display==='none'?'grid':'none';
 }
-function pickEmoji(id,emoji){
-  const s=schedItems.find(function(x){return x.id===id;});
+function pickEmoji(id,idx){
+  var emoji=ALL_EMOJIS[idx];
+  var s=schedItems.find(function(x){return x.id===id;});
   if(s){s.emoji=emoji;}
-  const dp=document.getElementById('ep-'+id);
+  var dp=document.getElementById('ep-'+id);
   if(dp)dp.style.display='none';
   renderSchedule();
   renderDashFlow();
