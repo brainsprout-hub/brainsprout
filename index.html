@@ -659,7 +659,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
   <nav class="nav">
     <button class="nav-btn active" onclick="showScreen('dashboard',this)"><span>🏠</span> Home</button>
-    <button class="nav-btn" onclick="showScreen('rewards',this)"><span>⭐</span> Stars</button>
+    <button class="nav-btn" onclick="showScreen('rewards',this)"><span>⭐</span> Students</button>
     <button class="nav-btn" onclick="showScreen('timer',this)"><span>⏱</span> Timer</button>
     <button class="nav-btn" onclick="showScreen('schedule',this)"><span>📋</span> Schedule</button>
     <button class="nav-btn" onclick="showScreen('activities',this)"><span>🎮</span> Activities</button>
@@ -681,6 +681,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div>
         <div class="dash-greeting">🌱 Good <span id="dash-greeting-time">Morning</span>, <span id="dash-teacher-name">Teacher</span>!</div>
         <div class="dash-date-text" id="dash-today-date">—</div>
+        <div id="dash-live-time" style="font-size:28px;font-weight:900;color:rgba(255,255,255,.95);margin-top:2px;letter-spacing:1px">—</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px 14px;text-align:center">
@@ -1473,7 +1474,8 @@ async function doForgot(){
   const email=document.getElementById('forgot-email').value.trim();
   if(!email){showMsg('Please enter your email.','error');return;}
   const btn=document.getElementById('forgot-btn');btn.disabled=true;btn.textContent='Sending...';
-  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  const redirectUrl='https://brainsprout.netlify.app';
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:redirectUrl});
   btn.disabled=false;btn.textContent='Send Reset Link 📧';
   if(error){showMsg(error.message,'error');return;}
   showMsg('Reset link sent! Check your email inbox.','success');
@@ -1829,14 +1831,30 @@ function openDashActivity(){
 }
 
 // ── INIT DASHBOARD ──
+function updateDashClock(){
+  const now=new Date();
+  const timeEl=document.getElementById('dash-live-time');
+  if(timeEl){
+    const h=now.getHours();
+    const m=String(now.getMinutes()).padStart(2,'0');
+    const ampm=h>=12?'PM':'AM';
+    const h12=h%12||12;
+    timeEl.textContent=h12+':'+m+' '+ampm;
+  }
+  const greetEl=document.getElementById('dash-greeting-time');
+  if(greetEl){
+    const h=now.getHours();
+    greetEl.textContent=h<12?'Morning':h<17?'Afternoon':'Evening';
+  }
+}
+
 function initDashboard(){
-  // Set date and greeting
   const now=new Date();
   const dateEl=document.getElementById('dash-today-date');
   if(dateEl)dateEl.textContent=now.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  const hour=now.getHours();
-  const greetEl=document.getElementById('dash-greeting-time');
-  if(greetEl)greetEl.textContent=hour<12?'Morning':hour<17?'Afternoon':'Evening';
+  updateDashClock();
+  // Live clock — updates every second
+  setInterval(updateDashClock,1000);
   renderDashFlow();
   updateDashStats();
   initMorningQuestion();
