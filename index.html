@@ -158,7 +158,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .delete-student{position:absolute;top:-8px;right:-8px;background:var(--red);border:3px solid var(--redDark);border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;transition:all .2s;box-shadow:0 3px 0 var(--redDark);z-index:5}
 .delete-student:hover{transform:scale(1.15)}
 .color-dots{display:flex;justify-content:center;gap:4px;margin-top:6px;flex-wrap:wrap}
-.color-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0}
+.color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0}
 .color-dot:hover{transform:scale(1.2)}
 .color-dot.active{border-color:var(--text);transform:scale(1.15)}
 .confetti-burst{position:fixed;pointer-events:none;top:40%;left:50%;transform:translate(-50%,-50%);font-size:48px;animation:starBurst 1.1s forwards;z-index:9999}
@@ -1205,7 +1205,7 @@ const sb=createClient(
 );
 
 // ── STATE ──
-const AVATAR_COLORS=['#E8404A','#F5C842','#5BAD5A','#4A90C4','#F0698A','#9B6DFF','#FF7043','#26C6DA','#AB47BC','#66BB6A'];
+const AVATAR_COLORS=['#E8404A','#FF7043','#F5C842','#5BAD5A','#4A90C4','#9B6DFF','#F0698A'];
 let currentUser=null,students=[],selectedAvatar=0,pendingDeleteId=null;
 let timerInterval=null,timerRunning=false,timerTotal=300,timerRemaining=300,soundOn=true;
 const CIRC=2*Math.PI*86;
@@ -1964,7 +1964,7 @@ function renderStudents(filter='all'){
     return`<div class="student-card" id="card-${s.id}" style="border-color:${bc};cursor:pointer" onclick="openProfile(${s.id})" title="Click to view ${s.name}'s profile">
       <button class="delete-student" onclick="event.stopPropagation();confirmDelete(${s.id},'${s.name.replace(/'/g,"\\'")}')">✕</button>
       <div style="position:absolute;top:0;left:0;right:0;height:7px;background:${bc};border-radius:16px 16px 0 0"></div>
-      <div class="s-avatar" id="avatar-${s.id}" style="background:${s.color}" onclick="event.stopPropagation();cycleColor(${s.id})" title="Click to change color">${s.name.slice(0,2).toUpperCase()}</div>
+      <div class="s-avatar" id="avatar-${s.id}" style="background:${s.color}" onclick="event.stopPropagation();cycleColor(${s.id})" title="Click to change color"></div>
       <div class="s-avatar-hint">tap to recolor</div>
       <div class="s-name-wrap">
         <div class="s-name" id="sname-${s.id}" onclick="event.stopPropagation();startEditName(${s.id})" title="Click to edit name">${s.name}</div>
@@ -2049,13 +2049,18 @@ async function deleteStudent(id){
   showToast('🗑 '+(s?s.name:'Student')+' removed from class.');
 }
 function openAddStudent(){
-  document.getElementById('avatar-picker').innerHTML=AVATAR_COLORS.map((c,i)=>`<div class="av-opt${i===0?' sel':''}" style="background:${c}" onclick="selectAvatar(${i},this)">${'ABCDEFGHIJ'[i]}</div>`).join('');
+  document.getElementById('avatar-picker').innerHTML=AVATAR_COLORS.map((c,i)=>`<div class="av-opt${i===0?' sel':''}" style="background:${c};width:36px;height:36px;border-radius:50%;cursor:pointer;border:4px solid ${i===0?'var(--text)':'transparent'};transition:all .2s;display:inline-block" onclick="selectAvatar(${i},this)"></div>`).join('');
   selectedAvatar=0;document.getElementById('s-name-input').value='';
   document.getElementById('add-student-modal').classList.remove('hidden');
   setTimeout(()=>document.getElementById('s-name-input').focus(),100);
 }
 function closeAddStudent(){document.getElementById('add-student-modal').classList.add('hidden');}
-function selectAvatar(i,el){selectedAvatar=i;document.querySelectorAll('.av-opt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function selectAvatar(i,el){
+  selectedAvatar=i;
+  document.querySelectorAll('.av-opt').forEach(e=>{e.classList.remove('sel');e.style.border='4px solid transparent';});
+  el.classList.add('sel');
+  el.style.border='4px solid var(--text)';
+}
 async function addStudent(){
   const name=document.getElementById('s-name-input').value.trim();
   const grade=document.getElementById('s-grade-input').value;
@@ -2597,7 +2602,7 @@ async function forceUnlockCheck(){
 function openProfile(studentId){
   const s=students.find(x=>x.id===studentId);
   if(!s)return;
-  document.getElementById('profile-avatar').textContent=s.name.slice(0,2).toUpperCase();
+  document.getElementById('profile-avatar').textContent='';
   document.getElementById('profile-avatar').style.background=s.color;
   document.getElementById('profile-name').textContent=s.name;
   document.getElementById('profile-grade').textContent='Grade '+s.grade;
