@@ -529,6 +529,13 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .bb-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--pinkDark)}
 .bb-shuffle{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:12px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer}
 
+
+/* ── EMOJI PICKER ── */
+.emoji-picker-wrap{position:relative;display:inline-block}
+.emoji-picker-dropdown{position:absolute;top:110%;left:0;background:var(--white);border:3px solid #E8D5C0;border-radius:16px;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;z-index:200;box-shadow:0 8px 24px rgba(42,31,26,0.18);min-width:180px}
+.emoji-picker-dropdown button{background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px;transition:background .15s}
+.emoji-picker-dropdown button:hover{background:var(--cream)}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -1867,29 +1874,47 @@ function renderDashFlow(){
     el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:14px">No items yet — click "+ Add Item" to build today's flow!</div>`;
     return;
   }
-  el.innerHTML=dashItems.map(item=>`
-    <div class="dash-flow-row" id="dfrow-${item.id}">
-      <button class="df-emoji" onclick="cycleDashEmoji(${item.id})" title="Change icon">${item.emoji}</button>
-      <input type="time" class="df-time-input" value="${item.time||''}"
-        onchange="updateDashTime(${item.id},this.value)"
-        title="Set time">
-      <input class="df-text" type="text" value="${item.text}" maxlength="30" placeholder="Activity..."
-        onblur="updateDashText(${item.id},this.value)"
-        onkeydown="if(event.key==='Enter'){this.blur();}">
-      <button class="df-check${item.done?' df-checked':''}" onclick="toggleDashDone(${item.id})" title="Mark done">${item.done?'✓':''}</button>
-      <button class="df-del" onclick="deleteDashItem(${item.id})" title="Remove">×</button>
-    </div>`).join('');
+  el.innerHTML=dashItems.map(item=>{
+    const grid=typeof ALL_EMOJIS!=='undefined'?ALL_EMOJIS.map(e=>'<button onclick="pickEmojiDash('+item.id+',''+e+'')">'+e+'</button>').join(''):'';
+    return '<div class="dash-flow-row" id="dfrow-'+item.id+'">'+
+      '<div class="emoji-picker-wrap">'+
+        '<button class="df-emoji" onclick="toggleEmojiPickerDash('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
+        '<div class="emoji-picker-dropdown" id="dep-'+item.id+'" style="display:none">'+grid+'</div>'+
+      '</div>'+
+      '<input type="time" class="df-time-input" value="'+(item.time||'')+'" onchange="updateDashTime('+item.id+',this.value)" title="Set time">'+
+      '<input class="df-text" type="text" value="'+item.text+'" maxlength="30" placeholder="Activity..." onblur="updateDashText('+item.id+',this.value)" onkeydown="if(event.key==='Enter'){this.blur();}">'+
+      '<button class="df-check'+(item.done?' df-checked':'')+'" onclick="toggleDashDone('+item.id+')" title="Mark done">'+(item.done?'✓':'')+'</button>'+
+      '<button class="df-del" onclick="deleteDashItem('+item.id+')" title="Remove">×</button>'+
+    '</div>';
+  }).join('');
 }
 
-// Sync dashItems → schedItems → DB
+// Single source of truth — schedItems drives everything
 function syncDashToDB(){
-  schedItems=dashItems.map(d=>({...d}));
   saveSchedToDB();
+  if(document.getElementById('schedule')&&document.getElementById('schedule').classList.contains('active')){
+    renderSchedule();
+  }
 }
 function cycleDashEmoji(id){
   const s=dashItems.find(x=>x.id===id);if(!s)return;
   dashEmojiIdx=(dashEmojiIdx+1)%DASH_EMOJIS.length;
   s.emoji=DASH_EMOJIS[dashEmojiIdx];renderDashFlow();syncDashToDB();
+}
+function toggleEmojiPickerDash(id,e){
+  e.stopPropagation();
+  document.querySelectorAll('.emoji-picker-dropdown').forEach(function(d){if(d.id!=='dep-'+id)d.style.display='none';});
+  const dp=document.getElementById('dep-'+id);
+  if(dp)dp.style.display=dp.style.display==='none'?'grid':'none';
+}
+function pickEmojiDash(id,emoji){
+  const s=schedItems.find(function(x){return x.id===id;});
+  if(s){s.emoji=emoji;}
+  const dp=document.getElementById('dep-'+id);
+  if(dp)dp.style.display='none';
+  renderDashFlow();
+  if(document.getElementById('schedule')&&document.getElementById('schedule').classList.contains('active')){renderSchedule();}
+  saveSchedToDB();
 }
 function updateDashText(id,val){const s=dashItems.find(x=>x.id===id);if(s&&s.text!==val){s.text=val;syncDashToDB();}}
 function updateDashTime(id,val){const s=dashItems.find(x=>x.id===id);if(s&&s.time!==val){s.time=val;syncDashToDB();}}
@@ -2083,28 +2108,51 @@ async function saveSchedToDB(){
   await sb.from('schedule_items').insert(rows);
 }
 
+const ALL_EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸','💨','🎮','✏️','🔬','🎯','🎪','🏫','📐','📓','🎒','🌈','🌻','🦋','🎈','🏅','🎤','🖌','📏','🔭','🎸','🏆'];
 function renderSchedule(){
-  document.getElementById('sched-editor').innerHTML=schedItems.map(item=>`
-    <div class="sched-row">
-      <button class="sched-emoji" onclick="cycleEmoji(${item.id})">${item.emoji}</button>
-      <input type="time" class="sched-time" value="${item.time||''}"
-        onchange="updateSchedTime(${item.id},this.value)"
-        title="Set time">
-      <input class="sched-input" value="${item.text}"
-        onblur="updateSchedText(${item.id},this.value)"
-        onkeydown="if(event.key==='Enter'){this.blur();}"
-        placeholder="Activity name...">
-      <div class="sched-done-check${item.done?' checked':''}" onclick="toggleSchedDone(${item.id})">${item.done?'✓':''}</div>
-      <button class="sched-delete" onclick="deleteSchedItem(${item.id})">×</button>
-    </div>`).join('');
+  const emojiGrid=ALL_EMOJIS.map(e=>'<button onclick="pickEmoji('+'{id}'+',''+e+'')">'+e+'</button>').join('');
+  document.getElementById('sched-editor').innerHTML=schedItems.map(item=>{
+    const grid=ALL_EMOJIS.map(e=>'<button onclick="pickEmoji('+item.id+',''+e+'')">'+e+'</button>').join('');
+    return '<div class="sched-row">'+
+      '<div class="emoji-picker-wrap">'+
+        '<button class="sched-emoji" onclick="toggleEmojiPicker('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
+        '<div class="emoji-picker-dropdown" id="ep-'+item.id+'" style="display:none">'+grid+'</div>'+
+      '</div>'+
+      '<input type="time" class="sched-time" value="'+(item.time||'')+'" onchange="updateSchedTime('+item.id+',this.value)" title="Set time">'+
+      '<input class="sched-input" value="'+item.text+'" onblur="updateSchedText('+item.id+',this.value)" onkeydown="if(event.key==='Enter'){this.blur();}" placeholder="Activity name...">'+
+      '<div class="sched-done-check'+(item.done?' checked':'')+'" onclick="toggleSchedDone('+item.id+')">'+(item.done?'✓':'')+'</div>'+
+      '<button class="sched-delete" onclick="deleteSchedItem('+item.id+')">×</button>'+
+    '</div>';
+  }).join('');
   updateSchedProgress();
 }
+function toggleEmojiPicker(id,e){
+  e.stopPropagation();
+  document.querySelectorAll('.emoji-picker-dropdown').forEach(function(d){if(d.id!=='ep-'+id)d.style.display='none';});
+  const dp=document.getElementById('ep-'+id);
+  if(dp)dp.style.display=dp.style.display==='none'?'grid':'none';
+}
+function pickEmoji(id,emoji){
+  const s=schedItems.find(function(x){return x.id===id;});
+  if(s){s.emoji=emoji;}
+  const dp=document.getElementById('ep-'+id);
+  if(dp)dp.style.display='none';
+  renderSchedule();
+  renderDashFlow();
+  saveSchedToDB();
+}
+document.addEventListener('click',function(){
+  document.querySelectorAll('.emoji-picker-dropdown').forEach(function(d){d.style.display='none';});
+});
 function updateSchedTime(id,val){
   const s=schedItems.find(x=>x.id===id);
   if(s&&s.time!==val){s.time=val;saveSchedToDB();}
 }
 function cycleEmoji(id){const s=schedItems.find(x=>x.id===id);if(!s)return;emojiIdx=(emojiIdx+1)%EMOJIS.length;s.emoji=EMOJIS[emojiIdx];renderSchedule();saveSchedToDB();}
-function updateSchedText(id,val){const s=schedItems.find(x=>x.id===id);if(s&&s.text!==val){s.text=val;saveSchedToDB();}}
+function updateSchedText(id,val){
+  const s=schedItems.find(function(x){return x.id===id;});
+  if(s&&s.text!==val){s.text=val;dashItems=schedItems;renderDashFlow();saveSchedToDB();}
+}
 function toggleSchedDone(id){const s=schedItems.find(x=>x.id===id);if(!s)return;s.done=!s.done;renderSchedule();saveSchedToDB();if(s.done)showToast('✅ "'+s.text+'" done!');}
 function deleteSchedItem(id){schedItems=schedItems.filter(x=>x.id!==id);renderSchedule();saveSchedToDB();}
 function addSchedItem(){schedItems.push({id:Date.now(),emoji:'📌',text:'New Activity',time:'',done:false});renderSchedule();saveSchedToDB();}
