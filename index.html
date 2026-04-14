@@ -480,38 +480,15 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 
 @media print{
-  /* Hide everything except the report */
-  body > *{display:none!important}
-  .report-overlay{display:block!important;position:static!important;background:none!important;padding:0!important}
-  .report-modal{display:block!important;max-height:none!important;border:none!important;box-shadow:none!important;border-radius:0!important;width:100%!important;max-width:100%!important;font-family:'Baloo 2',Georgia,serif}
-
-  /* Hide UI elements */
-  .report-actions,.report-student-select,.report-close{display:none!important}
-
-  /* Print header */
-  .report-header{background:#2c7a3a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20px 28px!important;border-radius:0!important}
-  .report-header h2{color:#fff!important;font-size:22px!important}
-  .report-header p{color:rgba(255,255,255,.9)!important}
-
-  /* Student header */
-  .report-student-header{background:#f5f5f5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:2px solid #ddd!important;border-radius:10px!important;padding:14px 18px!important;margin-bottom:16px!important}
-  .report-s-avatar{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-
-  /* Sections */
-  .report-section{margin-bottom:16px!important;page-break-inside:avoid}
-  .report-section-title{font-size:12px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:1px!important;color:#444!important;border-bottom:2px solid #ddd!important;padding-bottom:5px!important;margin-bottom:8px!important}
-
-  /* Log rows */
-  .report-log-row{display:flex!important;gap:12px!important;padding:6px 10px!important;background:#fafafa!important;border:1px solid #eee!important;border-radius:6px!important;margin-bottom:4px!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .report-log-time{font-size:10px!important;color:#666!important;min-width:110px!important}
-  .report-log-val{font-size:12px!important;color:#222!important}
-
-  /* Body padding */
-  .report-body{padding:16px 24px!important}
-
-  /* Page setup */
   @page{margin:15mm;size:A4 portrait}
+  /* Hide everything except the print container */
+  body *{visibility:hidden}
+  #print-container,#print-container *{visibility:visible}
+  #print-container{position:absolute;left:0;top:0;width:100%;background:#fff}
 }
+
+/* Print container — hidden on screen, shown when printing */
+#print-container{display:none}
 
 
 /* ── NEW DASHBOARD LAYOUT ── */
@@ -2690,6 +2667,75 @@ function openReport(){
 }
 function closeReport(){document.getElementById('report-overlay').classList.add('hidden');}
 
+function printReport(){
+  const sel=document.getElementById('report-student-sel');
+  if(!sel||!sel.value){showToast('Please select a student first.');return;}
+  const s=students.find(x=>x.id===parseInt(sel.value));
+  if(!s)return;
+
+  // Get the week label
+  const weekLabel=document.getElementById('report-week-label')?.textContent||'';
+
+  // Get report body content
+  const bodyContent=document.getElementById('report-body')?.innerHTML||'';
+
+  // Build a clean printable HTML document
+  const printHTML=`
+    <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#222">
+      <!-- Header -->
+      <div style="background:#4A90C4;color:#fff;padding:24px 28px;border-radius:8px;margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.8;margin-bottom:4px">BrainSprout · Weekly Report</div>
+        <div style="font-size:24px;font-weight:900;margin-bottom:4px">${s.name}</div>
+        <div style="font-size:13px;opacity:.85">${weekLabel} &nbsp;·&nbsp; Grade ${s.grade} &nbsp;·&nbsp; ⭐ ${s.stars} stars</div>
+      </div>
+
+      <!-- Stars -->
+      <div style="background:#fff8e1;border:2px solid #f5c842;border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px">⭐</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:2px">Total Stars Earned</div>
+          <div style="font-size:22px;font-weight:900;color:#b8860b">${s.stars} stars</div>
+        </div>
+      </div>
+
+      ${buildPrintSection('😊 Mood Check-Ins',
+        moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=new Date(Date.now()-7*24*60*60*1000))
+          .map(m=>'<div style="display:flex;gap:12px;padding:7px 10px;border-bottom:1px solid #eee;font-size:13px"><span style="color:#888;min-width:130px;font-size:12px">'+new Date(m.loggedAt).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><span style="font-weight:600">'+(MOOD_EMOJI[m.mood]||'')+'  '+m.mood+'</span></div>').join(''),
+        'No mood check-ins recorded this week.'
+      )}
+
+      ${buildPrintSection('🫁 Sensory Needs',
+        sensoryLogs.filter(l=>l.studentId===s.id&&l.active&&new Date(l.loggedAt)>=new Date(Date.now()-7*24*60*60*1000))
+          .map(l=>'<div style="display:flex;gap:12px;padding:7px 10px;border-bottom:1px solid #eee;font-size:13px"><span style="color:#888;min-width:130px;font-size:12px">'+new Date(l.loggedAt).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><span style="font-weight:600">🫁  '+l.need+'</span></div>').join(''),
+        'No sensory needs logged this week.'
+      )}
+
+      ${buildPrintSection('📝 Teacher Notes',
+        notes.filter(n=>n.studentId===s.id&&n.created_at&&new Date(n.created_at)>=new Date(Date.now()-7*24*60*60*1000))
+          .map(n=>'<div style="padding:8px 10px;border-bottom:1px solid #eee;font-size:13px"><div style="color:#888;font-size:11px;margin-bottom:2px">'+n.time+'</div><div>'+n.text+'</div></div>').join(''),
+        'No notes recorded this week.'
+      )}
+
+      <!-- Footer -->
+      <div style="margin-top:24px;padding-top:12px;border-top:2px solid #eee;font-size:11px;color:#aaa;text-align:center">
+        Generated by BrainSprout · brainsprout.netlify.app · Printed on ${new Date().toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'})}
+      </div>
+    </div>`;
+
+  document.getElementById('print-container').innerHTML=printHTML;
+  window.print();
+  // Clear after printing
+  setTimeout(()=>{document.getElementById('print-container').innerHTML='';},1000);
+}
+
+function buildPrintSection(title,rows,emptyMsg){
+  return '<div style="margin-bottom:18px;page-break-inside:avoid">'+
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#555;border-bottom:2px solid #4A90C4;padding-bottom:6px;margin-bottom:8px">'+title+'</div>'+
+    '<div style="border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;background:#fff">'+
+    (rows||'<div style="padding:10px 12px;font-size:13px;color:#aaa;font-style:italic">'+emptyMsg+'</div>')+
+    '</div></div>';
+}
+
 function renderReportForStudent(idStr){
   if(!idStr){document.getElementById('report-body').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above.</div>';return;}
   const studentId=parseInt(idStr);
@@ -3017,7 +3063,7 @@ init();
       <div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above to view their weekly report.</div>
     </div>
     <div class="report-actions">
-      <button class="report-btn report-btn-print" onclick="window.print()">🖨 Print Report</button>
+      <button class="report-btn report-btn-print" onclick="printReport()">🖨 Print Report</button>
     </div>
   </div>
 </div>
@@ -3072,6 +3118,8 @@ init();
     <button class="save-note" style="width:100%;margin-top:10px;border-radius:16px;font-size:15px" onclick="saveEditNote()">💾 Save Changes</button>
   </div>
 </div>
+
+<div id="print-container"></div>
 
 <script>
 // Fill in email addresses that Cloudflare might obfuscate
