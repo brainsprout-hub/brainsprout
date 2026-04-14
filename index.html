@@ -1399,8 +1399,7 @@ async function loadProfile(){
   console.log('Plan loaded from DB:',profile?.plan,'is_pro:',profile?.is_pro);
   const displayName=profile?.class_name||'My Class';
   document.getElementById('teacher-display').textContent='🍎 '+displayName;
-  const firstName=displayName.replace(/'s Class/,'').replace(/^(Mrs?|Ms|Dr|Mr)\.?\s*/i,'');
-  document.getElementById('dash-teacher-name').textContent=firstName||'Teacher';
+  document.getElementById('dash-teacher-name').textContent=displayName||'Teacher';
 
   // Show referral code
 
@@ -1504,8 +1503,7 @@ async function saveTeacher(){
   const val=inp.value.trim()||prevName||'My Class';
   document.getElementById('teacher-display').textContent='🍎 '+val;
   inp.classList.remove('visible');pill.classList.remove('hidden');
-  const firstName=val.replace(/'s Class/,'').replace(/^(Mrs?|Ms|Dr|Mr)\.?\s*/i,'');
-  document.getElementById('dash-teacher-name').textContent=firstName||'Teacher';
+  document.getElementById('dash-teacher-name').textContent=val||'Teacher';
   await sb.from('teachers').update({class_name:val}).eq('id',currentUser.id);
   showToast('✅ Class name saved!');
 }
