@@ -995,7 +995,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="card">
       <h3 style="font-size:20px;font-weight:900;margin-bottom:14px">✉️ Update Email</h3>
       <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:12px">Current email: <span id="account-current-email" style="color:var(--text);font-weight:900"></span></div>
-      <div class="auth-field"><label>New Email Address</label><input class="auth-input" id="new-email-input" type="email" placeholder="new@email.com"></div>
+
+      <div class="auth-field"><label>New Email Address</label><input class="auth-input" id="new-email-input" type="email" placeholder="Enter new email address" autocomplete="off" autocorrect="off" spellcheck="false"></div>
       <button onclick="updateEmail()" style="background:var(--blue);color:#fff;border:4px solid var(--blueDark);border-radius:16px;padding:12px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--blueDark);margin-top:6px;width:100%">✉️ Update Email</button>
       <div id="email-update-msg" style="font-size:13px;font-weight:700;margin-top:10px;display:none"></div>
     </div>
@@ -2727,8 +2728,7 @@ function downloadReport(){
 function renderAccountScreen(){
   if(!currentUser||!teacherProfile)return;
   // Email
-  const emailEl=document.getElementById('account-current-email');
-  if(emailEl)emailEl.textContent=currentUser.email||'';
+
 
   // Plan info
   const plan=getPlan();
@@ -2766,6 +2766,11 @@ function renderAccountScreen(){
     if(cancelRow)cancelRow.style.display='none';
   }
 
+  const emailEl=document.getElementById('account-current-email');
+  if(emailEl)emailEl.textContent=currentUser?.email||'';
+  // Clear new email input so browser autofill doesn't show
+  const newEmailInput=document.getElementById('new-email-input');
+  if(newEmailInput)newEmailInput.value='';
   // Pre-fill help name
   const helpName=document.getElementById('help-name');
   if(helpName&&!helpName.value){
@@ -2785,9 +2790,7 @@ async function updateEmail(){
   if(error){showMsg2(msgEl,'Error: '+error.message,'error');return;}
   showMsg2(msgEl,'✅ Confirmation sent to '+newEmail+'. Check your inbox and click the link to confirm.','success');
   document.getElementById('new-email-input').value='';
-  // Update displayed email
-  const emailDisplay=document.getElementById('account-current-email');
-  if(emailDisplay)emailDisplay.textContent=newEmail+' (pending confirmation)';
+
 }
 
 function openCustomerPortal(){
