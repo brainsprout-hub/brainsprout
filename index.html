@@ -498,7 +498,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .dash-greeting{font-size:15px;font-weight:900;color:rgba(255,255,255,.9)}
 
 .morning-q-card{background:var(--yellow);border:4px solid var(--yellowDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--yellowDark);padding:20px 24px;margin-bottom:16px;position:relative}
-.morning-q-label{font-size:17px;font-weight:900;color:var(--yellowDark);letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.morning-q-label{font-size:17px;font-weight:900;color:#fff;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;text-shadow:1px 1px 0 var(--yellowDark)}
 .morning-q-text{font-size:20px;font-weight:900;color:var(--text);line-height:1.3;margin-bottom:12px}
 .morning-q-btns{display:flex;gap:8px;flex-wrap:wrap}
 .morning-q-btn{background:var(--white);border:3px solid var(--yellowDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellowDark);transition:all .2s}
@@ -742,8 +742,11 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
           <div class="bb-icon" id="bb-icon">🎮</div>
           <div class="bb-title" id="bb-title">Loading...</div>
           <div class="bb-desc" id="bb-desc"></div>
+          <!-- Steps shown when expanded -->
+          <div id="bb-steps" style="display:none;margin-bottom:12px;position:relative;z-index:1"></div>
           <div class="bb-btns" id="bb-start-btns">
-            <button class="bb-btn" onclick="startDashBrainBreak()">▶ Start Activity</button>
+            <button class="bb-btn" id="bb-view-btn" onclick="showBBSteps()">📋 How To Play</button>
+            <button class="bb-btn" onclick="startDashBrainBreak()">▶ Start Timer</button>
             <button class="bb-shuffle" onclick="shuffleBrainBreak()">🔀 New Break</button>
           </div>
           <!-- In-progress timer shown when brain break is running -->
@@ -1841,6 +1844,29 @@ function shuffleBrainBreak(){
 // Brain break in-place timer
 let bbTimerInterval=null,bbTimerRunning=false,bbTimerRemaining=300;
 
+function showBBSteps(){
+  const a=ACTIVITIES.find(x=>x.id===currentBBId);
+  if(!a)return;
+  const stepsEl=document.getElementById('bb-steps');
+  if(!stepsEl)return;
+  if(stepsEl.style.display==='block'){
+    stepsEl.style.display='none';
+    document.getElementById('bb-view-btn').textContent='📋 How To Play';
+    return;
+  }
+  stepsEl.innerHTML=
+    '<div style="background:rgba(255,255,255,.15);border-radius:12px;padding:12px 14px;margin-bottom:4px">'+
+    '<div style="font-size:11px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">How to run this activity:</div>'+
+    a.steps.map((s,i)=>
+      '<div style="display:flex;gap:10px;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.15);font-size:13px;font-weight:700;color:#fff">'+
+      '<span style="background:rgba(255,255,255,.25);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px">'+(i+1)+'</span>'+
+      '<span>'+s+'</span></div>'
+    ).join('')+
+    '</div>';
+  stepsEl.style.display='block';
+  document.getElementById('bb-view-btn').textContent='✕ Hide Steps';
+}
+
 function startDashBrainBreak(){
   if(!currentBBId)return;
   const a=ACTIVITIES.find(x=>x.id===currentBBId);
@@ -1848,6 +1874,7 @@ function startDashBrainBreak(){
   bbTimerRemaining=mins*60;
   bbTimerRunning=true;
   document.getElementById('bb-start-btns').style.display='none';
+  document.getElementById('bb-steps').style.display='none';
   document.getElementById('bb-timer-section').style.display='block';
   updateBBCountdown();
   bbTimerInterval=setInterval(()=>{
@@ -1901,6 +1928,9 @@ function stopBBTimer(){
   bbTimerRemaining=300;
   document.getElementById('bb-timer-section').style.display='none';
   document.getElementById('bb-start-btns').style.display='flex';
+  document.getElementById('bb-steps').style.display='none';
+  const vb=document.getElementById('bb-view-btn');
+  if(vb)vb.textContent='📋 How To Play';
   const btn=document.getElementById('bb-pause-btn');
   if(btn){btn.textContent='⏸ Pause';btn.style.display='';}
   updateBBCountdown();
