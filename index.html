@@ -479,16 +479,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 /* ── SCHEDULE TIME EDIT ── */
 
 
-@media print{
-  @page{margin:15mm;size:A4 portrait}
-  /* Hide everything except the print container */
-  body *{visibility:hidden}
-  #print-container,#print-container *{visibility:visible}
-  #print-container{position:absolute;left:0;top:0;width:100%;background:#fff}
-}
-
-/* Print container — hidden on screen, shown when printing */
-#print-container{display:none}
+/* Print styles not needed — reports open in popup window */
 
 
 /* ── NEW DASHBOARD LAYOUT ── */
@@ -2773,59 +2764,72 @@ function printReport(){
   const s=students.find(x=>x.id===parseInt(sel.value));
   if(!s)return;
 
-  // Get the week label
   const weekLabel=document.getElementById('report-week-label')?.textContent||'';
+  const cutoff=new Date(Date.now()-7*24*60*60*1000);
+  const fmtDT=d=>new Date(d).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const printDate=new Date().toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
 
-  // Get report body content
-  const bodyContent=document.getElementById('report-body')?.innerHTML||'';
+  const moodRows=moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=cutoff)
+    .map(m=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap">'+fmtDT(m.loggedAt)+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">'+(MOOD_EMOJI[m.mood]||'')+' '+m.mood+'</td></tr>').join('');
 
-  // Build a clean printable HTML document
-  const printHTML=`
-    <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#222">
-      <!-- Header -->
-      <div style="background:#4A90C4;color:#fff;padding:24px 28px;border-radius:8px;margin-bottom:20px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.8;margin-bottom:4px">BrainSprout · Weekly Report</div>
-        <div style="font-size:24px;font-weight:900;margin-bottom:4px">${s.name}</div>
-        <div style="font-size:13px;opacity:.85">${weekLabel} &nbsp;·&nbsp; Grade ${s.grade} &nbsp;·&nbsp; ⭐ ${s.stars} stars</div>
-      </div>
+  const sensRows=sensoryLogs.filter(l=>l.studentId===s.id&&l.active&&new Date(l.loggedAt)>=cutoff)
+    .map(l=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap">'+fmtDT(l.loggedAt)+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">'+l.need+'</td></tr>').join('');
 
-      <!-- Stars -->
-      <div style="background:#fff8e1;border:2px solid #f5c842;border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
-        <div style="font-size:28px">⭐</div>
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:2px">Total Stars Earned</div>
-          <div style="font-size:22px;font-weight:900;color:#b8860b">${s.stars} stars</div>
-        </div>
-      </div>
+  const noteRows=notes.filter(n=>n.studentId===s.id&&n.created_at&&new Date(n.created_at)>=cutoff)
+    .map(n=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap;vertical-align:top">'+n.time+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee">'+n.text+'</td></tr>').join('');
 
-      ${buildPrintSection('😊 Mood Check-Ins',
-        moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=new Date(Date.now()-7*24*60*60*1000))
-          .map(m=>'<div style="display:flex;gap:12px;padding:7px 10px;border-bottom:1px solid #eee;font-size:13px"><span style="color:#888;min-width:130px;font-size:12px">'+new Date(m.loggedAt).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><span style="font-weight:600">'+(MOOD_EMOJI[m.mood]||'')+'  '+m.mood+'</span></div>').join(''),
-        'No mood check-ins recorded this week.'
-      )}
+  const emptyRow='<tr><td colspan="2" style="padding:10px;color:#aaa;font-style:italic;font-size:13px">None recorded this week.</td></tr>';
 
-      ${buildPrintSection('🫁 Sensory Needs',
-        sensoryLogs.filter(l=>l.studentId===s.id&&l.active&&new Date(l.loggedAt)>=new Date(Date.now()-7*24*60*60*1000))
-          .map(l=>'<div style="display:flex;gap:12px;padding:7px 10px;border-bottom:1px solid #eee;font-size:13px"><span style="color:#888;min-width:130px;font-size:12px">'+new Date(l.loggedAt).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><span style="font-weight:600">🫁  '+l.need+'</span></div>').join(''),
-        'No sensory needs logged this week.'
-      )}
+  const fullHTML=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>BrainSprout Report — ${s.name}</title>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:Arial,Helvetica,sans-serif;color:#222;background:#fff;padding:20px}
+      .header{background:#4A90C4;color:#fff;padding:22px 28px;border-radius:10px;margin-bottom:20px}
+      .header-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.8;margin-bottom:6px}
+      .header-name{font-size:26px;font-weight:900;margin-bottom:4px}
+      .header-meta{font-size:13px;opacity:.85}
+      .stars-box{background:#fff8e1;border:2px solid #f5c842;border-radius:8px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+      .stars-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:3px}
+      .stars-val{font-size:24px;font-weight:900;color:#b8860b}
+      .section{margin-bottom:20px;page-break-inside:avoid}
+      .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#4A90C4;border-bottom:2px solid #4A90C4;padding-bottom:5px;margin-bottom:0}
+      table{width:100%;border-collapse:collapse;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;font-size:13px}
+      .footer{margin-top:28px;padding-top:10px;border-top:1px solid #eee;font-size:10px;color:#bbb;text-align:center}
+      @media print{@page{margin:15mm;size:A4 portrait}body{padding:0}}
+    </style>
+  </head><body>
+    <div class="header">
+      <div class="header-label">BrainSprout &middot; Weekly Report</div>
+      <div class="header-name">${s.name}</div>
+      <div class="header-meta">${weekLabel} &nbsp;&middot;&nbsp; Grade ${s.grade} &nbsp;&middot;&nbsp; &#11088; ${s.stars} stars total</div>
+    </div>
+    <div class="stars-box">
+      <div style="font-size:30px">&#11088;</div>
+      <div><div class="stars-label">Total Stars Earned</div><div class="stars-val">${s.stars} stars</div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">&#128522; Mood Check-Ins</div>
+      <table>${moodRows||emptyRow}</table>
+    </div>
+    <div class="section">
+      <div class="section-title">&#129760; Sensory Needs</div>
+      <table>${sensRows||emptyRow}</table>
+    </div>
+    <div class="section">
+      <div class="section-title">&#128221; Teacher Notes</div>
+      <table>${noteRows||emptyRow}</table>
+    </div>
+    <div class="footer">Generated by BrainSprout &middot; brainsprout.netlify.app &middot; Printed on ${printDate}</div>
+  </body></html>`;
 
-      ${buildPrintSection('📝 Teacher Notes',
-        notes.filter(n=>n.studentId===s.id&&n.created_at&&new Date(n.created_at)>=new Date(Date.now()-7*24*60*60*1000))
-          .map(n=>'<div style="padding:8px 10px;border-bottom:1px solid #eee;font-size:13px"><div style="color:#888;font-size:11px;margin-bottom:2px">'+n.time+'</div><div>'+n.text+'</div></div>').join(''),
-        'No notes recorded this week.'
-      )}
-
-      <!-- Footer -->
-      <div style="margin-top:24px;padding-top:12px;border-top:2px solid #eee;font-size:11px;color:#aaa;text-align:center">
-        Generated by BrainSprout · brainsprout.netlify.app · Printed on ${new Date().toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'})}
-      </div>
-    </div>`;
-
-  document.getElementById('print-container').innerHTML=printHTML;
-  window.print();
-  // Clear after printing
-  setTimeout(()=>{document.getElementById('print-container').innerHTML='';},1000);
+  // Open in a new window and print from there
+  const win=window.open('','_blank','width=800,height=600');
+  if(!win){showToast('Please allow popups for this site to print reports.');return;}
+  win.document.write(fullHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>win.print(),500);
 }
 
 function buildPrintSection(title,rows,emptyMsg){
@@ -3219,7 +3223,6 @@ init();
   </div>
 </div>
 
-<div id="print-container"></div>
 
 <script>
 // Fill in email addresses that Cloudflare might obfuscate
