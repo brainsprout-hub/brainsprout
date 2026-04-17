@@ -605,7 +605,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <span class="auth-panel-sprout">🌱</span>
         <div>
           <div class="auth-panel-brand">BrainSprout</div>
-          <div class="auth-panel-sub">Free Beta — All features unlocked!</div>
+          <div class="auth-panel-sub">Supporting Every Learner</div>
         </div>
       </div>
 
@@ -613,6 +613,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <div class="auth-tabs">
           <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log In</button>
           <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up Free</button>
+          <button class="auth-tab" id="tab-guest" onclick="goToGuestMode()" style="color:var(--muted)">👀 Preview</button>
         </div>
 
         <!-- LOGIN -->
@@ -1552,10 +1553,17 @@ async function loadProfile(){
 
 // ── AUTH ──
 let currentTab='login';
+function goToGuestMode(){
+  document.getElementById('auth-screen').classList.add('hidden');
+  showGuestMode();
+}
+
 function switchTab(tab){
   currentTab=tab;
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
   document.getElementById('tab-signup').classList.toggle('active',tab==='signup');
+  const tg=document.getElementById('tab-guest');
+  if(tg)tg.classList.remove('active');
   document.getElementById('login-form').style.display=tab==='login'?'block':'none';
   document.getElementById('signup-form').style.display=tab==='signup'?'block':'none';
   document.getElementById('forgot-form').style.display=tab==='forgot'?'block':'none';
