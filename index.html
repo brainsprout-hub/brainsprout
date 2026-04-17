@@ -3005,7 +3005,21 @@ function renderReportForStudent(idStr){
 
 // ── MY ACCOUNT ──
 function renderAccountScreen(){
-  if(!currentUser||!teacherProfile)return;
+  // Guest view — show signup prompt only
+  if(!currentUser){
+    const screen=document.getElementById('account');
+    if(screen){
+      screen.innerHTML=`
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
+          <div style="font-size:64px;margin-bottom:16px">🌱</div>
+          <h2 style="font-size:26px;font-weight:900;color:var(--text);margin-bottom:10px">Create Your Free Account</h2>
+          <p style="font-size:15px;font-weight:700;color:var(--muted);margin-bottom:8px;max-width:340px;line-height:1.5">Sign up free and get a <strong>7-day full trial</strong> — no credit card needed. After your trial, upgrade to Pro for $4.99/month.</p>
+          <button onclick="showAuthFromGuest('signup')" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:15px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 5px 0 var(--redDark);margin-bottom:12px;width:100%;max-width:340px">🌱 Sign Up Free</button>
+          <button onclick="showAuthFromGuest('login')" style="background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:16px;padding:12px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #E8D5C0;width:100%;max-width:340px">Already have an account? Log In</button>
+        </div>`;
+    }
+    return;
+  }
   // Email
 
 
