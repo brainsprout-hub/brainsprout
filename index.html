@@ -699,6 +699,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <button class="nav-btn" onclick="showScreen('noise',this)"><span>🔊</span> Noise</button>
     <button class="nav-btn" onclick="showScreen('tools',this)"><span>🛠</span> Tools</button>
     <button class="nav-btn" onclick="showScreen('account',this)"><span>👤</span> My Account</button>
+    <button class="nav-btn" onclick="showScreen('howto',this)"><span>💡</span> How It Works</button>
     <button class="nav-btn" onclick="showScreen('help',this)"><span>❓</span> Help</button>
   </nav>
 
@@ -1051,6 +1052,93 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <h3 style="font-size:20px;font-weight:900;margin-bottom:8px;color:var(--redDark)">⚠️ Sign Out</h3>
       <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px">Sign out of your BrainSprout account on this device.</p>
       <button onclick="doLogout()" style="background:var(--redLight);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:10px 22px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--red)">↩ Sign Out</button>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="howto" class="screen">
+    <div class="sec-title">💡 How BrainSprout Works</div>
+
+    <!-- Hero -->
+    <div style="background:var(--red);border-radius:var(--rad);border:4px solid var(--redDark);box-shadow:0 5px 0 var(--redDark);padding:24px 28px;margin-bottom:20px;text-align:center">
+      <div style="font-size:52px;margin-bottom:8px">🌱</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;text-shadow:2px 2px 0 var(--redDark);margin-bottom:6px">Your All-in-One Classroom Engagement Tool</div>
+      <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.5">BrainSprout helps K-5 teachers manage their day, support students, and keep energy levels just right — all from one easy dashboard.</div>
+    </div>
+
+    <!-- Feature cards grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px">
+
+      <div class="card" style="border-color:var(--red)">
+        <div style="font-size:28px;margin-bottom:8px">⭐</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Star Reward Board</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Add your students and give or remove stars to recognize good behavior and effort. Click any student card to view their full profile including mood history and notes.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--blue)">
+        <div style="font-size:28px;margin-bottom:8px">📋</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Visual Schedule</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Build your daily plan in the Schedule tab using quick templates or custom activities. Your schedule syncs to the Home screen so you can check things off as the day goes.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--green)">
+        <div style="font-size:28px;margin-bottom:8px">🎮</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Brain Breaks &amp; Activities</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">12 ready-to-go games, brain breaks, and movement activities sorted by grade level. Today's Brain Break on the Home screen rotates daily and includes step-by-step instructions.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--yellow)">
+        <div style="font-size:28px;margin-bottom:8px">💨</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom=6px">Breathing Exercises</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">6 guided breathing methods with animated prompts — perfect for transitions, before tests, or when the class needs to calm down. Great for all ages K-5.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--pink)">
+        <div style="font-size:28px;margin-bottom:8px">⏱</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Classroom Timer</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">A big countdown timer with quick presets (1, 5, 10, 15, 20, 30 min) plus a custom input. A mini version also lives right on the Home screen for quick access.</div>
+      </div>
+
+      <div class="card" style="border-color:#9B6DFF">
+        <div style="font-size:28px;margin-bottom:8px">🔊</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Noise Expectations</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">A large color-coded noise level chart the whole class can see. Tap Silent, Whisper, Partner, Group, or Loud to set the current expectation for the room.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--green)">
+        <div style="font-size:28px;margin-bottom:8px">😊</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Mood Check-In <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Log how each student is feeling — Happy, Calm, Sad, Frustrated, or Worried. Suggestions appear for how to support each mood. History is saved to student profiles.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--blue)">
+        <div style="font-size:28px;margin-bottom:8px">🫁</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Sensory Needs <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Track sensory accommodations for individual students or the whole class — Quiet Space, Seat Break, Dim Lights, Fidget Tool, Movement, Visual Cue, and Extra Time.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--red)">
+        <div style="font-size:28px;margin-bottom:8px">📝</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Teacher Notes <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Quickly jot observations about student behavior, moods, or needs. Tag notes to specific students, then view or print them as a Weekly Report for parent-teacher conferences.</div>
+      </div>
+
+      <div class="card" style="border-color:var(--yellow)">
+        <div style="font-size:28px;margin-bottom:8px">🌅</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Morning Meeting Question</div>
+        <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">150 built-in conversation starters that rotate daily. The question changes every day and never repeats until all 150 have been used. Click "New Question" to reshuffle anytime.</div>
+      </div>
+
+    </div>
+
+    <!-- Pricing note -->
+    <div style="background:var(--greenLight);border:3px solid var(--green);border-radius:var(--rad);padding:18px 22px;margin-bottom:16px;text-align:center">
+      <div style="font-size:16px;font-weight:900;color:var(--greenDark);margin-bottom:6px">🆓 Free 7-Day Trial — No Credit Card Needed</div>
+      <div style="font-size:13px;font-weight:700;color:var(--greenDark);line-height:1.5">Every new account gets full access to all features for 7 days. After your trial, the free plan includes Star Board, Schedule, Timer, Noise Level, and basic activities. Upgrade to <strong>Pro for $4.99/month</strong> to keep everything.</div>
+    </div>
+
+    <div style="text-align:center;padding-bottom:8px">
+      <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:14px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 5px 0 var(--redDark)">🌟 Upgrade to Pro — $4.99/mo</button>
     </div>
   </div>
 
@@ -1644,7 +1732,7 @@ function showScreen(id,btn){
   if(id==='breathing')renderBreathing();
   if(id==='schedule')renderSchedule();
   if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();applyPlanUI();}
-  if(id==='account'||id==='help'){
+  if(id==='account'||id==='help'||id==='howto'){
     renderAccountScreen();
     // Reset sent message when opening help screen
     const sentEl=document.getElementById('help-sent-msg');
