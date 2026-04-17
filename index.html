@@ -532,6 +532,14 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .emoji-picker-dropdown button{background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px;transition:background .15s}
 .emoji-picker-dropdown button:hover{background:var(--cream)}
 
+
+/* ── GUEST BANNER ── */
+.guest-banner{background:var(--blue);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:50;box-shadow:0 3px 10px rgba(0,0,0,0.15)}
+.guest-banner-text{font-size:13px;font-weight:800}
+.guest-banner-btns{display:flex;gap:8px}
+.guest-sign-up{background:var(--yellow);color:var(--yellowDark);border:3px solid var(--yellowDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--yellowDark)}
+.guest-sign-in{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:12px;padding:7px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -638,6 +646,26 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <!-- MAIN APP -->
 <div class="app" id="main-app">
+  <!-- GUEST SIGNUP POPUP -->
+  <div id="guest-popup" style="display:none;position:fixed;inset:0;background:rgba(42,31,26,0.6);z-index:600;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:24px;max-width:380px;width:100%;padding:32px;text-align:center;border:5px solid var(--yellow);box-shadow:0 16px 50px rgba(0,0,0,0.2);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)">
+      <div style="font-size:52px;margin-bottom:8px">🌱</div>
+      <h2 style="font-size:22px;font-weight:900;color:var(--text);margin-bottom:8px">Create a Free Account</h2>
+      <p style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:20px;line-height:1.5">Sign up free and get a <strong>7-day full trial</strong> — no credit card needed!</p>
+      <button onclick="showAuthFromGuest('signup')" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:13px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);margin-bottom:10px">🌱 Sign Up Free</button>
+      <button onclick="showAuthFromGuest('login')" style="background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:16px;padding:11px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;width:100%;box-shadow:0 3px 0 #E8D5C0;margin-bottom:12px">Already have an account? Log In</button>
+      <button onclick="closeGuestPopup()" style="background:none;border:none;font-family:'Baloo 2',cursive;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer">✕ Continue as Guest</button>
+    </div>
+  </div>
+
+  <!-- GUEST BANNER — shown when not signed in -->
+  <div class="guest-banner" id="guest-banner" style="display:none">
+    <div class="guest-banner-text">👀 You're previewing BrainSprout as a guest. Sign up free for a 7-day trial with full access!</div>
+    <div class="guest-banner-btns">
+      <button class="guest-sign-up" onclick="showAuthFromGuest('signup')">🌱 Sign Up Free</button>
+      <button class="guest-sign-in" onclick="showAuthFromGuest('login')">Log In</button>
+    </div>
+  </div>
 
   <div class="header">
     <div class="logo">
@@ -1229,6 +1257,7 @@ const sensoryLogs=[];  // {studentId, need, active, loggedAt}
 // ── PLAN HELPERS ──
 function getPlan(){
   const p=teacherProfile?.plan||'free';
+  if(p==='guest')return 'free'; // guests get free tier
   if(p==='free'&&teacherProfile?.is_pro===true)return 'pro';
   // If canceling, check if cancel date has passed
   if(p==='canceling'){
@@ -1274,7 +1303,8 @@ async function init(){
 
   const{data:{session}}=await sb.auth.getSession();
   if(!session){
-    showAuth();
+    // Show guest mode instead of forcing login
+    showGuestMode();
     if(isCanceled)setTimeout(()=>showToast('Payment canceled — upgrade anytime!'),800);
     return;
   }
@@ -1308,11 +1338,92 @@ function showApp(){
   document.getElementById('loading-screen').classList.add('hidden');
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('main-app').classList.add('visible');
+  // Hide guest banner if logged in
+  const gb=document.getElementById('guest-banner');
+  if(gb)gb.style.display='none';
   initDashboard();renderStudents();renderActivities();renderBreathing();renderSchedule();renderNotesLog();renderNotesStudentDropdown();
-  // Apply plan UI after everything renders so locks are correct
   setTimeout(applyPlanUI, 100);
   document.getElementById('ring-prog').style.strokeDasharray=CIRC;
   document.getElementById('ring-prog').style.strokeDashoffset=0;
+}
+
+function showGuestMode(){
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('main-app').classList.add('visible');
+  // Show guest banner
+  const gb=document.getElementById('guest-banner');
+  if(gb)gb.style.display='flex';
+  // Set up guest profile
+  teacherProfile={plan:'guest',class_name:'Guest Classroom',is_pro:false,trial_start:null,cancel_at:null};
+  students=[];
+  // Render with guest restrictions
+  initDashboard();
+  renderActivities();
+  renderBreathing();
+  renderSchedule();
+  document.getElementById('ring-prog').style.strokeDasharray=CIRC;
+  document.getElementById('ring-prog').style.strokeDashoffset=0;
+  document.getElementById('teacher-display').textContent='🍎 Guest Classroom';
+  document.getElementById('dash-teacher-name').textContent='Guest';
+  // Hide account/help nav for guests — keep everything else
+  setTimeout(applyGuestUI, 100);
+}
+
+function applyGuestUI(){
+  // Guests see free tier only — lock pro features
+  const moodLock=document.getElementById('mood-lock-overlay');
+  if(moodLock){moodLock.classList.remove('hidden');moodLock.style.display='flex';}
+  const sensLock=document.getElementById('sensory-lock-overlay');
+  if(sensLock){sensLock.classList.remove('hidden');sensLock.style.display='flex';}
+  const notesLock=document.getElementById('notes-lock-overlay');
+  if(notesLock){notesLock.style.display='flex';}
+  renderActivities();
+  renderBreathing();
+  // Show a guest student placeholder in the star board
+  const grid=document.getElementById('student-grid');
+  if(grid){
+    grid.innerHTML='';
+    const d=document.createElement('div');
+    d.style.cssText='text-align:center;padding:40px 20px;color:var(--muted);font-weight:700;font-size:14px;grid-column:1/-1';
+    d.innerHTML='🌱 Sign up free to add students and track their stars!<br><br>';
+    const btn=document.createElement('button');
+    btn.textContent='🌱 Sign Up Free';
+    btn.style.background='var(--red)';
+    btn.style.color='#fff';
+    btn.style.border='3px solid var(--redDark)';
+    btn.style.borderRadius='14px';
+    btn.style.padding='10px 22px';
+    btn.style.fontFamily='Baloo 2,cursive';
+    btn.style.fontWeight='900';
+    btn.style.fontSize='14px';
+    btn.style.cursor='pointer';
+    btn.style.marginTop='8px';
+    btn.onclick=function(){showGuestPopup();};
+    d.appendChild(btn);
+    grid.appendChild(d);
+  }
+}
+
+function showGuestPopup(){
+  const el=document.getElementById('guest-popup');
+  if(el)el.style.display='flex';
+}
+function closeGuestPopup(){
+  const el=document.getElementById('guest-popup');
+  if(el)el.style.display='none';
+}
+// Close popup when clicking the dark overlay
+document.addEventListener('click',function(e){
+  const popup=document.getElementById('guest-popup');
+  if(popup&&e.target===popup)closeGuestPopup();
+});
+
+function showAuthFromGuest(tab){
+  closeGuestPopup();
+  document.getElementById('main-app').classList.remove('visible');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  switchTab(tab||'signup');
 }
 function showAuth(){
   document.getElementById('loading-screen').classList.add('hidden');
@@ -2144,6 +2255,10 @@ async function deleteStudent(id){
   showToast('🗑 '+(s?s.name:'Student')+' removed from class.');
 }
 function openAddStudent(){
+  if(!currentUser){
+    showGuestPopup();
+    return;
+  }
   document.getElementById('avatar-picker').innerHTML=AVATAR_COLORS.map((c,i)=>`<div class="av-opt${i===0?' sel':''}" style="background:${c};width:36px;height:36px;border-radius:50%;cursor:pointer;border:4px solid ${i===0?'var(--text)':'transparent'};transition:all .2s;display:inline-block" onclick="selectAvatar(${i},this)"></div>`).join('');
   selectedAvatar=0;document.getElementById('s-name-input').value='';
   document.getElementById('add-student-modal').classList.remove('hidden');
@@ -2563,6 +2678,7 @@ function renderNotesLog(){
 }
 
 async function saveNote(){
+  if(!currentUser){showGuestPopup();return;}
   const ta=document.getElementById('note-input');const text=ta.value.trim();
   if(!text){showToast('Write a note first!');return;}
   const sel=document.getElementById('notes-student-sel');
