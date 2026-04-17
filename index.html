@@ -567,6 +567,19 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .dash-flow-card{background:linear-gradient(135deg,#f8f4ee 0%,#fff 100%)!important;border-color:#5BAD5A!important}
 .brain-break-card{background:linear-gradient(135deg,#F0698A 0%,#D85070 100%)!important;border-color:#B83060!important;box-shadow:0 6px 0 #B83060!important}
 
+
+/* ── DAY SCHEDULES ── */
+.day-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.day-tab{flex:1;min-width:60px;padding:10px 6px;border:3px solid #E8D5C0;border-radius:14px;background:var(--cream);font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;text-align:center;color:var(--muted);transition:all .2s;position:relative}
+.day-tab:hover{transform:translateY(-2px);border-color:var(--blue);color:var(--blueDark)}
+.day-tab.active{background:var(--blue);border-color:var(--blueDark);color:#fff;box-shadow:0 4px 0 var(--blueDark);transform:translateY(-2px)}
+.day-tab.has-items::after{content:'';position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--green);border-radius:50%;border:2px solid #fff}
+.day-tab.active.has-items::after{border-color:var(--blueDark)}
+.day-editor-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.load-day-btn{background:var(--green);color:#fff;border:3px solid var(--greenDark);border-radius:14px;padding:9px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--greenDark)}
+.save-day-btn{background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:14px;padding:9px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark)}
+.clear-day-btn{background:var(--redLight);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:9px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--red)}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -776,13 +789,20 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="dash-two-col">
       <!-- LEFT COL: Morning Question stacked on Brain Break -->
       <div class="dash-left-col">
-        <div class="morning-q-card" style="margin-bottom:0">
+        <div class="morning-q-card" style="margin-bottom:0;position:relative">
           <div class="morning-q-label">🌅 Morning Meeting Question</div>
           <div class="morning-q-text" id="morning-q-text">Loading today's question...</div>
           <div class="morning-q-btns">
             <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
           </div>
           <div class="morning-q-used" id="morning-q-used"></div>
+          <!-- Pro lock overlay -->
+          <div id="morning-q-lock" style="display:none;position:absolute;inset:0;background:rgba(52,122,51,.82);border-radius:calc(var(--rad) - 4px);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;z-index:10" onclick="openPaywall()">
+            <div style="font-size:32px">🔒</div>
+            <div style="font-size:15px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.3)">Pro Feature</div>
+            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:0 16px">Upgrade to Pro to unlock Morning Meeting Questions</div>
+            <div style="background:#fff;color:#347A33;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:6px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;margin-top:4px">🌟 Upgrade Now</div>
+          </div>
         </div>
         <div class="brain-break-card">
           <div class="bb-label">🧠 Today's Brain Break</div>
@@ -813,10 +833,16 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   </div>
 
   <!-- REWARDS -->
-  <div id="rewards" class="screen">
+  <div id="rewards" class="screen" style="position:relative">
+
     <div class="sec-title">⭐ Star Board</div>
+    <!-- Shown to free users only -->
+    <div id="students-free-banner" style="display:none;background:var(--yellowLight);border:3px solid var(--yellow);border-radius:14px;padding:12px 16px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:800;color:var(--yellowDark)">🔒 Upgrade to Pro to add students, give stars, and edit profiles. Your existing data is safe!</div>
+      <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:3px solid var(--redDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--redDark);white-space:nowrap">🌟 Upgrade</button>
+    </div>
     <div class="reward-toolbar">
-      <button class="add-student-btn" onclick="openAddStudent()">+ Add Student</button>
+      <button class="add-student-btn" id="add-student-btn" onclick="openAddStudent()">+ Add Student</button>
       <div class="class-total">🏆 Class Stars: <span id="total-stars">0</span></div>
       <select class="filter-select" onchange="filterStudents(this.value)">
         <option value="all">All Students</option>
@@ -875,27 +901,36 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
   <!-- SCHEDULE -->
   <div id="schedule" class="screen">
-    <div class="sec-title">📋 Visual Schedule</div>
+    <div class="sec-title">📋 Weekly Schedules</div>
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-        <div style="font-size:20px;font-weight:900">Today's Plan</div>
-        <button onclick="window.print()" style="background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--text);box-shadow:0 3px 0 #E8D5C0">🖨 Print</button>
+      <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:16px">Click a day to edit its schedule. When you click a day, that schedule loads into <strong>Today's Flow</strong> on the home screen automatically.</p>
+      <!-- Day tabs -->
+      <div class="day-tabs" id="day-tabs">
+        <button class="day-tab active" id="dt-Monday"    onclick="switchDayTab('Monday')">Mon</button>
+        <button class="day-tab"        id="dt-Tuesday"   onclick="switchDayTab('Tuesday')">Tue</button>
+        <button class="day-tab"        id="dt-Wednesday" onclick="switchDayTab('Wednesday')">Wed</button>
+        <button class="day-tab"        id="dt-Thursday"  onclick="switchDayTab('Thursday')">Thu</button>
+        <button class="day-tab"        id="dt-Friday"    onclick="switchDayTab('Friday')">Fri</button>
       </div>
-      <div class="sched-editor" id="sched-editor"></div>
-      <button class="add-sched-btn" onclick="addSchedItem()">+ Add Activity</button>
-      <p style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Set a time · Click emoji to change · Click text to rename · ✓ to mark done</p>
-      <div style="margin-top:14px">
-        <div style="font-size:13px;font-weight:900;color:var(--muted)">Progress: <span id="prog-text">0 / 0 done</span></div>
-        <div class="sched-prog-bar"><div class="sched-prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <!-- Day editor -->
+      <div class="day-editor-header">
+        <div id="day-tab-title" style="font-size:18px;font-weight:900;color:var(--text)">Monday's Schedule</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="save-day-btn" onclick="saveDaySchedule()">💾 Save</button>
+          <button class="clear-day-btn" onclick="clearDaySchedule()">🗑 Clear</button>
+        </div>
       </div>
+      <div class="sched-editor" id="day-sched-editor"></div>
+      <button class="add-sched-btn" onclick="addDayItem()" style="margin-top:10px">+ Add Activity</button>
+      <p style="font-size:11px;color:var(--muted);font-weight:700;margin-top:10px">💡 Click emoji to change it · Click text to rename · A green dot on a tab means it has a saved schedule</p>
     </div>
+
     <div class="card">
-      <div class="sec-title" style="font-size:20px;margin-bottom:14px">⚡ Quick Templates</div>
+      <div class="sec-title" style="font-size:16px;margin-bottom:12px">⚡ Quick Templates</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <button onclick="loadTemplate('morning')" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellow)">🌅 Morning</button>
-        <button onclick="loadTemplate('afternoon')" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--blueDark);box-shadow:0 3px 0 var(--blue)">☀️ Afternoon</button>
-        <button onclick="loadTemplate('full')" style="background:var(--greenLight);border:3px solid var(--green);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--greenDark);box-shadow:0 3px 0 var(--green)">📅 Full Day</button>
-        <button onclick="clearSched()" style="background:var(--redLight);border:3px solid var(--red);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--redDark);box-shadow:0 3px 0 var(--red)">🗑 Clear</button>
+        <button onclick="loadDayTemplate('morning')" style="background:var(--yellowLight);border:3px solid var(--yellow);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--yellowDark);box-shadow:0 3px 0 var(--yellow)">🌅 Morning</button>
+        <button onclick="loadDayTemplate('afternoon')" style="background:var(--blueLight);border:3px solid var(--blue);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--blueDark);box-shadow:0 3px 0 var(--blue)">☀️ Afternoon</button>
+        <button onclick="loadDayTemplate('full')" style="background:var(--greenLight);border:3px solid var(--green);border-radius:14px;padding:9px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;color:var(--greenDark);box-shadow:0 3px 0 var(--green)">📅 Full Day</button>
       </div>
     </div>
   </div>
@@ -1131,19 +1166,19 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
       <div class="card" style="border-color:var(--green)">
         <div style="font-size:28px;margin-bottom:8px">😊</div>
-        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Mood Check-In <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Mood Check-In</div>
         <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Log how each student is feeling — Happy, Calm, Sad, Frustrated, or Worried. Suggestions appear for how to support each mood. History is saved to student profiles.</div>
       </div>
 
       <div class="card" style="border-color:var(--blue)">
         <div style="font-size:28px;margin-bottom:8px">🫁</div>
-        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Sensory Needs <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Sensory Needs</div>
         <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Track sensory accommodations for individual students or the whole class — Quiet Space, Seat Break, Dim Lights, Fidget Tool, Movement, Visual Cue, and Extra Time.</div>
       </div>
 
       <div class="card" style="border-color:var(--red)">
         <div style="font-size:28px;margin-bottom:8px">📝</div>
-        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Teacher Notes <span style="background:var(--greenLight);color:var(--greenDark);font-size:11px;padding:2px 8px;border-radius:10px;border:2px solid var(--green)">Pro</span></div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:6px">Teacher Notes</div>
         <div style="font-size:13px;font-weight:700;color:var(--muted);line-height:1.5">Quickly jot observations about student behavior, moods, or needs. Tag notes to specific students, then view or print them as a Weekly Report for parent-teacher conferences.</div>
       </div>
 
@@ -1493,6 +1528,9 @@ function applyGuestUI(){
   if(notesLock){notesLock.style.display='flex';}
   renderActivities();
   renderBreathing();
+  // Lock morning meeting question for guests
+  const mqLockG=document.getElementById('morning-q-lock');
+  if(mqLockG)mqLockG.style.display='flex';
   // Show a guest student placeholder in the star board
   const grid=document.getElementById('student-grid');
   if(grid){
@@ -1579,6 +1617,27 @@ function applyPlanUI(){
       banner.style.display='none';
     }
   }
+
+  // Morning question lock — only unlocked during trial or pro
+  const mqLock=document.getElementById('morning-q-lock');
+  if(mqLock){
+    const shouldLock=!canAccessPro(); // locked if not pro and not in trial
+    mqLock.style.display=shouldLock?'flex':'none';
+  }
+
+  // Students tab — show banner and hide edit controls for free users
+  const freeBanner=document.getElementById('students-free-banner');
+  if(freeBanner)freeBanner.style.display=canAccessPro()?'none':'flex';
+  const addStudentBtn=document.getElementById('add-student-btn');
+  if(addStudentBtn)addStudentBtn.style.display=canAccessPro()?'':'none';
+  // Disable star/edit buttons on student cards for free users
+  document.querySelectorAll('.add-star,.remove-star,.delete-student,.color-dot,.s-avatar,.s-grade-select').forEach(function(el){
+    if(canAccessPro()){
+      el.style.pointerEvents='';el.style.opacity='';
+    } else {
+      el.style.pointerEvents='none';el.style.opacity='.4';
+    }
+  });
 
   // Lock overlays — everything behind Pro
   ['mood-lock-overlay','sensory-lock-overlay'].forEach(id=>{
@@ -1754,7 +1813,7 @@ function showScreen(id,btn){
   if(btn)btn.classList.add('active');
   if(id==='activities')renderActivities();
   if(id==='breathing')renderBreathing();
-  if(id==='schedule')renderSchedule();
+  if(id==='schedule'){renderSchedule();initDaySchedules();}
   if(id==='tools'){renderSensoryWhoButtons();renderSensoryTags();renderMoodWhoButtons();renderMoodSummary();applyPlanUI();}
   if(id==='account'||id==='help'||id==='howto'){
     renderAccountScreen();
@@ -1947,6 +2006,9 @@ function saveMQState(state){
 function getTodayStr(){return new Date().toISOString().slice(0,10);}
 
 function initMorningQuestion(){
+  // Show lock immediately if not pro — don't wait for applyPlanUI
+  const mqLock=document.getElementById('morning-q-lock');
+  if(mqLock)mqLock.style.display=canAccessPro()?'none':'flex';
   const state=getMQState();
   const today=getTodayStr();
   // If we already have a question for today, show it
@@ -2201,24 +2263,19 @@ function buildEmojiGrid(id,fn){
 function renderDashFlow(){
   const el=document.getElementById('dash-schedule');
   if(!el)return;
-  if(dashItems.length===0){
-    el.innerHTML="<div style='text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:14px'>No items yet. Click + to add activities.</div>";
+  if(!dashItems||dashItems.length===0){
+    el.innerHTML="<div style='text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:13px'>Go to Schedule tab, pick a day, and click Save to show your schedule here.</div>";
     return;
   }
   el.innerHTML=dashItems.map(function(item){
-    var grid=buildEmojiGrid(item.id,'pickEmojiDash');
-    var timeVal=item.time||'';
     var checked=item.done?' df-checked':'';
     var checkMark=item.done?'&#10003;':'';
-    return '<div class="dash-flow-row" id="dfrow-'+item.id+'">'+
-      '<div class="emoji-picker-wrap">'+
-        '<button class="df-emoji" onclick="toggleEmojiPickerDash('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
-        '<div class="emoji-picker-dropdown" id="dep-'+item.id+'" style="display:none;grid-template-columns:repeat(5,1fr)">'+grid+'</div>'+
-      '</div>'+
-      '<input type="time" class="df-time-input" value="'+timeVal+'" onchange="updateDashTime('+item.id+',this.value)">'+
-      '<input class="df-text" type="text" value="'+item.text+'" maxlength="30" placeholder="Activity..." onblur="updateDashText('+item.id+',this.value)">'+
+    var timeStr=item.time?'<span style="font-size:11px;font-weight:700;color:var(--muted);min-width:42px">'+item.time+'</span>':'<span style="min-width:42px"></span>';
+    return '<div class="dash-flow-row" id="dfrow-'+item.id+'" style="cursor:default">'+
+      '<span style="font-size:22px;width:32px;text-align:center;flex-shrink:0">'+item.emoji+'</span>'+
+      timeStr+
+      '<span class="df-text" style="flex:1;font-weight:800;font-size:14px;color:var(--text);padding:2px 0'+(item.done?';text-decoration:line-through;opacity:.5':'')+'">' +item.text+'</span>'+
       '<button class="df-check'+checked+'" onclick="toggleDashDone('+item.id+')" title="Mark done">'+checkMark+'</button>'+
-      '<button class="df-del" onclick="deleteDashItem('+item.id+')" title="Remove">&times;</button>'+
     '</div>';
   }).join('');
 }
@@ -2321,6 +2378,7 @@ function renderStudents(filter='all'){
 function filterStudents(v){renderStudents(v);}
 function startEditName(id){document.getElementById('sname-'+id).classList.add('hidden');const inp=document.getElementById('sinput-'+id);inp.classList.add('visible');inp.focus();inp.select();}
 async function saveStudentName(id){
+  if(!canAccessPro()){renderStudents();return;}
   const inp=document.getElementById('sinput-'+id);const val=inp.value.trim();
   const s=students.find(x=>x.id===id);if(!s)return;
   if(val)s.name=val;
@@ -2333,6 +2391,7 @@ async function saveStudentName(id){
 }
 function cancelEditName(id){const s=students.find(x=>x.id===id);document.getElementById('sinput-'+id).value=s?s.name:'';document.getElementById('sinput-'+id).classList.remove('visible');document.getElementById('sname-'+id).classList.remove('hidden');}
 async function changeColor(id,color,dot){
+  if(!canAccessPro()){openPaywall();return;}
   const s=students.find(x=>x.id===id);if(!s)return;s.color=color;
   const av=document.getElementById('avatar-'+id);if(av)av.style.background=color;
   const card=document.getElementById('card-'+id);if(card){card.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));dot.classList.add('active');}
@@ -2348,7 +2407,7 @@ async function cycleColor(id){
   const card=document.getElementById('card-'+id);if(card){card.querySelectorAll('.color-dot').forEach((d,i)=>d.classList.toggle('active',AVATAR_COLORS[i]===c));}
   await sb.from('students').update({color:c}).eq('id',id);
 }
-async function changeGrade(id,grade){const s=students.find(x=>x.id===id);if(s){s.grade=grade;await sb.from('students').update({grade}).eq('id',id);}}
+async function changeGrade(id,grade){if(!canAccessPro()){openPaywall();return;}const s=students.find(x=>x.id===id);if(s){s.grade=grade;await sb.from('students').update({grade}).eq('id',id);}}
 function launchConfetti(count,emojis){
   const e=emojis||['⭐','🌟','✨','🎉','🎊','💫'];
   for(let i=0;i<count;i++){
@@ -2384,6 +2443,7 @@ function showMilestoneBanner(emoji,title,sub,duration){
 }
 
 async function addStar(id){
+  if(!canAccessPro()){openPaywall();return;}
   const s=students.find(x=>x.id===id);if(!s)return;s.stars++;
   renderStudents();updateDashStats();
   await sb.from('students').update({stars:s.stars}).eq('id',id);
@@ -2409,12 +2469,14 @@ async function addStar(id){
   }
 }
 async function removeStar(id){
+  if(!canAccessPro()){openPaywall();return;}
   const s=students.find(x=>x.id===id);if(!s||s.stars<=0)return;s.stars--;
   renderStudents();updateDashStats();
   await sb.from('students').update({stars:s.stars}).eq('id',id);
   showToast('⭐ Star removed from '+s.name+'. Total: '+s.stars);
 }
 function confirmDelete(id,name){
+  if(!canAccessPro()){openPaywall();return;}
   pendingDeleteId=id;
   document.getElementById('confirm-text').textContent='Remove '+name+' from the class? Their stars will be lost.';
   document.getElementById('confirm-yes-btn').onclick=()=>deleteStudent(id);
@@ -2541,21 +2603,13 @@ async function saveSchedToDB(){
 
 const ALL_EMOJIS=['🌅','📖','🧮','🧠','🎨','🍎','📝','🏃','📚','🎵','⏱','🌟','💬','🧪','🎭','🏠','⭐','🧩','🖍','🌸','💨','🎮','✏️','🔬','🎯','🎪','🏫','📐','📓','🎒','🌈','🌻','🦋','🎈','🏅','🎤','🖌','📏','🔭','🎸','🏆'];
 function renderSchedule(){
-  document.getElementById('sched-editor').innerHTML=schedItems.map(function(item){
-    var grid=buildEmojiGrid(item.id,'pickEmoji');
-    return '<div class="sched-row">'+
-      '<div class="emoji-picker-wrap">'+
-        '<button class="sched-emoji" onclick="toggleEmojiPicker('+item.id+',event)" title="Choose emoji">'+item.emoji+'</button>'+
-        '<div class="emoji-picker-dropdown" id="ep-'+item.id+'" style="display:none">'+grid+'</div>'+
-      '</div>'+
-      '<input type="time" class="sched-time" value="'+(item.time||'')+'" onchange="updateSchedTime('+item.id+',this.value)" title="Set time">'+
-      '<input class="sched-input" value="'+item.text+'" onblur="updateSchedText('+item.id+',this.value)" onkeydown="if(event.keyCode===13){this.blur();}" placeholder="Activity name...">'+
-      '<div class="sched-done-check'+(item.done?' checked':'')+'" onclick="toggleSchedDone('+item.id+')">'+(item.done?'✓':'')+'</div>'+
-      '<button class="sched-delete" onclick="deleteSchedItem('+item.id+')">×</button>'+
-    '</div>';
-  }).join('');
+  // sched-editor removed — schedule is now managed via day tabs
+  // Just update dash flow to reflect current schedItems
+  dashItems=schedItems;
+  renderDashFlow();
   updateSchedProgress();
 }
+
 function toggleEmojiPicker(id,e){
   e.stopPropagation();
   document.querySelectorAll('.emoji-picker-dropdown').forEach(function(d){if(d.id!=='ep-'+id)d.style.display='none';});
@@ -2590,15 +2644,145 @@ function addSchedItem(){schedItems.push({id:Date.now(),emoji:'📌',text:'New Ac
 function updateSchedProgress(){
   const done=schedItems.filter(x=>x.done).length,total=schedItems.length,pct=total?Math.round(done/total*100):0;
   const pt=document.getElementById('prog-text');const pf=document.getElementById('prog-fill');
-  if(pt)pt.textContent=done+' / '+total+' done';if(pf)pf.style.width=pct+'%';
+  if(pt)pt.textContent=done+' / '+total+' done';
+  if(pf)pf.style.width=pct+'%';
 }
 const TEMPLATES={
   morning:[{emoji:'🌅',text:'Arrival & Unpack'},{emoji:'📖',text:'Morning Meeting'},{emoji:'🧮',text:'Math Warm-Up'},{emoji:'💨',text:'Breathing Break'},{emoji:'📝',text:'Writing Time'},{emoji:'🧠',text:'Brain Break'}],
   afternoon:[{emoji:'🍎',text:'Lunch & Recess'},{emoji:'📚',text:'Reading Block'},{emoji:'🎨',text:'Art / Centers'},{emoji:'🧪',text:'Science / SS'},{emoji:'🏠',text:'Pack Up & Dismiss'}],
   full:[{emoji:'🌅',text:'Morning Meeting'},{emoji:'📖',text:'Reading Block'},{emoji:'🧮',text:'Math Practice'},{emoji:'🧠',text:'Brain Break'},{emoji:'📝',text:'Writing Workshop'},{emoji:'🍎',text:'Lunch'},{emoji:'🎨',text:'Art / Specials'},{emoji:'📚',text:'Science / Social Studies'},{emoji:'🏃',text:'Recess / Movement'},{emoji:'🏠',text:'Pack Up & Go Home'}]
 };
-function loadTemplate(t){schedItems=TEMPLATES[t].map((item,i)=>({id:Date.now()+i,emoji:item.emoji,text:item.text,time:'',done:false}));renderSchedule();saveSchedToDB();showToast('📋 Template loaded!');}
+function loadTemplate(t){schedItems=TEMPLATES[t].map((item,i)=>({id:Date.now()+i,emoji:item.emoji,text:item.text,time:'',done:false}));dashItems=schedItems;renderSchedule();saveSchedToDB();showToast('📋 Template loaded!');}
+
+// ── SAVED SCHEDULES ──
+// ── DAY SCHEDULES ──
+const DEFAULT_DAY_SCHEDS={"Monday": [{"emoji": "\ud83c\udf05", "text": "Morning Meeting", "time": "8:00"}, {"emoji": "\ud83d\udcd6", "text": "Reading Block", "time": "8:30"}, {"emoji": "\ud83e\uddee", "text": "Math", "time": "9:15"}, {"emoji": "\ud83e\udde0", "text": "Brain Break", "time": "10:00"}, {"emoji": "\ud83d\udcdd", "text": "Writing Workshop", "time": "10:15"}, {"emoji": "\ud83c\udf4e", "text": "Lunch & Recess", "time": "11:30"}, {"emoji": "\ud83c\udfa8", "text": "Art / Specials", "time": "12:30"}, {"emoji": "\ud83d\udcda", "text": "Science", "time": "1:15"}, {"emoji": "\ud83c\udfe0", "text": "Pack Up & Dismiss", "time": "2:45"}], "Tuesday": [{"emoji": "\ud83c\udf05", "text": "Morning Meeting", "time": "8:00"}, {"emoji": "\ud83e\uddee", "text": "Math", "time": "8:30"}, {"emoji": "\ud83d\udcd6", "text": "Reading Block", "time": "9:15"}, {"emoji": "\ud83e\udde0", "text": "Brain Break", "time": "10:00"}, {"emoji": "\ud83d\udcdd", "text": "Writing Workshop", "time": "10:15"}, {"emoji": "\ud83c\udf4e", "text": "Lunch & Recess", "time": "11:30"}, {"emoji": "\ud83e\uddea", "text": "Science / Social Studies", "time": "12:30"}, {"emoji": "\ud83c\udfb5", "text": "Music / PE", "time": "1:30"}, {"emoji": "\ud83c\udfe0", "text": "Pack Up & Dismiss", "time": "2:45"}], "Wednesday": [{"emoji": "\ud83c\udf05", "text": "Morning Meeting", "time": "8:00"}, {"emoji": "\ud83d\udcd6", "text": "Reading Block", "time": "8:30"}, {"emoji": "\ud83e\uddee", "text": "Math", "time": "9:15"}, {"emoji": "\ud83e\udde0", "text": "Brain Break", "time": "10:00"}, {"emoji": "\ud83c\udfa8", "text": "Art / Centers", "time": "10:15"}, {"emoji": "\ud83c\udf4e", "text": "Lunch & Recess", "time": "11:30"}, {"emoji": "\ud83d\udcdd", "text": "Writing Workshop", "time": "12:30"}, {"emoji": "\ud83d\udcda", "text": "Social Studies", "time": "1:30"}, {"emoji": "\ud83c\udfe0", "text": "Pack Up & Dismiss", "time": "2:45"}], "Thursday": [{"emoji": "\ud83c\udf05", "text": "Morning Meeting", "time": "8:00"}, {"emoji": "\ud83e\uddee", "text": "Math", "time": "8:30"}, {"emoji": "\ud83d\udcd6", "text": "Reading Block", "time": "9:15"}, {"emoji": "\ud83e\udde0", "text": "Brain Break", "time": "10:00"}, {"emoji": "\ud83d\udcdd", "text": "Writing Workshop", "time": "10:15"}, {"emoji": "\ud83c\udf4e", "text": "Lunch & Recess", "time": "11:30"}, {"emoji": "\ud83e\uddea", "text": "Science", "time": "12:30"}, {"emoji": "\ud83c\udfad", "text": "Library / PE", "time": "1:30"}, {"emoji": "\ud83c\udfe0", "text": "Pack Up & Dismiss", "time": "2:45"}], "Friday": [{"emoji": "\ud83c\udf05", "text": "Morning Meeting", "time": "8:00"}, {"emoji": "\ud83d\udcd6", "text": "Reading Block", "time": "8:30"}, {"emoji": "\ud83e\uddee", "text": "Math Review", "time": "9:15"}, {"emoji": "\ud83c\udf89", "text": "Friday Brain Break", "time": "10:00"}, {"emoji": "\ud83d\udcdd", "text": "Writing / Journals", "time": "10:20"}, {"emoji": "\ud83c\udf4e", "text": "Lunch & Recess", "time": "11:30"}, {"emoji": "\ud83c\udfa8", "text": "Art / Free Choice", "time": "12:30"}, {"emoji": "\ud83c\udf1f", "text": "Class Meeting / Celebrations", "time": "1:30"}, {"emoji": "\ud83c\udfe0", "text": "Pack Up & Dismiss", "time": "2:45"}]};
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+let currentDayTab='Monday';
+let dayItems=[]; // items currently shown in the day editor
+
+function getDaySchedKey(){return 'bs_day_scheds_'+(currentUser?.id||'guest');}
+
+function getAllDayScheds(){
+  try{const r=localStorage.getItem(getDaySchedKey());return r?JSON.parse(r):{};} catch(e){return {};}
+}
+
+function saveAllDayScheds(data){
+  try{localStorage.setItem(getDaySchedKey(),JSON.stringify(data));}catch(e){}
+}
+
+function switchDayTab(day){
+  currentDayTab=day;
+  DAYS.forEach(function(d){
+    const btn=document.getElementById('dt-'+d);
+    if(btn)btn.classList.toggle('active',d===day);
+  });
+  const title=document.getElementById('day-tab-title');
+  if(title)title.textContent=day+"'s Schedule";
+  // Load day items — use saved schedule if exists, otherwise use defaults
+  const all=getAllDayScheds();
+  const saved=all[day]||(DEFAULT_DAY_SCHEDS[day]||[]);
+  dayItems=saved.map(function(item,i){return {id:Date.now()+i,emoji:item.emoji||'📌',text:item.text||'',time:item.time||'',done:false};});
+  renderDayEditor();
+  // Auto-mirror to Today's Flow
+  schedItems=dayItems.map(function(item,i){return {id:Date.now()+i+1000,emoji:item.emoji,text:item.text,time:item.time||'',done:false};});
+  dashItems=schedItems;
+  renderDashFlow();
+}
+
+function renderDayEditor(){
+  const el=document.getElementById('day-sched-editor');
+  if(!el)return;
+  if(dayItems.length===0){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-weight:700;font-size:13px">No activities yet — click + Add Activity below</div>';
+    return;
+  }
+  el.innerHTML='';
+  dayItems.forEach(function(item){
+    const row=document.createElement('div');
+    row.className='sched-row';
+    const grid=typeof ALL_EMOJIS!=='undefined'?ALL_EMOJIS.map(function(e,i){
+      var b=document.createElement('button');
+      b.style.cssText='background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px';
+      b.textContent=e;
+      b.onclick=function(){pickDayEmoji(item.id,i);};
+      return b.outerHTML;
+    }).join(''):'';
+    row.innerHTML=
+      '<div class="emoji-picker-wrap">'+
+        '<button class="sched-emoji" onclick="toggleDayEmojiPicker('+item.id+',event)">'+item.emoji+'</button>'+
+        '<div class="emoji-picker-dropdown" id="dep2-'+item.id+'" style="display:none;grid-template-columns:repeat(5,1fr)">'+grid+'</div>'+
+      '</div>'+
+      '<input type="time" class="sched-time" value="'+(item.time||'')+'" onchange="updateDayTime('+item.id+',this.value)">'+
+      '<input class="sched-input" value="'+item.text+'" placeholder="Activity name..." onblur="updateDayText('+item.id+',this.value)" onkeydown="if(event.keyCode===13)this.blur()">'+
+      '<button class="sched-delete" onclick="deleteDayItem('+item.id+')">×</button>';
+    el.appendChild(row);
+  });
+}
+
+function toggleDayEmojiPicker(id,e){
+  e.stopPropagation();
+  document.querySelectorAll('.emoji-picker-dropdown').forEach(function(d){if(d.id!=='dep2-'+id)d.style.display='none';});
+  var dp=document.getElementById('dep2-'+id);
+  if(dp)dp.style.display=dp.style.display==='none'?'grid':'none';
+}
+
+function pickDayEmoji(id,idx){
+  var item=dayItems.find(function(x){return x.id===id;});
+  if(item&&typeof ALL_EMOJIS!=='undefined')item.emoji=ALL_EMOJIS[idx];
+  var dp=document.getElementById('dep2-'+id);
+  if(dp)dp.style.display='none';
+  renderDayEditor();
+}
+
+function updateDayText(id,val){var item=dayItems.find(function(x){return x.id===id;});if(item)item.text=val;}
+function updateDayTime(id,val){var item=dayItems.find(function(x){return x.id===id;});if(item)item.time=val;}
+function deleteDayItem(id){dayItems=dayItems.filter(function(x){return x.id!==id;});renderDayEditor();}
+function addDayItem(){dayItems.push({id:Date.now(),emoji:'📌',text:'New Activity',time:'',done:false});renderDayEditor();}
+
+function saveDaySchedule(){
+  const all=getAllDayScheds();
+  all[currentDayTab]=dayItems.map(function(item){return {emoji:item.emoji,text:item.text,time:item.time||''};});
+  saveAllDayScheds(all);
+  updateDayTabDots();
+  // Mirror to Today's Flow
+  schedItems=dayItems.map(function(item,i){return {id:Date.now()+i+1000,emoji:item.emoji,text:item.text,time:item.time||'',done:false};});
+  dashItems=schedItems;
+  renderDashFlow();
+  showToast('💾 '+currentDayTab+' schedule saved and loaded to Today!');
+}
+
+function clearDaySchedule(){
+  dayItems=[];
+  renderDayEditor();
+}
+
+// loadDayToToday removed — switching tabs auto-loads to Today's Flow
+
+function updateDayTabDots(){
+  const all=getAllDayScheds();
+  DAYS.forEach(function(d){
+    const btn=document.getElementById('dt-'+d);
+    if(!btn)return;
+    const items=all[d]||[];
+    btn.classList.toggle('has-items',items.length>0);
+  });
+}
+
+function initDaySchedules(){
+  updateDayTabDots();
+  switchDayTab('Monday');
+}
+
 function clearSched(){schedItems=[];renderSchedule();saveSchedToDB();}
+
+function loadDayTemplate(t){
+  if(!TEMPLATES[t])return;
+  dayItems=TEMPLATES[t].map(function(item,i){return {id:Date.now()+i,emoji:item.emoji,text:item.text,time:'',done:false};});
+  renderDayEditor();
+  showToast('📋 Template loaded into '+currentDayTab+'! Click Save to keep it.');
+}
+
 
 // ── ACTIVITIES ──
 const ACTIVITIES=[
@@ -3538,10 +3722,11 @@ init();
     </div>
     <div style="padding:24px 28px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 12 activities</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 6 breathing methods</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 12 brain break activities</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 6 breathing exercises</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Morning Meeting Questions</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Mood Check-In</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Sensory Needs</div>
+        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Sensory Needs Tracker</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Teacher Notes</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Weekly Reports</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
