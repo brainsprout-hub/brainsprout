@@ -580,6 +580,17 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .save-day-btn{background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:14px;padding:9px 18px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark)}
 .clear-day-btn{background:var(--redLight);color:var(--redDark);border:3px solid var(--red);border-radius:14px;padding:9px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--red)}
 
+
+/* ── FULLSCREEN MODE ── */
+.fullscreen-btn{background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Baloo 2',cursive;transition:all .2s}
+.fullscreen-btn:hover{background:rgba(255,255,255,.25)}
+body.fs-mode .header{display:none!important}
+body.fs-mode .nav{display:flex!important}
+body.fs-mode .app{padding:0}
+body.fs-mode .screen{padding:10px 14px}
+#fs-exit-btn{display:none;position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(42,31,26,.7);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:20px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;backdrop-filter:blur(4px)}
+body.fs-mode #fs-exit-btn{display:block}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -687,6 +698,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <!-- MAIN APP -->
 <div class="app" id="main-app">
+  <button id="fs-exit-btn" onclick="toggleFullscreen()">✕ Exit Fullscreen</button>
   <!-- GUEST SIGNUP POPUP -->
   <div id="guest-popup" style="display:none;position:fixed;inset:0;background:rgba(42,31,26,0.6);z-index:600;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:24px;max-width:380px;width:100%;padding:32px;text-align:center;border:5px solid var(--yellow);box-shadow:0 16px 50px rgba(0,0,0,0.2);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)">
@@ -725,6 +737,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
         <input class="teacher-edit-input" id="teacher-input" type="text" placeholder="Class name" maxlength="30"
           onblur="saveTeacher()" onkeydown="if(event.key==='Enter')saveTeacher()">
       </div>
+      <button class="fullscreen-btn" id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen for smartboard">⛶ Fullscreen</button>
       <button class="logout-btn" onclick="doLogout()">↩ Log Out</button>
     </div>
   </div>
@@ -2551,6 +2564,33 @@ function tickTimer(){
 function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerRemaining=timerTotal;document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='READY';document.getElementById('timer-big').style.color='var(--text)';updateTimerDisplay();updateRing();}
 function updateTimerDisplay(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;document.getElementById('timer-big').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function updateRing(){const pct=timerRemaining/timerTotal;const ring=document.getElementById('ring-prog');if(ring){ring.style.strokeDashoffset=CIRC*(1-pct);ring.style.stroke=pct>0.33?'var(--red)':'var(--yellow)';}}
+function toggleFullscreen(){
+  const body=document.body;
+  const isFs=body.classList.toggle('fs-mode');
+  const btn=document.getElementById('fs-btn');
+  if(isFs){
+    // Try native browser fullscreen
+    if(document.documentElement.requestFullscreen){
+      document.documentElement.requestFullscreen().catch(()=>{});
+    }
+    if(btn)btn.textContent='✕ Exit';
+    showToast('Fullscreen mode — press Esc or click Exit to leave');
+  }else{
+    if(document.exitFullscreen&&document.fullscreenElement){
+      document.exitFullscreen().catch(()=>{});
+    }
+    if(btn)btn.textContent='⛶ Fullscreen';
+  }
+}
+// Exit fullscreen when Escape pressed
+document.addEventListener('fullscreenchange',function(){
+  if(!document.fullscreenElement){
+    document.body.classList.remove('fs-mode');
+    const btn=document.getElementById('fs-btn');
+    if(btn)btn.textContent='⛶ Fullscreen';
+  }
+});
+
 function toggleSound(){soundOn=!soundOn;const tog=document.getElementById('sound-tog');tog.classList.toggle('on',soundOn);document.getElementById('sound-label').textContent=soundOn?'Sound On':'Sound Off';}
 
 function playTimerDoneSound(){
