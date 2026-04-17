@@ -196,7 +196,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .ac-title{font-size:19px;font-weight:900;margin-bottom:4px}
 .ac-desc{font-size:12px;opacity:.9;line-height:1.4;font-weight:700}
 .ac-time-badge{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.3);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:900;text-transform:uppercase}
-.ac-grade{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.1);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:900}
+.ac-grade{display:block;background:rgba(0,0,0,0.15);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:900;margin-top:3px;text-align:center}
 
 /* BREATHING */
 .breathing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px;margin-bottom:20px}
@@ -484,9 +484,9 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 /* ── NEW DASHBOARD LAYOUT ── */
 .dash-date-bar{background:var(--red);border-radius:var(--rad);border:4px solid var(--redDark);box-shadow:0 5px 0 var(--redDark);padding:18px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.dash-date-text{font-size:22px;font-weight:900;color:#fff;text-shadow:1px 1px 0 var(--redDark)}
+.dash-date-text{font-size:28px;font-weight:900;color:#fff;text-shadow:1px 1px 0 var(--redDark)}
 .dash-date-sub{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);margin-top:2px}
-.dash-greeting{font-size:15px;font-weight:900;color:rgba(255,255,255,.9)}
+.dash-greeting{font-size:19px;font-weight:900;color:rgba(255,255,255,.9)}
 
 .morning-q-card{background:var(--yellow);border:4px solid var(--yellowDark);border-radius:var(--rad);box-shadow:0 5px 0 var(--yellowDark);padding:20px 24px;margin-bottom:16px;position:relative}
 .morning-q-label{font-size:17px;font-weight:900;color:#fff;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;text-shadow:1px 1px 0 var(--yellowDark)}
@@ -539,6 +539,33 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .guest-banner-btns{display:flex;gap:8px}
 .guest-sign-up{background:var(--yellow);color:var(--yellowDark);border:3px solid var(--yellowDark);border-radius:12px;padding:7px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--yellowDark)}
 .guest-sign-in{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:12px;padding:7px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer}
+
+
+/* ── CELEBRATION ANIMATIONS ── */
+@keyframes confettiFall{0%{opacity:1;transform:translateY(-20px) rotate(0deg) scale(1.2)}70%{opacity:1}100%{opacity:0;transform:translateY(110vh) rotate(540deg) scale(.7)}}
+@keyframes milestoneIn{0%{opacity:0;transform:scale(.3) rotate(-10deg)}60%{transform:scale(1.2) rotate(4deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
+@keyframes milestoneOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.5) translateY(-40px)}}
+@keyframes timerDone{0%,100%{transform:scale(1)}25%{transform:scale(1.15) rotate(-3deg)}75%{transform:scale(1.15) rotate(3deg)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 5px 0 var(--yellowDark),0 0 0 0 rgba(245,200,66,.4)}50%{box-shadow:0 5px 0 var(--yellowDark),0 0 18px 8px rgba(245,200,66,.35)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.confetti-piece{position:fixed;pointer-events:none;z-index:9999;font-size:22px;animation:confettiFall linear forwards}
+.milestone-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--white);border:5px solid var(--yellow);border-radius:28px;padding:28px 40px;text-align:center;z-index:9999;box-shadow:0 20px 60px rgba(42,31,26,.25);animation:milestoneIn .5s cubic-bezier(.34,1.56,.64,1) forwards}
+.milestone-emoji{font-size:56px;display:block;margin-bottom:8px;animation:float 1s ease-in-out infinite}
+.milestone-title{font-size:28px;font-weight:900;color:var(--text);margin-bottom:4px}
+.milestone-sub{font-size:15px;font-weight:700;color:var(--muted)}
+
+/* ── SOFTER HOME SCREEN ── */
+.dash-date-bar{background:linear-gradient(135deg,#E05A62 0%,#C8404A 100%)!important;border-color:#B52830!important;box-shadow:0 5px 0 #B52830!important}
+.morning-q-card{background:linear-gradient(135deg,#5BAD5A 0%,#4A9A49 100%)!important;border-color:#347A33!important;box-shadow:0 6px 0 #347A33,0 0 0 4px rgba(91,173,90,.15)!important;animation:pulse-glow 3s ease-in-out infinite!important}
+.morning-q-label{color:#fff!important;text-shadow:1px 1px 0 rgba(0,0,0,.2)!important;font-size:28px!important;letter-spacing:.5px!important}
+.morning-q-text{color:#fff!important;font-size:17px!important;text-shadow:1px 1px 0 rgba(0,0,0,.15)!important;font-weight:700!important}
+.morning-q-btn{background:rgba(255,255,255,.9)!important;color:var(--greenDark)!important;border-color:var(--greenDark)!important;box-shadow:0 3px 0 var(--greenDark)!important}
+.morning-q-used{color:rgba(255,255,255,.75)!important}
+.dash-mini-timer{background:linear-gradient(135deg,#f8f4ee 0%,#fff 100%)!important;border-color:#d4c8b8!important}
+.dash-flow-card{background:linear-gradient(135deg,#f8f4ee 0%,#fff 100%)!important;border-color:#5BAD5A!important}
+.brain-break-card{background:linear-gradient(135deg,#F0698A 0%,#D85070 100%)!important;border-color:#B83060!important;box-shadow:0 6px 0 #B83060!important}
 
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
@@ -714,7 +741,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <div>
         <div class="dash-greeting">🌱 Good <span id="dash-greeting-time">Morning</span>, <span id="dash-teacher-name">Teacher</span>!</div>
         <div class="dash-date-text" id="dash-today-date">—</div>
-        <div id="dash-live-time" style="font-size:28px;font-weight:900;color:rgba(255,255,255,.95);margin-top:2px;letter-spacing:1px">—</div>
+        <div id="dash-live-time" style="font-size:42px;font-weight:900;color:rgba(255,255,255,.95);margin-top:2px;letter-spacing:2px;line-height:1">—</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px 14px;text-align:center">
@@ -728,49 +755,46 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       </div>
     </div>
 
-    <!-- MORNING QUESTION -->
-    <div class="morning-q-card">
-      <div class="morning-q-label">🌅 Morning Meeting Question</div>
-      <div class="morning-q-text" id="morning-q-text">Loading today's question...</div>
-      <div class="morning-q-btns">
-        <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
-        
+    <!-- TIMER (full width below date bar) -->
+    <div class="dash-mini-timer" style="margin-bottom:16px">
+      <h3>⏱ Quick Timer</h3>
+      <div class="dash-mini-time" id="dash-timer-display">05:00</div>
+      <div class="dash-mini-presets">
+        <button class="dmt-preset" onclick="setDashTimer(1)">1m</button>
+        <button class="dmt-preset" onclick="setDashTimer(3)">3m</button>
+        <button class="dmt-preset" onclick="setDashTimer(5)">5m</button>
+        <button class="dmt-preset" onclick="setDashTimer(10)">10m</button>
+        <button class="dmt-preset" onclick="setDashTimer(15)">15m</button>
       </div>
-      <div class="morning-q-used" id="morning-q-used"></div>
+      <div class="dash-mini-btns">
+        <button class="dmt-btn dmt-reset" onclick="resetDashTimer()">↺ Reset</button>
+        <button class="dmt-btn dmt-start" id="dash-timer-btn" onclick="toggleDashTimer()">▶ Start</button>
+      </div>
     </div>
 
-    <!-- TIMER + TODAY'S FLOW -->
+    <!-- MORNING QUESTION + TODAY'S FLOW side by side -->
     <div class="dash-two-col">
-      <!-- LEFT COL: Timer stacked on top of Brain Break -->
+      <!-- LEFT COL: Morning Question stacked on Brain Break -->
       <div class="dash-left-col">
-        <div class="dash-mini-timer">
-          <h3>⏱ Quick Timer</h3>
-          <div class="dash-mini-time" id="dash-timer-display">05:00</div>
-          <div class="dash-mini-presets">
-            <button class="dmt-preset" onclick="setDashTimer(1)">1m</button>
-            <button class="dmt-preset" onclick="setDashTimer(3)">3m</button>
-            <button class="dmt-preset" onclick="setDashTimer(5)">5m</button>
-            <button class="dmt-preset" onclick="setDashTimer(10)">10m</button>
-            <button class="dmt-preset" onclick="setDashTimer(15)">15m</button>
+        <div class="morning-q-card" style="margin-bottom:0">
+          <div class="morning-q-label">🌅 Morning Meeting Question</div>
+          <div class="morning-q-text" id="morning-q-text">Loading today's question...</div>
+          <div class="morning-q-btns">
+            <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
           </div>
-          <div class="dash-mini-btns">
-            <button class="dmt-btn dmt-reset" onclick="resetDashTimer()">↺ Reset</button>
-            <button class="dmt-btn dmt-start" id="dash-timer-btn" onclick="toggleDashTimer()">▶ Start</button>
-          </div>
+          <div class="morning-q-used" id="morning-q-used"></div>
         </div>
         <div class="brain-break-card">
           <div class="bb-label">🧠 Today's Brain Break</div>
           <div class="bb-icon" id="bb-icon">🎮</div>
           <div class="bb-title" id="bb-title">Loading...</div>
           <div class="bb-desc" id="bb-desc"></div>
-          <!-- Steps shown when expanded -->
           <div id="bb-steps" style="display:none;margin-bottom:12px;position:relative;z-index:1"></div>
           <div class="bb-btns" id="bb-start-btns">
             <button class="bb-btn" id="bb-view-btn" onclick="showBBSteps()">📋 How To Play</button>
             <button class="bb-btn" onclick="startDashBrainBreak()">▶ Start Timer</button>
             <button class="bb-shuffle" onclick="shuffleBrainBreak()">🔀 New Break</button>
           </div>
-          <!-- In-progress timer shown when brain break is running -->
           <div id="bb-timer-section" style="display:none;position:relative;z-index:1;margin-top:8px">
             <div style="font-size:48px;font-weight:900;color:#fff;text-align:center;text-shadow:2px 2px 0 var(--pinkDark);letter-spacing:2px;margin-bottom:8px" id="bb-countdown">05:00</div>
             <div style="display:flex;gap:8px;justify-content:center">
@@ -783,7 +807,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
       <!-- RIGHT COL: Today's Flow tall -->
       <div class="dash-flow-card">
         <h3>🏫 Today's Flow <button onclick="addDashItem()" style="background:var(--green);border:2px solid var(--greenDark);border-radius:10px;padding:4px 10px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer;box-shadow:0 2px 0 var(--greenDark)">+</button></h3>
-        <div id="dash-schedule" style="height:calc(100% - 50px);overflow-y:auto;max-height:400px"></div>
+        <div id="dash-schedule" style="height:calc(100% - 50px);overflow-y:auto;max-height:500px"></div>
       </div>
     </div>
   </div>
@@ -2113,6 +2137,8 @@ function toggleBBTimer(){
         bbTimerRunning=false;
         document.getElementById('bb-countdown').textContent='Done! 🎉';
         document.getElementById('bb-pause-btn').style.display='none';
+        launchConfetti(35,['🧠','🎉','✨','🎊','🏃','💪']);
+        showMilestoneBanner('🧠','Brain Break Complete!','Great energy, class!',2500);
         showToast('🎉 Brain break complete!');
         setTimeout(stopBBTimer,3000);
       }
@@ -2323,12 +2349,64 @@ async function cycleColor(id){
   await sb.from('students').update({color:c}).eq('id',id);
 }
 async function changeGrade(id,grade){const s=students.find(x=>x.id===id);if(s){s.grade=grade;await sb.from('students').update({grade}).eq('id',id);}}
+function launchConfetti(count,emojis){
+  const e=emojis||['⭐','🌟','✨','🎉','🎊','💫'];
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.textContent=e[Math.floor(Math.random()*e.length)];
+      el.style.left=Math.random()*100+'vw';
+      el.style.top='-30px';
+      el.style.fontSize=(20+Math.random()*22)+'px';
+      // Slower: 3.5 to 6 seconds
+      const dur=(3.5+Math.random()*2.5).toFixed(2)+'s';
+      el.style.animationDuration=dur;
+      el.style.animationDelay=(Math.random()*0.6)+'s';
+      document.body.appendChild(el);
+      // Remove after animation + delay + buffer
+      setTimeout(()=>el.remove(),7000);
+    },i*50);
+  }
+}
+
+function showMilestoneBanner(emoji,title,sub,duration){
+  const existing=document.querySelector('.milestone-banner');
+  if(existing)existing.remove();
+  const el=document.createElement('div');
+  el.className='milestone-banner';
+  el.innerHTML='<span class="milestone-emoji">'+emoji+'</span><div class="milestone-title">'+title+'</div><div class="milestone-sub">'+sub+'</div>';
+  document.body.appendChild(el);
+  setTimeout(()=>{
+    el.style.animation='milestoneOut .4s forwards';
+    setTimeout(()=>el.remove(),400);
+  },duration||2200);
+}
+
 async function addStar(id){
   const s=students.find(x=>x.id===id);if(!s)return;s.stars++;
   renderStudents();updateDashStats();
   await sb.from('students').update({stars:s.stars}).eq('id',id);
-  ['⭐','🌟','✨'].forEach((em,i)=>{setTimeout(()=>{const b=document.createElement('div');b.className='confetti-burst';b.textContent=em;b.style.left=(40+i*12)+'%';document.body.appendChild(b);setTimeout(()=>b.remove(),1200);},i*130);});
+  // Basic star burst
+  launchConfetti(8,['⭐','✨','🌟']);
   showToast('⭐ Star given to '+s.name+'! Total: '+s.stars);
+  // Milestone celebrations
+  if(s.stars===5){
+    setTimeout(()=>{
+      launchConfetti(25,['⭐','🌟','✨','🎉']);
+      showMilestoneBanner('🌟','5 Stars!',s.name+' reached 5 stars!');
+    },300);
+  } else if(s.stars===10){
+    setTimeout(()=>{
+      launchConfetti(40,['⭐','🏆','🎉','🎊','🌟','💫']);
+      showMilestoneBanner('🏆','10 Stars!',s.name+' is on fire!',2800);
+    },300);
+  } else if(s.stars===20){
+    setTimeout(()=>{
+      launchConfetti(60,['⭐','🏆','🎉','🎊','👑','💫','🌟','🔥']);
+      showMilestoneBanner('👑','20 Stars!',s.name+' is a SUPERSTAR!',3200);
+    },300);
+  }
 }
 async function removeStar(id){
   const s=students.find(x=>x.id===id);if(!s||s.stars<=0)return;s.stars--;
@@ -2395,13 +2473,48 @@ function toggleTimer(){
 }
 function tickTimer(){
   timerRemaining--;updateTimerDisplay();updateRing();
-  if(timerRemaining<=0){clearInterval(timerInterval);timerRunning=false;document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='DONE! 🎉';document.getElementById('timer-big').style.color='var(--greenDark)';showToast('🎉 Time is up! Great job, class!');}
+  if(timerRemaining<=0){
+  clearInterval(timerInterval);timerRunning=false;
+  document.getElementById('start-btn').textContent='▶ Start';
+  document.getElementById('timer-label').textContent='DONE! 🎉';
+  const tb=document.getElementById('timer-big');
+  tb.style.color='var(--greenDark)';
+  tb.style.animation='timerDone .5s ease-in-out 3';
+  launchConfetti(30,['🎉','⏱','🎊','✨','👏']);
+  playTimerDoneSound();
+  showToast('🎉 Time is up! Great job, class!');
+}
   else if(timerRemaining<=30){document.getElementById('timer-big').style.color='var(--redDark)';}
 }
 function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerRemaining=timerTotal;document.getElementById('start-btn').textContent='▶ Start';document.getElementById('timer-label').textContent='READY';document.getElementById('timer-big').style.color='var(--text)';updateTimerDisplay();updateRing();}
 function updateTimerDisplay(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;document.getElementById('timer-big').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function updateRing(){const pct=timerRemaining/timerTotal;const ring=document.getElementById('ring-prog');if(ring){ring.style.strokeDashoffset=CIRC*(1-pct);ring.style.stroke=pct>0.33?'var(--red)':'var(--yellow)';}}
 function toggleSound(){soundOn=!soundOn;const tog=document.getElementById('sound-tog');tog.classList.toggle('on',soundOn);document.getElementById('sound-label').textContent=soundOn?'Sound On':'Sound Off';}
+
+function playTimerDoneSound(){
+  if(!soundOn)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const notes=[523.25,659.25,783.99,1046.5]; // C5 E5 G5 C6
+    // Play chime 3 times with a short gap between each
+    [0,0.9,1.8].forEach(function(rep){
+      notes.forEach(function(freq,i){
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type='sine';
+        const t=ctx.currentTime+rep+i*0.18;
+        osc.frequency.setValueAtTime(freq,t);
+        gain.gain.setValueAtTime(0,t);
+        gain.gain.linearRampToValueAtTime(0.35,t+0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+        osc.start(t);
+        osc.stop(t+0.5);
+      });
+    });
+  }catch(e){console.log('Audio not supported');}
+}
 
 // ── SCHEDULE ──
 let schedItems=[
@@ -2509,12 +2622,14 @@ function renderActivities(filter='all'){
   document.getElementById('activity-grid').innerHTML=list.map(a=>{
     const locked=!canAccessPro()&&!FREE_ACTIVITY_IDS.includes(a.id);
     return`<div class="activity-card" style="background:${a.bg};color:${a.tc||'#fff'};border-color:rgba(0,0,0,0.15);${locked?'opacity:.7':''}" onclick="${locked?'openPaywall()':'openActivity('+a.id+')'}">
-      <span class="ac-time-badge">${a.time}</span>
+      <div style="position:absolute;top:12px;right:12px;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <span class="ac-time-badge" style="position:static">${a.time}</span>
+        <span class="ac-grade">Gr ${a.grades}</span>
+      </div>
       ${locked?'<span style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,.92);color:#C49A00;border:2px solid #F5C842;border-radius:8px;padding:2px 8px;font-size:10px;font-weight:900">🔒 Pro</span>':''}
       <span class="ac-icon">${a.icon}</span>
       <div class="ac-title">${a.title}</div>
       <div class="ac-desc">${a.desc}</div>
-      <span class="ac-grade">Gr ${a.grades}</span>
     </div>`;
   }).join('');
 }
