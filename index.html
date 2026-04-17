@@ -13,7 +13,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --sky:#B8DEE8;--red:#E8404A;--redLight:#FADADC;--redDark:#B52830;
-  --yellow:#F5C842;--yellowLight:#FFF6CC;--yellowDark:#C49A00;
+  --yellow:#FFE566;--yellowLight:#FFFBD0;--yellowDark:#B89000;
   --green:#5BAD5A;--greenLight:#D6F0D6;--greenDark:#347A33;
   --pink:#F0698A;--pinkLight:#FCDDE6;--pinkDark:#B83060;
   --blue:#4A90C4;--blueLight:#D6EAF8;--blueDark:#2C6090;
@@ -558,7 +558,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 /* ── SOFTER HOME SCREEN ── */
 .dash-date-bar{background:linear-gradient(135deg,#E05A62 0%,#C8404A 100%)!important;border-color:#B52830!important;box-shadow:0 5px 0 #B52830!important}
-.morning-q-card{background:linear-gradient(135deg,#5BAD5A 0%,#4A9A49 100%)!important;border-color:#347A33!important;box-shadow:0 6px 0 #347A33,0 0 0 4px rgba(91,173,90,.15)!important;animation:pulse-glow 3s ease-in-out infinite!important}
+.morning-q-card{background:linear-gradient(135deg,#FFE566 0%,#FFD700 100%)!important;border-color:var(--yellowDark)!important;box-shadow:0 6px 0 var(--yellowDark),0 0 0 4px rgba(245,200,66,.15)!important;animation:pulse-glow 3s ease-in-out infinite!important}
 .morning-q-label{color:#fff!important;text-shadow:1px 1px 0 rgba(0,0,0,.2)!important;font-size:28px!important;letter-spacing:.5px!important}
 .morning-q-text{color:#fff!important;font-size:17px!important;text-shadow:1px 1px 0 rgba(0,0,0,.15)!important;font-weight:700!important}
 .morning-q-btn{background:rgba(255,255,255,.9)!important;color:var(--greenDark)!important;border-color:var(--greenDark)!important;box-shadow:0 3px 0 var(--greenDark)!important}
@@ -797,7 +797,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
           </div>
           <div class="morning-q-used" id="morning-q-used"></div>
           <!-- Pro lock overlay -->
-          <div id="morning-q-lock" style="display:none;position:absolute;inset:0;background:rgba(52,122,51,.82);border-radius:calc(var(--rad) - 4px);backdrop-filter:blur(3px);align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;z-index:10" onclick="openPaywall()">
+          <div id="morning-q-lock" style="display:none;position:absolute;inset:0;background:rgba(200,160,0,.45);border-radius:calc(var(--rad) - 4px);backdrop-filter:blur(2px);align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;z-index:10" onclick="openPaywall()">
             <div style="font-size:32px">🔒</div>
             <div style="font-size:15px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.3)">Pro Feature</div>
             <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:0 16px">Upgrade to Pro to unlock Morning Meeting Questions</div>
