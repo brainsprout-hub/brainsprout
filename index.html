@@ -585,11 +585,31 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .fullscreen-btn{background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Baloo 2',cursive;transition:all .2s}
 .fullscreen-btn:hover{background:rgba(255,255,255,.25)}
 body.fs-mode .header{display:none!important}
-body.fs-mode .nav{display:flex!important}
-body.fs-mode .app{padding:0}
+body.fs-mode .nav{display:flex!important;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:200!important}
+body.fs-mode .app{padding:0;padding-top:52px!important}
 body.fs-mode .screen{padding:10px 14px}
 #fs-exit-btn{display:none;position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(42,31,26,.7);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:20px;padding:8px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;backdrop-filter:blur(4px)}
 body.fs-mode #fs-exit-btn{display:block}
+
+
+/* ── CUSTOMIZABLE DASHBOARD ── */
+.dash-customize-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.dash-customize-btn{background:rgba(255,255,255,.18);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:900;cursor:pointer;font-family:'Baloo 2',cursive;transition:all .2s}
+.dash-customize-btn:hover{background:rgba(255,255,255,.3)}
+.dash-customize-btn.active{background:var(--yellow);color:var(--yellowDark);border-color:var(--yellowDark)}
+.dash-widget-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.dash-widget-grid{grid-template-columns:1fr}}
+.dash-widget{position:relative;border-radius:var(--rad);transition:box-shadow .2s}
+.dash-widget.dragging{opacity:.5;cursor:grabbing}
+.dash-widget.drag-over{box-shadow:0 0 0 4px var(--blue)!important}
+.dash-widget.full-width{grid-column:1/-1}
+.widget-drag-handle{position:absolute;top:6px;right:6px;z-index:20;background:rgba(0,0,0,.12);border-radius:8px;padding:3px 6px;cursor:grab;font-size:12px;opacity:0;transition:opacity .2s;display:flex;gap:4px;align-items:center}
+.dash-widget:hover .widget-drag-handle{opacity:1}
+.widget-color-btn{background:rgba(0,0,0,.12);border:none;border-radius:6px;padding:3px 6px;cursor:pointer;font-size:11px;font-family:'Baloo 2',cursive;font-weight:900;color:#fff}
+/* Color picker popup */
+.widget-color-picker{position:absolute;top:32px;right:6px;z-index:100;background:var(--white);border:3px solid #E8D5C0;border-radius:16px;padding:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.wcp-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
+.wcp-swatch:hover,.wcp-swatch.active{border-color:var(--text);transform:scale(1.15)}
 
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
@@ -769,7 +789,7 @@ body.fs-mode #fs-exit-btn{display:block}
         <div class="dash-date-text" id="dash-today-date">—</div>
         <div id="dash-live-time" style="font-size:42px;font-weight:900;color:rgba(255,255,255,.95);margin-top:2px;letter-spacing:2px;line-height:1">—</div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px 14px;text-align:center">
           <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px">Students</div>
           <div style="font-size:24px;font-weight:900;color:#fff" id="dash-students">0</div>
@@ -800,7 +820,6 @@ body.fs-mode #fs-exit-btn{display:block}
 
     <!-- MORNING QUESTION + TODAY'S FLOW side by side -->
     <div class="dash-two-col">
-      <!-- LEFT COL: Morning Question stacked on Brain Break -->
       <div class="dash-left-col">
         <div class="morning-q-card" style="margin-bottom:0;position:relative">
           <div class="morning-q-label">🌅 Morning Meeting Question</div>
@@ -809,12 +828,11 @@ body.fs-mode #fs-exit-btn{display:block}
             <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
           </div>
           <div class="morning-q-used" id="morning-q-used"></div>
-          <!-- Pro lock overlay -->
           <div id="morning-q-lock" style="display:none;position:absolute;inset:0;background:rgba(200,160,0,.45);border-radius:calc(var(--rad) - 4px);backdrop-filter:blur(2px);align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;z-index:10" onclick="openPaywall()">
             <div style="font-size:32px">🔒</div>
             <div style="font-size:15px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.3)">Pro Feature</div>
             <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:0 16px">Upgrade to Pro to unlock Morning Meeting Questions</div>
-            <div style="background:#fff;color:#347A33;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:6px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;margin-top:4px">🌟 Upgrade Now</div>
+            <div style="background:#fff;color:#D4A000;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:6px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;margin-top:4px">🌟 Upgrade Now</div>
           </div>
         </div>
         <div class="brain-break-card">
@@ -837,9 +855,8 @@ body.fs-mode #fs-exit-btn{display:block}
           </div>
         </div>
       </div>
-      <!-- RIGHT COL: Today's Flow tall -->
       <div class="dash-flow-card">
-        <h3>🏫 Today's Flow <button onclick="addDashItem()" style="background:var(--green);border:2px solid var(--greenDark);border-radius:10px;padding:4px 10px;color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer;box-shadow:0 2px 0 var(--greenDark)">+</button></h3>
+        <h3>🏫 Today's Flow</h3>
         <div id="dash-schedule" style="height:calc(100% - 50px);overflow-y:auto;max-height:500px"></div>
       </div>
     </div>
@@ -2258,7 +2275,6 @@ function initDashboard(){
   const dateEl=document.getElementById('dash-today-date');
   if(dateEl)dateEl.textContent=now.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   updateDashClock();
-  // Live clock — updates every second
   setInterval(updateDashClock,1000);
   renderDashFlow();
   updateDashStats();
