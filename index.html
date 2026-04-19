@@ -771,7 +771,7 @@ body.fs-mode #fs-exit-btn{display:block}
     <button class="nav-btn" onclick="showScreen('activities',this)"><span>🎮</span> Activities</button>
     <button class="nav-btn" onclick="showScreen('breathing',this)"><span>💨</span> Breathing</button>
     <button class="nav-btn" onclick="showScreen('noise',this)"><span>🔊</span> Noise</button>
-    <button class="nav-btn" onclick="showScreen('tools',this)"><span>🛠</span> Tools</button>
+    <button class="nav-btn" onclick="showScreen('tools',this)"><span>💚</span> SEL</button>
     <button class="nav-btn" onclick="showScreen('account',this)"><span>👤</span> My Account</button>
     <button class="nav-btn" onclick="showScreen('howto',this)"><span>💡</span> How It Works</button>
     <button class="nav-btn" onclick="showScreen('help',this)"><span>❓</span> Help</button>
@@ -1017,7 +1017,7 @@ body.fs-mode #fs-exit-btn{display:block}
 
   <!-- TOOLS -->
   <div id="tools" class="screen">
-    <div class="sec-title">🛠 Classroom Tools</div>
+    <div class="sec-title">😊 SEL Tools</div>
     <div class="tools-grid">
 
       <!-- MOOD CHECK-IN -->
@@ -1245,7 +1245,7 @@ body.fs-mode #fs-exit-btn{display:block}
       <h3 style="font-size:20px;font-weight:900;margin-bottom:8px">✉️ Contact Support</h3>
       <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px">Have a question or issue? Send us a message and we'll get back to you as soon as possible.</p>
       <p style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:16px">📧 You can also email us directly at <span id="support-email-display" style="color:var(--blue);font-weight:900"></span></p>
-      <script>document.getElementById('support-email-display').textContent=['brainsprouthelp','gmail.com'].join('@');</script>
+      <script>document.getElementById('support-email-display').textContent=['help','brainsproutedu.com'].join('@');</script>
       <div class="auth-field"><label>Your Name</label><input class="auth-input" id="help-name" type="text" placeholder="Your name"></div>
       <div class="auth-field"><label>Subject</label><input class="auth-input" id="help-subject" type="text" placeholder="e.g. I can't log in, billing question..."></div>
       <div class="auth-field"><label>Message</label><textarea class="note-area" id="help-message" rows="5" placeholder="Describe your issue or question..." style="margin-top:0"></textarea></div>
@@ -3680,7 +3680,7 @@ async function confirmCancel(){
       msg.style.padding='12px';
       msg.style.borderRadius='10px';
       msg.style.border='2px solid var(--red)';
-      msg.textContent='Something went wrong. Please email brainsprouthelp@gmail.com to cancel.';
+      msg.textContent='Something went wrong. Please email help@brainsproutedu.com to cancel.';
     }
     if(btn){btn.disabled=false;btn.textContent='Yes, Cancel My Subscription';}
   }
@@ -3721,7 +3721,7 @@ async function sendHelpEmail(){
   // Disable button while sending
   if(btn){btn.disabled=true;btn.textContent='Sending...';}
   try{
-    // Send via EmailJS directly to brainsprouthelp@gmail.com
+    // Send via EmailJS directly to help@brainsproutedu.com
     await emailjs.send('service_skf9s0a','template_u7i08t7',{
       user_name: name||'A BrainSprout Teacher',
       user_email: currentUser?.email||'Unknown',
@@ -3750,7 +3750,7 @@ async function sendHelpEmail(){
     document.getElementById('help-subject').value='';
     showToast('✅ Message sent!');
   }catch(e){
-    showToast('Failed to send. Please email brainsprouthelp@gmail.com directly.');
+    showToast('Failed to send. Please email help@brainsproutedu.com directly.');
     console.error('EmailJS error:',e);
   }finally{
     if(btn){btn.disabled=false;btn.textContent='📧 Send Message';}
@@ -3872,7 +3872,7 @@ init();
 <script>
 // Fill in email addresses that Cloudflare might obfuscate
 (function(){
-  var e=['brainsprouthelp','gmail.com'].join('@');
+  var e=['help','brainsproutedu.com'].join('@');
   document.querySelectorAll('.cf-email-fix').forEach(function(el){
     el.textContent=e;
     el.style.color='var(--blue)';
