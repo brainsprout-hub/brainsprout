@@ -2802,21 +2802,54 @@ function renderDayEditor(){
   dayItems.forEach(function(item){
     const row=document.createElement('div');
     row.className='sched-row';
-    const grid=typeof ALL_EMOJIS!=='undefined'?ALL_EMOJIS.map(function(e,i){
-      var b=document.createElement('button');
-      b.style.cssText='background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px';
-      b.textContent=e;
-      b.onclick=function(){pickDayEmoji(item.id,i);};
-      return b.outerHTML;
-    }).join(''):'';
-    row.innerHTML=
-      '<div class="emoji-picker-wrap">'+
-        '<button class="sched-emoji" onclick="toggleDayEmojiPicker('+item.id+',event)">'+item.emoji+'</button>'+
-        '<div class="emoji-picker-dropdown" id="dep2-'+item.id+'" style="display:none;grid-template-columns:repeat(5,1fr)">'+grid+'</div>'+
-      '</div>'+
-      '<input type="time" class="sched-time" value="'+(item.time||'')+'" onchange="updateDayTime('+item.id+',this.value)">'+
-      '<input class="sched-input" value="'+item.text+'" placeholder="Activity name..." onblur="updateDayText('+item.id+',this.value)" onkeydown="if(event.keyCode===13)this.blur()">'+
-      '<button class="sched-delete" onclick="deleteDayItem('+item.id+')">×</button>';
+    // Build row with proper DOM elements so onclick handlers work correctly
+    var wrap=document.createElement('div');
+    wrap.className='emoji-picker-wrap';
+
+    var emojiBtn=document.createElement('button');
+    emojiBtn.className='sched-emoji';
+    emojiBtn.textContent=item.emoji;
+    emojiBtn.onclick=function(e){toggleDayEmojiPicker(item.id,e);};
+    wrap.appendChild(emojiBtn);
+
+    var dropdown=document.createElement('div');
+    dropdown.className='emoji-picker-dropdown';
+    dropdown.id='dep2-'+item.id;
+    dropdown.style.display='none';
+    dropdown.style.gridTemplateColumns='repeat(5,1fr)';
+    if(typeof ALL_EMOJIS!=='undefined'){
+      ALL_EMOJIS.forEach(function(e,i){
+        var b=document.createElement('button');
+        b.style.cssText='background:none;border:none;font-size:20px;cursor:pointer;border-radius:8px;padding:4px';
+        b.textContent=e;
+        b.onclick=function(ev){ev.stopPropagation();pickDayEmoji(item.id,i);};
+        dropdown.appendChild(b);
+      });
+    }
+    wrap.appendChild(dropdown);
+    row.appendChild(wrap);
+
+    var timeInput=document.createElement('input');
+    timeInput.type='time';
+    timeInput.className='sched-time';
+    timeInput.value=item.time||'';
+    timeInput.onchange=function(){updateDayTime(item.id,this.value);};
+    row.appendChild(timeInput);
+
+    var textInput=document.createElement('input');
+    textInput.className='sched-input';
+    textInput.value=item.text;
+    textInput.placeholder='Activity name...';
+    textInput.onblur=function(){updateDayText(item.id,this.value);};
+    textInput.onkeydown=function(e){if(e.keyCode===13)this.blur();};
+    row.appendChild(textInput);
+
+    var delBtn=document.createElement('button');
+    delBtn.className='sched-delete';
+    delBtn.textContent='×';
+    delBtn.onclick=function(){deleteDayItem(item.id);};
+    row.appendChild(delBtn);
+
     el.appendChild(row);
   });
 }
