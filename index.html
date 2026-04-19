@@ -829,12 +829,7 @@ body.fs-mode #fs-exit-btn{display:block}
             <button class="morning-q-btn" onclick="shuffleMorningQ()">🔀 New Question</button>
           </div>
           <div class="morning-q-used" id="morning-q-used"></div>
-          <div id="morning-q-lock" style="display:none;position:absolute;inset:0;background:rgba(200,160,0,.45);border-radius:calc(var(--rad) - 4px);backdrop-filter:blur(2px);align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;z-index:10" onclick="openPaywall()">
-            <div style="font-size:32px">🔒</div>
-            <div style="font-size:15px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.3)">Pro Feature</div>
-            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;padding:0 16px">Upgrade to Pro to unlock Morning Meeting Questions</div>
-            <div style="background:#fff;color:#D4A000;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:6px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;margin-top:4px">🌟 Upgrade Now</div>
-          </div>
+
         </div>
         <div class="brain-break-card">
           <div class="bb-label">🧠 Today's Brain Break</div>
@@ -1568,9 +1563,7 @@ function applyGuestUI(){
   if(notesLock){notesLock.style.display='flex';}
   renderActivities();
   renderBreathing();
-  // Lock morning meeting question for guests
-  const mqLockG=document.getElementById('morning-q-lock');
-  if(mqLockG)mqLockG.style.display='flex';
+
   // Show a guest student placeholder in the star board
   const grid=document.getElementById('student-grid');
   if(grid){
@@ -1658,12 +1651,7 @@ function applyPlanUI(){
     }
   }
 
-  // Morning question lock — only unlocked during trial or pro
-  const mqLock=document.getElementById('morning-q-lock');
-  if(mqLock){
-    const shouldLock=!canAccessPro(); // locked if not pro and not in trial
-    mqLock.style.display=shouldLock?'flex':'none';
-  }
+
 
   // Students tab — show banner and hide edit controls for free users
   const freeBanner=document.getElementById('students-free-banner');
@@ -2046,9 +2034,7 @@ function saveMQState(state){
 function getTodayStr(){return new Date().toISOString().slice(0,10);}
 
 function initMorningQuestion(){
-  // Show lock immediately if not pro — don't wait for applyPlanUI
-  const mqLock=document.getElementById('morning-q-lock');
-  if(mqLock)mqLock.style.display=canAccessPro()?'none':'flex';
+
   const state=getMQState();
   const today=getTodayStr();
   // If we already have a question for today, show it
@@ -3858,7 +3844,6 @@ init();
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 12 brain break activities</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 6 breathing exercises</div>
-        <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Morning Meeting Questions</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Mood Check-In</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Sensory Needs Tracker</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Teacher Notes</div>
