@@ -618,6 +618,19 @@ body.fs-mode #fs-exit-btn{display:block}
 .locale-btn{background:none;border:none;border-radius:16px;padding:4px 10px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;color:rgba(255,255,255,.8);transition:all .2s}
 .locale-btn.active{background:rgba(255,255,255,.9);color:var(--text)}
 
+
+/* ── FOUNDING MEMBER BANNER ── */
+.founder-banner{background:linear-gradient(135deg,#E8F8EE 0%,#C8F0D8 100%);border:3px solid #4AAA6A;border-radius:18px;padding:12px 16px;margin-bottom:14px;text-align:center;box-shadow:0 4px 0 #3A8A55;position:relative;overflow:hidden}
+.founder-banner::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.4) 2px,transparent 2px);background-size:20px 20px;pointer-events:none}
+.founder-badge{background:#3A8FD4;color:#fff;border:2px solid #1A6AAA;border-radius:10px;padding:3px 10px;font-size:10px;font-weight:900;display:inline-block;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 0 #1A6AAA;position:relative;z-index:1}
+.founder-title{font-size:20px;font-weight:900;color:#1A4A2A;margin-bottom:4px;position:relative;z-index:1}
+.founder-sub{font-size:13px;font-weight:700;color:#2A6A3A;margin-bottom:10px;position:relative;z-index:1}
+.founder-price{font-size:32px;font-weight:900;color:#1A6AAA;position:relative;z-index:1}
+.founder-price s{font-size:18px;color:#999;font-weight:700;margin-left:6px}
+.founder-btn{background:#3A8FD4;color:#fff;border:3px solid #1A6AAA;border-radius:14px;padding:9px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 0 #1A6AAA;transition:all .2s;position:relative;z-index:1;margin-top:6px}
+.founder-btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #1A6AAA}
+.founder-spots{font-size:12px;font-weight:700;color:#2A6A3A;margin-top:6px;position:relative;z-index:1}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -679,12 +692,14 @@ body.fs-mode #fs-exit-btn{display:block}
 
     <!-- RIGHT AUTH PANEL -->
     <div class="auth-panel">
-      <div class="auth-panel-logo">
-        <span class="auth-panel-sprout">🌱</span>
-        <div>
-          <div class="auth-panel-brand">BrainSprout</div>
-          <div class="auth-panel-sub">Supporting Every Learner</div>
-        </div>
+
+
+      <!-- Founding Member Promo on Login Screen -->
+      <div class="founder-banner" style="margin-bottom:14px">
+        <div class="founder-badge">🎉 First 50 Subscribers Only</div>
+        <div style="font-size:16px;font-weight:900;color:#1A4A2A;margin:5px 0;position:relative;z-index:1">Yearly Plan — <span style="color:#1A6AAA;font-size:20px">$25/yr</span> <s style="font-size:13px;color:#999;font-weight:700">$35</s></div>
+        <button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim This Rate</button>
+        <div style="font-size:10px;font-weight:700;color:#2A6A3A;margin-top:5px;position:relative;z-index:1">50 spots only · lock in forever!</div>
       </div>
 
       <div class="auth-box">
@@ -1119,6 +1134,15 @@ body.fs-mode #fs-exit-btn{display:block}
         <div style="background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:12px">
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-align:center">🌟 Upgrade to BrainSprout Pro</div>
           <div style="font-size:13px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:16px">Unlock everything — try it free for 7 days</div>
+          <!-- Founding Member Offer -->
+          <div class="founder-banner" style="margin-bottom:14px">
+            <div class="founder-badge">🎉 Limited Time Offer</div>
+            <div class="founder-title">Founding Member Special</div>
+            <div class="founder-sub">First 50 subscribers only!</div>
+            <div class="founder-price">$25/yr <s>$35</s></div>
+            <div><button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim Founding Member Price</button></div>
+            <div class="founder-spots">Only 50 spots available — lock in your rate forever!</div>
+          </div>
           <!-- Plan cards -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
             <div id="acct-plan-monthly" onclick="selectAcctPlan('monthly')" style="border:3px solid var(--red);border-radius:14px;padding:12px;text-align:center;cursor:pointer;background:var(--red);color:#fff;transition:all .2s">
@@ -2926,6 +2950,7 @@ const LOCALE_STRINGS = {
     priceLabel: '$4.99',
     stripeLink: 'https://buy.stripe.com/14AbJ14bk3DP2hn2zSenS03',
     stripeLinkYearly: 'https://buy.stripe.com/7sY28r23c2zL6xDdewenS05',
+    stripeLinkFounder: 'https://buy.stripe.com/7sY4gz6jsb6h3lrcasenS07',
     gradeLabel: 'Grade',
     grades: ['K','1','2','3','4','5'],
     gradeOptions: ['K','1st','2nd','3rd','4th','5th'],
@@ -3798,6 +3823,21 @@ function selectAcctPlan(plan){
     if(btn)btn.innerHTML='💳 Subscribe Yearly &mdash; <span class="price-yearly">'+getPriceYearly()+'</span>/yr';
   }
 }
+function startFounderCheckout(){
+  const L=getLocale();
+  const link=L.stripeLinkFounder||'https://buy.stripe.com/7sY4gz6jsb6h3lrcasenS07';
+  if(!currentUser){
+    // From login screen — show signup first with a note
+    showToast('🎉 Sign up first, then claim your founding rate!');
+    // Switch to signup tab if on auth screen
+    var signupTab=document.getElementById('tab-signup');
+    if(signupTab)switchTab('signup');
+    return;
+  }
+  showToast('🎉 Redirecting to Founding Member checkout...');
+  setTimeout(function(){window.location.href=link;},400);
+}
+
 function startAcctCheckout(){
   if(!currentUser){return;}
   showToast('Redirecting to secure checkout...');
@@ -4445,6 +4485,15 @@ init();
       <div style="font-size:44px;font-weight:900;margin-top:14px"><span id="paywall-price-display">$4.99</span><span style="font-size:18px;opacity:.85">/month</span></div>
     </div>
     <div style="padding:24px 28px">
+      <!-- Founding Member Offer -->
+      <div class="founder-banner" style="margin-bottom:16px">
+        <div class="founder-badge">🎉 Limited Time Offer</div>
+        <div class="founder-title">Founding Member Special</div>
+        <div class="founder-sub">First 50 subscribers only!</div>
+        <div class="founder-price">$25/yr <s>$35</s></div>
+        <div><button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim Founding Member Price</button></div>
+        <div class="founder-spots">Only 50 spots available — lock in your rate forever!</div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 12 brain break activities</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ All 6 breathing exercises</div>
