@@ -2487,7 +2487,7 @@ function renderStudents(filter='all'){
       </div>
       <div class="s-grade-wrap">
         <select class="s-grade-select" onclick="event.stopPropagation()" onchange="changeGrade(${s.id},this.value)">
-          ${['K','1','2','3','4','5'].map(g=>`<option value="${g}"${s.grade===g?' selected':''}>${g==='K'?'Kinder':'Gr '+g}</option>`).join('')}
+          ${(currentLocale==='ie'?[['Jnr Inf','Jnr Inf'],['Snr Inf','Snr Inf'],['1st','1st Class'],['2nd','2nd Class'],['3rd','3rd Class'],['4th','4th Class'],['5th','5th Class'],['6th','6th Class']]:[['K','Kinder'],['1','Gr 1'],['2','Gr 2'],['3','Gr 3'],['4','Gr 4'],['5','Gr 5']]).map(([v,l])=>`<option value="${v}"${s.grade===v?' selected':''}>${l}</option>`).join('')}
         </select>
         <span class="s-level">${level}</span>
       </div>
@@ -3120,9 +3120,12 @@ function setLocale(loc){
   applyLocaleToUI();
   // Reset morning question for new locale
   initMorningQuestion();
-  // Re-render activities and breathing with new locale grades
+  // Re-render activities and students with new locale
   if(document.getElementById('activities')&&document.getElementById('activities').classList.contains('active')){
     renderActivities();
+  }
+  if(document.getElementById('rewards')&&document.getElementById('rewards').classList.contains('active')){
+    renderStudents();
   }
   showToast(loc==='ie'?'🇮🇪 Switched to Irish/UK version':'🇺🇸 Switched to US version');
 }
@@ -3738,7 +3741,7 @@ function openProfile(studentId){
   document.getElementById('profile-avatar').textContent='';
   document.getElementById('profile-avatar').style.background=s.color;
   document.getElementById('profile-name').textContent=s.name;
-  document.getElementById('profile-grade').textContent='Grade '+s.grade;
+  document.getElementById('profile-grade').textContent=(currentLocale==='ie'?s.grade:('Grade '+s.grade));
   document.getElementById('profile-stars-big').textContent='⭐ '+s.stars+' stars earned';
 
   // Moods for this student
@@ -3840,7 +3843,7 @@ function printReport(){
     <div class="header">
       <div class="header-label">BrainSprout &middot; Weekly Report</div>
       <div class="header-name">${s.name}</div>
-      <div class="header-meta">${weekLabel} &nbsp;&middot;&nbsp; Grade ${s.grade} &nbsp;&middot;&nbsp; &#11088; ${s.stars} stars total</div>
+      <div class="header-meta">${weekLabel} &nbsp;&middot;&nbsp; ${currentLocale==='ie'?s.grade:'Grade '+s.grade} &nbsp;&middot;&nbsp; &#11088; ${s.stars} stars total</div>
     </div>
     <div class="stars-box">
       <div style="font-size:30px">&#11088;</div>
@@ -3903,7 +3906,7 @@ function renderReportForStudent(idStr){
       <div class="report-s-avatar" style="background:${s.color}">${s.name.slice(0,2).toUpperCase()}</div>
       <div>
         <div class="report-s-name">${s.name}</div>
-        <div class="report-s-stars">⭐ ${s.stars} total stars · Grade ${s.grade}</div>
+        <div class="report-s-stars">⭐ ${s.stars} total stars · ${currentLocale==='ie'?s.grade:'Grade '+s.grade}</div>
       </div>
     </div>
     <div class="report-section">
