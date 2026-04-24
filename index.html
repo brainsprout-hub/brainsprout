@@ -3045,7 +3045,7 @@ function renderMoodWhoButtons(){
     wrap.innerHTML='<div style="font-size:13px;color:var(--muted);font-weight:700;padding:6px 0">Add students to the Star Board first to use Mood Check-In.</div>';
     return;
   }
-  wrap.innerHTML=students.map(s=>`<button class="sensory-who-btn${moodWho===s.id?' active':''}" id="mwb-${s.id}" onclick="selectMoodWho(${s.id})" style="${moodWho===s.id?'background:'+s.color+';border-color:'+s.color+';color:#fff':''}">${s.name.slice(0,2).toUpperCase()} ${s.name}${moodData[s.id]?' '+MOOD_EMOJI[moodData[s.id]]:''}</button>`).join('');
+  wrap.innerHTML=students.map(s=>`<button class="sensory-who-btn${moodWho===s.id?' active':''}" id="mwb-${s.id}" onclick="selectMoodWho(${s.id})" style="${moodWho===s.id?'background:'+s.color+';border-color:'+s.color+';color:#fff':''}">${s.name}${moodData[s.id]?' '+MOOD_EMOJI[moodData[s.id]]:''}</button>`).join('');
 }
 
 function selectMoodWho(id){
@@ -3106,7 +3106,7 @@ function renderSensoryWhoButtons(){
   if(!wrap)return;
   // Build buttons: Whole Class + each student
   wrap.innerHTML=`<button class="sensory-who-btn sw-class${sensoryWho==='class'?' active':''}" id="swb-class" onclick="selectSensoryWho('class')">🏫 Whole Class</button>`
-    +students.map(s=>`<button class="sensory-who-btn${sensoryWho===s.id?' active':''}" id="swb-${s.id}" onclick="selectSensoryWho(${s.id})" style="--who-color:${s.color}">${s.name.slice(0,2).toUpperCase()} ${s.name}</button>`).join('');
+    +students.map(s=>`<button class="sensory-who-btn${sensoryWho===s.id?' active':''}" id="swb-${s.id}" onclick="selectSensoryWho(${s.id})" style="--who-color:${s.color}">${s.name}</button>`).join('');
   // Ensure sensoryData exists for each student
   students.forEach(s=>{if(!sensoryData[s.id])sensoryData[s.id]=new Set();});
 }
