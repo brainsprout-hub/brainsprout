@@ -3707,10 +3707,35 @@ document.addEventListener('click',e=>{
   const ov=document.getElementById('paywall-overlay');
   if(ov&&e.target===ov)closePaywall();
 });
+let selectedPlan='monthly';
+
+function selectPlan(plan){
+  selectedPlan=plan;
+  const mDiv=document.getElementById('plan-monthly');
+  const yDiv=document.getElementById('plan-yearly');
+  const btn=document.getElementById('checkout-btn');
+  if(plan==='monthly'){
+    if(mDiv){mDiv.style.background='var(--red)';mDiv.style.color='#fff';mDiv.style.borderColor='var(--redDark)';}
+    if(yDiv){yDiv.style.background='var(--cream)';yDiv.style.color='var(--text)';yDiv.style.borderColor='#E8D5C0';}
+    if(btn)btn.innerHTML='💳 Subscribe Monthly &mdash; '+getPriceMonthly()+'/mo';
+  } else {
+    if(yDiv){yDiv.style.background='var(--red)';yDiv.style.color='#fff';yDiv.style.borderColor='var(--redDark)';}
+    if(mDiv){mDiv.style.background='var(--cream)';mDiv.style.color='var(--text)';mDiv.style.borderColor='#E8D5C0';}
+    if(btn)btn.innerHTML='💳 Subscribe Yearly &mdash; '+getPriceYearly()+'/yr';
+  }
+}
+
+function getPriceMonthly(){return currentLocale==='ie'?'€4.99':'$4.99';}
+function getPriceYearly(){return currentLocale==='ie'?'€32':'$35';}
+function getSaveAmount(){return currentLocale==='ie'?'save ~€28':'save ~$25';}
+
 function startCheckout(){
+  if(!currentUser){openPaywall();return;}
   closePaywall();
-  showToast('Redirecting to Stripe checkout...');
-  setTimeout(()=>{window.location.href=STRIPE_PRO_LINK;},400);
+  showToast('Redirecting to secure checkout...');
+  const L=getLocale();
+  const link=selectedPlan==='yearly'?(L.stripeLinkYearly||STRIPE_PRO_LINK):(L.stripeLink||STRIPE_PRO_LINK);
+  setTimeout(()=>{window.location.href=link;},400);
 }
 async function manualPlanRefresh(){
   if(!currentUser){showToast('Please log in first.');return;}
