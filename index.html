@@ -1647,6 +1647,10 @@ function showApp(){
   if(gb)gb.style.display='none';
   initDashboard();renderStudents();renderActivities();renderBreathing();renderSchedule();renderNotesLog();renderNotesStudentDropdown();
   setTimeout(applyPlanUI, 100);
+  // Refresh all price displays for current locale
+  document.querySelectorAll('.price-monthly').forEach(function(el){el.textContent=getPriceMonthly();});
+  document.querySelectorAll('.price-yearly').forEach(function(el){el.textContent=getPriceYearly();});
+  document.querySelectorAll('.price-save').forEach(function(el){el.textContent=getSaveAmount();});
   // Apply saved locale
   const savedLocale=localStorage.getItem('bs_locale')||'us';
   if(savedLocale!=='us'){
@@ -1681,6 +1685,11 @@ function showGuestMode(){
   document.getElementById('dash-teacher-name').textContent='Guest';
   // Hide account/help nav for guests — keep everything else
   setTimeout(applyGuestUI, 100);
+  setTimeout(function(){
+    document.querySelectorAll('.price-monthly').forEach(function(el){el.textContent=getPriceMonthly();});
+    document.querySelectorAll('.price-yearly').forEach(function(el){el.textContent=getPriceYearly();});
+    document.querySelectorAll('.price-save').forEach(function(el){el.textContent=getSaveAmount();});
+  },150);
 }
 
 function applyGuestUI(){
@@ -4022,6 +4031,10 @@ function renderReportForStudent(idStr){
 
 // ── MY ACCOUNT ──
 function renderAccountScreen(){
+  // Always refresh price displays for current locale
+  document.querySelectorAll('.price-monthly').forEach(function(el){el.textContent=getPriceMonthly();});
+  document.querySelectorAll('.price-yearly').forEach(function(el){el.textContent=getPriceYearly();});
+  document.querySelectorAll('.price-save').forEach(function(el){el.textContent=getSaveAmount();});
   // Guest view — show signup prompt only
   if(!currentUser){
     const screen=document.getElementById('account');
