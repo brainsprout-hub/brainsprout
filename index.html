@@ -1115,7 +1115,36 @@ body.fs-mode #fs-exit-btn{display:block}
         <div id="account-plan-desc" style="font-size:13px;font-weight:700;color:var(--muted)"></div>
       </div>
       <div id="account-upgrade-row" style="display:none;margin-bottom:12px">
-        <button onclick="openPaywall()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:12px 24px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 0 var(--redDark);width:100%">🌟 Upgrade to Pro — <span class="price-display">$4.99</span>/mo</button>
+        <!-- Inline pricing card -->
+        <div style="background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:12px">
+          <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-align:center">🌟 Upgrade to BrainSprout Pro</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:16px">Unlock everything — try it free for 7 days</div>
+          <!-- Plan cards -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <div id="acct-plan-monthly" onclick="selectAcctPlan('monthly')" style="border:3px solid var(--red);border-radius:14px;padding:12px;text-align:center;cursor:pointer;background:var(--red);color:#fff;transition:all .2s">
+              <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;opacity:.85;margin-bottom:4px">Monthly</div>
+              <div style="font-size:22px;font-weight:900"><span class="price-monthly">$4.99</span></div>
+              <div style="font-size:11px;font-weight:700;opacity:.8;margin-top:2px">per month</div>
+            </div>
+            <div id="acct-plan-yearly" onclick="selectAcctPlan('yearly')" style="border:3px solid #E8D5C0;border-radius:14px;padding:12px;text-align:center;cursor:pointer;background:var(--cream);color:var(--text);transition:all .2s;position:relative">
+              <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;border:2px solid var(--greenDark);border-radius:10px;padding:2px 10px;font-size:10px;font-weight:900;white-space:nowrap">🌟 BEST VALUE</div>
+              <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;opacity:.7;margin-bottom:4px">Yearly</div>
+              <div style="font-size:22px;font-weight:900"><span class="price-yearly">$35</span></div>
+              <div style="font-size:11px;font-weight:700;opacity:.7;margin-top:2px">per year · <span class="price-save" style="color:var(--greenDark)">save ~$25</span></div>
+            </div>
+          </div>
+          <!-- What's included -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;font-size:12px;font-weight:700;color:var(--greenDark)">
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ All 12 activities</div>
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ All 6 breathing</div>
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Mood Check-In</div>
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Sensory Needs</div>
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Teacher Notes</div>
+            <div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Weekly Reports</div>
+          </div>
+          <button id="acct-checkout-btn" onclick="startAcctCheckout()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark)">💳 Subscribe Monthly — <span class="price-monthly">$4.99</span>/mo</button>
+          <div style="text-align:center;font-size:11px;color:var(--muted);font-weight:700;margin-top:8px">Cancel anytime · 🔒 Secured by Stripe</div>
+        </div>
       </div>
       <div id="account-cancel-row" style="display:none">
         <p style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px">To cancel your subscription, click below. You'll keep Pro access until the end of your billing period.</p>
@@ -3726,6 +3755,30 @@ function selectPlan(plan){
 }
 
 function getPriceMonthly(){return currentLocale==='ie'?'€4.99':'$4.99';}
+
+let selectedAcctPlan='monthly';
+function selectAcctPlan(plan){
+  selectedAcctPlan=plan;
+  const mDiv=document.getElementById('acct-plan-monthly');
+  const yDiv=document.getElementById('acct-plan-yearly');
+  const btn=document.getElementById('acct-checkout-btn');
+  if(plan==='monthly'){
+    if(mDiv){mDiv.style.background='var(--red)';mDiv.style.color='#fff';mDiv.style.borderColor='var(--redDark)';}
+    if(yDiv){yDiv.style.background='var(--cream)';yDiv.style.color='var(--text)';yDiv.style.borderColor='#E8D5C0';}
+    if(btn)btn.innerHTML='💳 Subscribe Monthly &mdash; <span class="price-monthly">'+getPriceMonthly()+'</span>/mo';
+  } else {
+    if(yDiv){yDiv.style.background='var(--red)';yDiv.style.color='#fff';yDiv.style.borderColor='var(--redDark)';}
+    if(mDiv){mDiv.style.background='var(--cream)';mDiv.style.color='var(--text)';mDiv.style.borderColor='#E8D5C0';}
+    if(btn)btn.innerHTML='💳 Subscribe Yearly &mdash; <span class="price-yearly">'+getPriceYearly()+'</span>/yr';
+  }
+}
+function startAcctCheckout(){
+  if(!currentUser){return;}
+  showToast('Redirecting to secure checkout...');
+  const L=getLocale();
+  const link=selectedAcctPlan==='yearly'?(L.stripeLinkYearly||STRIPE_PRO_LINK):(L.stripeLink||STRIPE_PRO_LINK);
+  setTimeout(()=>{window.location.href=link;},400);
+}
 function getPriceYearly(){return currentLocale==='ie'?'€32':'$35';}
 function getSaveAmount(){return currentLocale==='ie'?'save ~€28':'save ~$25';}
 
@@ -3972,15 +4025,87 @@ function renderAccountScreen(){
   // Guest view — show signup prompt only
   if(!currentUser){
     const screen=document.getElementById('account');
+    const pm=getPriceMonthly();
+    const py=getPriceYearly();
+    const ps=getSaveAmount();
     if(screen){
-      screen.innerHTML=`
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
-          <div style="font-size:64px;margin-bottom:16px">🌱</div>
-          <h2 style="font-size:26px;font-weight:900;color:var(--text);margin-bottom:10px">Create Your Free Account</h2>
-          <p style="font-size:15px;font-weight:700;color:var(--muted);margin-bottom:8px;max-width:340px;line-height:1.5">Sign up free and get a <strong>7-day full trial</strong> — no credit card needed. After your trial, upgrade to Pro for <span class="price-display">$4.99</span>/month.</p>
-          <button onclick="showAuthFromGuest('signup')" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:15px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 5px 0 var(--redDark);margin-bottom:12px;width:100%;max-width:340px">🌱 Sign Up Free</button>
-          <button onclick="showAuthFromGuest('login')" style="background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:16px;padding:12px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #E8D5C0;width:100%;max-width:340px">Already have an account? Log In</button>
-        </div>`;
+      screen.innerHTML=
+        '<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center">'+
+        '<div style="font-size:56px;margin-bottom:12px">🌱</div>'+
+        '<h2 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:8px">Create Your Free Account</h2>'+
+        '<p style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:20px;max-width:360px;line-height:1.5">Sign up free and get a <strong>7-day full trial</strong> with full access — no credit card needed.</p>'+
+
+        '<div style="width:100%;max-width:380px;background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:20px">'+
+          '<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:14px;text-align:center">🌟 Pro Plan Pricing</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+            '<div style="border:3px solid var(--blue);border-radius:14px;padding:12px;text-align:center;background:var(--blueLight)">'+
+              '<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--blueDark);margin-bottom:4px">Monthly</div>'+
+              '<div style="font-size:26px;font-weight:900;color:var(--text)">'+pm+'</div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--muted);margin-top:2px">per month</div>'+
+            '</div>'+
+            '<div style="border:3px solid var(--green);border-radius:14px;padding:12px;text-align:center;background:var(--greenLight);position:relative">'+
+              '<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;border:2px solid var(--greenDark);border-radius:10px;padding:2px 8px;font-size:9px;font-weight:900;white-space:nowrap">🌟 BEST VALUE</div>'+
+              '<div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--greenDark);margin-bottom:4px">Yearly</div>'+
+              '<div style="font-size:26px;font-weight:900;color:var(--text)">'+py+'</div>'+
+              '<div style="font-size:11px;font-weight:700;color:var(--greenDark);margin-top:2px">'+ps+'</div>'+
+            '</div>'+
+          '</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;font-weight:700;color:var(--greenDark)">'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ All 12 activities</div>'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ All 6 breathing</div>'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Mood Check-In</div>'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Sensory Needs</div>'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Teacher Notes</div>'+
+            '<div style="background:var(--greenLight);border-radius:8px;padding:6px 8px">✅ Weekly Reports</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div id="guest-acct-btns"></div>'+
+        '</div>';
+      // Add buttons via DOM to avoid quote issues
+      const btnsDiv=screen.querySelector('#guest-acct-btns');
+      if(btnsDiv){
+        // Free trial signup
+        const signupBtn=document.createElement('button');
+        signupBtn.textContent='🌱 Sign Up Free — 7 Day Trial';
+        signupBtn.style.cssText='background:var(--green);color:#fff;border:4px solid var(--greenDark);border-radius:16px;padding:14px 28px;font-family:Baloo 2,cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 5px 0 var(--greenDark);margin-bottom:10px;width:100%;max-width:380px;display:block';
+        signupBtn.onclick=function(){showAuthFromGuest('signup');};
+
+        // Divider
+        const divider=document.createElement('div');
+        divider.style.cssText='display:flex;align-items:center;gap:10px;width:100%;max-width:380px;margin-bottom:10px';
+        divider.innerHTML='<div style="flex:1;height:2px;background:#E8D5C0"></div><span style="font-size:11px;font-weight:900;color:var(--muted)">OR</span><div style="flex:1;height:2px;background:#E8D5C0"></div>';
+
+        // Go Pro right away — monthly
+        const proMonthBtn=document.createElement('button');
+        proMonthBtn.innerHTML='💳 Subscribe Monthly — '+getPriceMonthly()+'/mo';
+        proMonthBtn.style.cssText='background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:16px;padding:14px 28px;font-family:Baloo 2,cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 5px 0 var(--redDark);margin-bottom:8px;width:100%;max-width:380px;display:block';
+        proMonthBtn.onclick=function(){
+          const L=getLocale();
+          window.location.href=L.stripeLink||STRIPE_PRO_LINK;
+        };
+
+        // Go Pro right away — yearly
+        const proYearBtn=document.createElement('button');
+        proYearBtn.innerHTML='💳 Subscribe Yearly — '+getPriceYearly()+'/yr <span style="background:rgba(255,255,255,.25);border-radius:8px;padding:1px 7px;font-size:11px;margin-left:4px">🌟 Best Value</span>';
+        proYearBtn.style.cssText='background:var(--blue);color:#fff;border:4px solid var(--blueDark);border-radius:16px;padding:14px 28px;font-family:Baloo 2,cursive;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 5px 0 var(--blueDark);margin-bottom:10px;width:100%;max-width:380px;display:block';
+        proYearBtn.onclick=function(){
+          const L=getLocale();
+          window.location.href=L.stripeLinkYearly||STRIPE_PRO_LINK;
+        };
+
+        // Log in
+        const loginBtn=document.createElement('button');
+        loginBtn.textContent='Already have an account? Log In';
+        loginBtn.style.cssText='background:var(--cream);color:var(--text);border:3px solid #E8D5C0;border-radius:16px;padding:12px 28px;font-family:Baloo 2,cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #E8D5C0;width:100%;max-width:380px;display:block';
+        loginBtn.onclick=function(){showAuthFromGuest('login');};
+
+        btnsDiv.appendChild(signupBtn);
+        btnsDiv.appendChild(divider);
+        btnsDiv.appendChild(proMonthBtn);
+        btnsDiv.appendChild(proYearBtn);
+        btnsDiv.appendChild(loginBtn);
+      }
     }
     return;
   }
@@ -4002,8 +4127,8 @@ function renderAccountScreen(){
       const daysLeft=Math.max(0,Math.ceil((cancelDate-new Date())/(1000*60*60*24)));
       const dateStr=cancelDate.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
       if(planName)planName.innerHTML='⚠️ <span style="color:var(--yellowDark)">Pro Plan — Canceled</span>';
-      if(planDesc)planDesc.innerHTML='Your Pro access ends on <strong>'+dateStr+'</strong> ('+daysLeft+' day'+(daysLeft!==1?'s':'')+' remaining). After that you will switch to the free plan.';
-      if(upgradeRow)upgradeRow.style.display='none';
+      if(planDesc)planDesc.innerHTML='Your Pro access ended. Resubscribe below to restore access.';
+      if(upgradeRow)upgradeRow.style.display='block';
       if(cancelRow)cancelRow.style.display='none';
     } else {
       if(planName)planName.innerHTML='⭐ <span style="color:var(--greenDark)">Pro Plan — Active</span>';
