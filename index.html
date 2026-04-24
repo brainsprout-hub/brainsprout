@@ -3150,23 +3150,40 @@ function convertGrade(grade){
 function setLocale(loc){
   currentLocale=loc;
   localStorage.setItem('bs_locale',loc);
+
   // Update toggle buttons
   document.getElementById('locale-us').classList.toggle('active',loc==='us');
   document.getElementById('locale-ie').classList.toggle('active',loc==='ie');
+
   // Update date display
   const dateEl=document.getElementById('dash-today-date');
   if(dateEl)dateEl.textContent=getLocale().dateFormat(new Date());
-  // Update grade options in add student modal
+
+  // Update all prices everywhere
+  document.querySelectorAll('.price-monthly').forEach(function(el){el.textContent=getPriceMonthly();});
+  document.querySelectorAll('.price-yearly').forEach(function(el){el.textContent=getPriceYearly();});
+  document.querySelectorAll('.price-save').forEach(function(el){el.textContent=getSaveAmount();});
+  document.querySelectorAll('.price-display').forEach(function(el){el.textContent=getPriceMonthly();});
+
+  // Apply full locale UI
   applyLocaleToUI();
-  // Reset morning question for new locale
+
+  // Re-render morning question with new locale's questions
   initMorningQuestion();
-  // Re-render activities and students with new locale
-  if(document.getElementById('activities')&&document.getElementById('activities').classList.contains('active')){
-    renderActivities();
-  }
-  if(document.getElementById('rewards')&&document.getElementById('rewards').classList.contains('active')){
-    renderStudents();
-  }
+
+  // Re-render whatever screen is currently active
+  var screens=['dashboard','rewards','timer','schedule','activities','breathing','noise','tools','account','howto','help','privacy'];
+  screens.forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el||!el.classList.contains('active'))return;
+    if(id==='activities')renderActivities();
+    else if(id==='breathing')renderBreathing();
+    else if(id==='rewards')renderStudents();
+    else if(id==='schedule'){renderSchedule();initDaySchedules();}
+    else if(id==='dashboard'){renderDashFlow();initBrainBreak();}
+    else if(id==='account')renderAccountScreen();
+  });
+
   showToast(loc==='ie'?'🇮🇪 Switched to Irish/UK version':'🇺🇸 Switched to US version');
 }
 
