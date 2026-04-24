@@ -1130,6 +1130,13 @@ body.fs-mode #fs-exit-btn{display:block}
         <div id="account-plan-desc" style="font-size:13px;font-weight:700;color:var(--muted)"></div>
       </div>
       <div id="account-upgrade-row" style="display:none;margin-bottom:12px">
+        <!-- Founding Member -->
+        <div class="founder-banner" style="margin-bottom:14px">
+          <div class="founder-badge">🎉 First 50 Subscribers Only</div>
+          <div style="font-size:16px;font-weight:900;color:#1A4A2A;margin:5px 0;position:relative;z-index:1">Yearly Plan — <span style="color:#1A6AAA;font-size:20px">$25/yr</span> <s style="font-size:13px;color:#999;font-weight:700">$35</s></div>
+          <div><button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim Founding Member Price</button></div>
+          <div class="founder-spots">50 spots only · lock in forever!</div>
+        </div>
         <!-- Inline pricing card -->
         <div style="background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:12px">
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-align:center">🌟 Upgrade to BrainSprout Pro</div>
@@ -4105,6 +4112,12 @@ function renderAccountScreen(){
         '<h2 style="font-size:24px;font-weight:900;color:var(--text);margin-bottom:8px">Create Your Free Account</h2>'+
         '<p style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:20px;max-width:360px;line-height:1.5">Sign up free and get a <strong>7-day full trial</strong> with full access — no credit card needed.</p>'+
 
+        '<div class="founder-banner" style="width:100%;max-width:380px;margin-bottom:14px">'+
+          '<div class="founder-badge">🎉 First 50 Subscribers Only</div>'+
+          '<div style="font-size:16px;font-weight:900;color:#1A4A2A;margin:5px 0;position:relative;z-index:1">Yearly Plan — <span style=\"color:#1A6AAA;font-size:20px\">$25/yr</span> <s style=\"font-size:13px;color:#999;font-weight:700\">$35</s></div>'+
+          '<div id="guest-founder-btn-wrap"></div>'+
+          '<div class="founder-spots">50 spots only · lock in forever!</div>'+
+        '</div>'+
         '<div style="width:100%;max-width:380px;background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:20px">'+
           '<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:14px;text-align:center">🌟 Pro Plan Pricing</div>'+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
@@ -4133,6 +4146,15 @@ function renderAccountScreen(){
         '<div id="guest-acct-btns"></div>'+
         '</div>';
       // Add buttons via DOM to avoid quote issues
+      // Add founder button via DOM
+      const founderWrap=screen.querySelector('#guest-founder-btn-wrap');
+      if(founderWrap){
+        const fb=document.createElement('button');
+        fb.className='founder-btn';
+        fb.textContent='🌟 Claim Founding Member Price';
+        fb.onclick=function(){startFounderCheckout();};
+        founderWrap.appendChild(fb);
+      }
       const btnsDiv=screen.querySelector('#guest-acct-btns');
       if(btnsDiv){
         // Free trial signup
