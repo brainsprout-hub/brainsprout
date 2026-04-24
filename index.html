@@ -1737,7 +1737,7 @@ async function loadProfile(){
   if(noteRows&&noteRows.length>0){
     notes.length=0;
     noteRows.forEach(r=>notes.push({id:r.id,text:r.text,studentId:r.student_id||null,
-      time:new Date(r.created_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      time:fmtLocalTime(r.created_at),
       created_at:r.created_at}));
   }
 
@@ -2638,6 +2638,36 @@ document.addEventListener('fullscreenchange',function(){
   }
 });
 
+// ── TIMESTAMP HELPER ──
+// Safely converts any timestamp to local time display
+function fmtLocalTime(ts){
+  if(!ts)return '';
+  // Supabase returns ISO strings - ensure they're treated as UTC
+  var d=new Date(ts);
+  if(isNaN(d.getTime()))return '';
+  return d.toLocaleString([],{
+    month:'short',
+    day:'numeric',
+    hour:'2-digit',
+    minute:'2-digit',
+    hour12:true
+  });
+}
+
+function fmtLocalDateTime(ts){
+  if(!ts)return '';
+  var d=new Date(ts);
+  if(isNaN(d.getTime()))return '';
+  return d.toLocaleString([],{
+    weekday:'short',
+    month:'short',
+    day:'numeric',
+    hour:'2-digit',
+    minute:'2-digit',
+    hour12:true
+  });
+}
+
 function toggleSound(){soundOn=!soundOn;const tog=document.getElementById('sound-tog');tog.classList.toggle('on',soundOn);document.getElementById('sound-label').textContent=soundOn?'Sound On':'Sound Off';}
 
 function playTimerDoneSound(){
@@ -3198,7 +3228,7 @@ async function saveNote(){
   if(!text){showToast('Write a note first!');return;}
   const sel=document.getElementById('notes-student-sel');
   const studentId=sel&&sel.value?parseInt(sel.value):null;
-  const now=new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const now=fmtLocalTime(new Date().toISOString());
   if(currentUser){
     const row={teacher_id:currentUser.id,text};
     if(studentId)row.student_id=studentId;
@@ -3340,7 +3370,7 @@ function openProfile(studentId){
   if(mEl){
     mEl.innerHTML=sMoods.length?sMoods.map(m=>`
       <div class="profile-log-item">
-        <div class="profile-log-time">${new Date(m.loggedAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="profile-log-time">${fmtLocalTime(m.loggedAt)}</div>
         <div class="profile-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div>
       </div>`).join(''):'<div class="profile-empty">No mood check-ins recorded yet.</div>';
   }
@@ -3351,7 +3381,7 @@ function openProfile(studentId){
   if(sEl){
     sEl.innerHTML=sSens.length?sSens.map(l=>`
       <div class="profile-log-item">
-        <div class="profile-log-time">${new Date(l.loggedAt).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="profile-log-time">${fmtLocalTime(l.loggedAt)}</div>
         <div class="profile-log-val">🫁 ${l.need}</div>
       </div>`).join(''):'<div class="profile-empty">No sensory needs logged yet.</div>';
   }
@@ -3397,7 +3427,7 @@ function printReport(){
 
   const weekLabel=document.getElementById('report-week-label')?.textContent||'';
   const cutoff=new Date(Date.now()-7*24*60*60*1000);
-  const fmtDT=d=>new Date(d).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const fmtDT=fmtLocalDateTime;
   const printDate=new Date().toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
 
   const moodRows=moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=cutoff)
