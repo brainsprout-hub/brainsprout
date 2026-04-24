@@ -2887,6 +2887,7 @@ const LOCALE_STRINGS = {
     price: '4.99',
     priceLabel: '$4.99',
     stripeLink: 'https://buy.stripe.com/14AbJ14bk3DP2hn2zSenS03',
+    stripeLinkYearly: 'https://buy.stripe.com/7sY28r23c2zL6xDdewenS05',
     gradeLabel: 'Grade',
     grades: ['K','1','2','3','4','5'],
     gradeOptions: ['K','1st','2nd','3rd','4th','5th'],
@@ -2905,6 +2906,7 @@ const LOCALE_STRINGS = {
     price: '4.99',
     priceLabel: '€4.99',
     stripeLink: 'https://buy.stripe.com/5kQ5kDazIdepg8d4I0enS04',
+    stripeLinkYearly: 'https://buy.stripe.com/3cI7sL8rAdep5tz6Q8enS06',
     gradeLabel: 'Class',
     grades: ['Jnr Inf','Snr Inf','1st','2nd','3rd','4th','5th','6th'],
     gradeOptions: ['Junior Infants','Senior Infants','1st Class','2nd Class','3rd Class','4th Class','5th Class','6th Class'],
@@ -3682,6 +3684,18 @@ function openPaywall(){
   const pl=L.priceLabel||L.currency+L.price;
   if(pd)pd.textContent=pl;
   if(ps)ps.textContent=pl+'/month';
+  // Reset to monthly and update prices
+  selectedPlan='monthly';
+  document.querySelectorAll('.price-monthly').forEach(function(el){el.textContent=getPriceMonthly();});
+  document.querySelectorAll('.price-yearly').forEach(function(el){el.textContent=getPriceYearly();});
+  document.querySelectorAll('.price-save').forEach(function(el){el.textContent=getSaveAmount();});
+  // Reset plan selector UI
+  const mDiv=document.getElementById('plan-monthly');
+  const yDiv=document.getElementById('plan-yearly');
+  const btn=document.getElementById('checkout-btn');
+  if(mDiv){mDiv.style.background='var(--red)';mDiv.style.color='#fff';mDiv.style.borderColor='var(--redDark)';}
+  if(yDiv){yDiv.style.background='var(--cream)';yDiv.style.color='var(--text)';yDiv.style.borderColor='#E8D5C0';}
+  if(btn)btn.innerHTML='💳 Subscribe Monthly &mdash; '+getPriceMonthly()+'/mo';
   const el=document.getElementById('paywall-overlay');
   if(el)el.style.display='flex';
 }
@@ -4261,8 +4275,22 @@ init();
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Student Profiles</div>
         <div style="background:var(--greenLight);border:2px solid var(--green);border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:var(--greenDark)">✅ Timer &amp; all tools</div>
       </div>
-      <button onclick="startCheckout()" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s">💳 Subscribe Now — <span class="price-display">$4.99</span>/mo</button>
-      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:10px"><span id="paywall-price-sub">$4.99/month</span> · Cancel anytime · 🔒 Secured by Stripe</div>
+      <!-- Plan selector -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px" id="plan-selector">
+        <div id="plan-monthly" onclick="selectPlan('monthly')" style="border:3px solid var(--red);border-radius:16px;padding:14px;text-align:center;cursor:pointer;background:var(--red);color:#fff;transition:all .2s">
+          <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;opacity:.85;margin-bottom:4px">Monthly</div>
+          <div style="font-size:22px;font-weight:900"><span class="price-monthly">$4.99</span></div>
+          <div style="font-size:11px;font-weight:700;opacity:.8;margin-top:2px">per month</div>
+        </div>
+        <div id="plan-yearly" onclick="selectPlan('yearly')" style="border:3px solid #E8D5C0;border-radius:16px;padding:14px;text-align:center;cursor:pointer;background:var(--cream);color:var(--text);transition:all .2s;position:relative">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;border:2px solid var(--greenDark);border-radius:10px;padding:2px 10px;font-size:10px;font-weight:900;white-space:nowrap">🌟 BEST VALUE</div>
+          <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;opacity:.7;margin-bottom:4px">Yearly</div>
+          <div style="font-size:22px;font-weight:900"><span class="price-yearly">$35</span></div>
+          <div style="font-size:11px;font-weight:700;opacity:.7;margin-top:2px">per year · <span class="price-save" style="color:var(--greenDark)">save ~$25</span></div>
+        </div>
+      </div>
+      <button onclick="startCheckout()" id="checkout-btn" style="background:var(--red);color:#fff;border:4px solid var(--redDark);border-radius:18px;padding:16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:18px;cursor:pointer;width:100%;box-shadow:0 5px 0 var(--redDark);transition:all .2s">💳 Subscribe Monthly — <span class="price-monthly">$4.99</span>/mo</button>
+      <div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:10px">Cancel anytime · 🔒 Secured by Stripe</div>
       <button onclick="closePaywall();showScreen('help',document.querySelectorAll('.nav-btn')[document.querySelectorAll('.nav-btn').length-1])" style="display:block;width:100%;background:none;border:none;font-family:'Baloo 2',cursive;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;margin-top:8px;text-decoration:underline;text-align:center">Having issues? Send us a message 💬</button>
     </div>
   </div>
