@@ -4096,46 +4096,35 @@ async function forceUnlockCheck(){
 }
 
 // ── STUDENT PROFILE ──
+let currentProfileId=null;
 function openProfile(studentId){
   const s=students.find(x=>x.id===studentId);
   if(!s)return;
+  currentProfileId=studentId;
   document.getElementById('profile-avatar').textContent='';
   document.getElementById('profile-avatar').style.background=s.color;
   document.getElementById('profile-name').textContent=s.name;
   document.getElementById('profile-grade').textContent=(currentLocale==='ie'?s.grade:('Grade '+s.grade));
   document.getElementById('profile-stars-big').textContent='⭐ '+s.stars+' stars earned';
 
-  // Moods for this student
-  const sMoods=moodLogs.filter(m=>m.studentId===studentId);
-  const mEl=document.getElementById('profile-moods');
-  if(mEl){
-    mEl.innerHTML=sMoods.length?sMoods.map(m=>`
-      <div class="profile-log-item">
-        <div class="profile-log-time">${fmtLocalTime(m.loggedAt)}</div>
-        <div class="profile-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div>
-      </div>`).join(''):'<div class="profile-empty">No mood check-ins recorded yet.</div>';
+  // Stars this week
+  const{start:wkStart,end:wkEnd}=getWeekBounds(0);
+  const inThisWeek=function(d){const dt=new Date(d);return dt>=wkStart&&dt<=wkEnd;};
+  const swEl=document.getElementById('profile-stars-week');
+  if(swEl){
+    swEl.innerHTML='<div class="profile-log-item" style="font-size:15px;font-weight:900;color:var(--text)">'+
+      s.stars+' total stars</div>';
   }
 
-  // Sensory for this student
-  const sSens=sensoryLogs.filter(l=>l.studentId===studentId&&l.active);
-  const sEl=document.getElementById('profile-sensory');
-  if(sEl){
-    sEl.innerHTML=sSens.length?sSens.map(l=>`
-      <div class="profile-log-item">
-        <div class="profile-log-time">${fmtLocalTime(l.loggedAt)}</div>
-        <div class="profile-log-val">🫁 ${l.need}</div>
-      </div>`).join(''):'<div class="profile-empty">No sensory needs logged yet.</div>';
-  }
-
-  // Notes for this student
-  const sNotes=notes.filter(n=>n.studentId===studentId);
+  // Notes this week only
+  const sNotes=notes.filter(n=>n.studentId===studentId&&n.created_at&&inThisWeek(n.created_at));
   const nEl=document.getElementById('profile-notes');
   if(nEl){
     nEl.innerHTML=sNotes.length?sNotes.map(n=>`
       <div class="profile-log-item">
         <div class="profile-log-time">${n.time}</div>
         <div class="profile-log-val">${n.text}</div>
-      </div>`).join(''):'<div class="profile-empty">No notes for this student yet.</div>';
+      </div>`).join(''):'<div class="profile-empty">No notes this week. View the Full Weekly Report for all history.</div>';
   }
 
   document.getElementById('profile-overlay').classList.remove('hidden');
@@ -4672,21 +4661,21 @@ init();
         <div class="profile-name" id="profile-name"></div>
         <div class="profile-grade" id="profile-grade"></div>
         <div class="profile-stars-big" id="profile-stars-big"></div>
+        <button id="clear-stars-btn" onclick="clearStudentStars()" style="background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.5);border-radius:12px;padding:5px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;margin-top:8px;transition:all .2s">🗑 Clear Stars</button>
       </div>
       <button class="profile-close" onclick="closeProfile()">✕</button>
     </div>
     <div class="profile-body">
       <div class="profile-section">
-        <div class="profile-section-title">😊 Mood Check-In History</div>
-        <div id="profile-moods"></div>
+        <div class="profile-section-title">⭐ Stars This Week</div>
+        <div id="profile-stars-week"></div>
       </div>
       <div class="profile-section">
-        <div class="profile-section-title">🫁 Sensory Needs History</div>
-        <div id="profile-sensory"></div>
-      </div>
-      <div class="profile-section">
-        <div class="profile-section-title">📝 Teacher Notes</div>
+        <div class="profile-section-title">📝 Notes This Week</div>
         <div id="profile-notes"></div>
+      </div>
+      <div style="text-align:center;padding:10px 0 4px">
+        <button onclick="closeProfile();openReport(currentProfileId)" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:14px;padding:9px 20px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark)">📊 View Full Weekly Report</button>
       </div>
     </div>
   </div>
