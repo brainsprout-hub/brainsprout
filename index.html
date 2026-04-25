@@ -631,6 +631,19 @@ body.fs-mode #fs-exit-btn{display:block}
 .founder-btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #1A6AAA}
 .founder-spots{font-size:12px;font-weight:700;color:#2A6A3A;margin-top:6px;position:relative;z-index:1}
 
+
+/* ── NOTES WEEK NAV ── */
+.notes-week-nav{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border:3px solid #E8D5C0;border-radius:14px;padding:8px 14px;margin-bottom:12px}
+.notes-week-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:2px 8px;border-radius:8px;font-weight:900;color:var(--text);transition:all .2s}
+.notes-week-btn:hover{background:#E8D5C0}
+.notes-week-label{font-size:13px;font-weight:900;color:var(--text)}
+.notes-filter-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.notes-filter-btn{background:var(--cream);border:2px solid #E8D5C0;border-radius:12px;padding:5px 12px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;color:var(--muted);transition:all .2s}
+.notes-filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blueDark)}
+.note-item{background:var(--cream);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px;font-weight:700;border-left:5px solid var(--blue);position:relative}
+.note-student-tag{display:inline-block;background:var(--blueLight);color:var(--blueDark);border:2px solid var(--blue);border-radius:8px;padding:1px 8px;font-size:10px;font-weight:900;margin-bottom:4px}
+.notes-empty{text-align:center;padding:20px;color:var(--muted);font-weight:700;font-size:13px}
+
 @media(max-width:520px){
   .logo-text{font-size:20px}.logo-sprout{font-size:26px}
   .timer-big{font-size:40px}.timer-ring{width:170px;height:170px}
@@ -1105,7 +1118,18 @@ body.fs-mode #fs-exit-btn{display:block}
         </div>
         <textarea class="note-area" id="note-input" rows="3" placeholder="Add a quick observation about a student's behavior, mood, or needs today..."></textarea>
         <button class="save-note" onclick="saveNote()">💾 Save Note</button>
-        <div class="notes-log" id="notes-log"><div style="font-size:13px;color:var(--muted);padding:8px;text-align:center;font-weight:700">Your notes will appear here</div></div>
+        <!-- Week navigation -->
+        <div class="notes-week-nav" id="notes-week-nav">
+          <button class="notes-week-btn" onclick="changeNotesWeek(-1)" title="Previous week">‹</button>
+          <div class="notes-week-label" id="notes-week-label">This Week</div>
+          <button class="notes-week-btn" id="notes-week-forward" onclick="changeNotesWeek(1)" title="Next week" style="opacity:.4;cursor:not-allowed">›</button>
+        </div>
+        <!-- Filter by student -->
+        <div class="notes-filter-row" id="notes-filter-row">
+          <button class="notes-filter-btn active" onclick="filterNotes(null,this)">📋 All</button>
+        </div>
+        <!-- Notes list -->
+        <div class="notes-log" id="notes-log" style="max-height:280px;overflow-y:auto"><div class="notes-empty">Your notes will appear here</div></div>
         <div class="feat-lock-overlay" id="notes-lock-overlay" style="position:absolute;inset:0;background:rgba(255,248,240,0.93);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:16px;text-align:center;display:flex">
           <div style="font-size:36px;margin-bottom:8px">📝</div>
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px">Pro Feature</div>
@@ -3664,24 +3688,104 @@ function toggleSensory(el){el.classList.toggle('sen-active');el.style.opacity=el
 const notes=[];
 let editingNoteId=null;
 
+// ── NOTES WEEK NAVIGATION ──
+let notesWeekOffset=0; // 0=this week, -1=last week, etc.
+let notesStudentFilter=null; // null = all
+
+function getWeekBounds(offset){
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun
+  const startOfWeek=new Date(now);
+  startOfWeek.setDate(now.getDate()-(day===0?6:day-1)+offset*7); // Monday
+  startOfWeek.setHours(0,0,0,0);
+  const endOfWeek=new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate()+6);
+  endOfWeek.setHours(23,59,59,999);
+  return{start:startOfWeek,end:endOfWeek};
+}
+
+function getWeekLabel(offset){
+  if(offset===0)return 'This Week';
+  if(offset===-1)return 'Last Week';
+  const{start,end}=getWeekBounds(offset);
+  const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});
+  return fmt(start)+' – '+fmt(end);
+}
+
+function changeNotesWeek(dir){
+  notesWeekOffset+=dir;
+  if(notesWeekOffset>0)notesWeekOffset=0;
+  const fwdBtn=document.getElementById('notes-week-forward');
+  if(fwdBtn){fwdBtn.style.opacity=notesWeekOffset===0?'.4':'1';fwdBtn.style.cursor=notesWeekOffset===0?'not-allowed':'pointer';}
+  const label=document.getElementById('notes-week-label');
+  if(label)label.textContent=getWeekLabel(notesWeekOffset);
+  renderNotesLog();
+}
+
+function filterNotes(studentId,btn){
+  notesStudentFilter=studentId;
+  document.querySelectorAll('.notes-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderNotesLog();
+}
+
+function buildNotesFilters(){
+  const row=document.getElementById('notes-filter-row');
+  if(!row)return;
+  row.innerHTML='<button class="notes-filter-btn'+(notesStudentFilter===null?' active':'')+'" onclick="filterNotes(null,this)">📋 All</button>';
+  students.forEach(function(s){
+    const btn=document.createElement('button');
+    btn.className='notes-filter-btn'+(notesStudentFilter===s.id?' active':'');
+    btn.textContent=s.name;
+    btn.onclick=function(){filterNotes(s.id,btn);};
+    row.appendChild(btn);
+  });
+}
+
 function renderNotesLog(){
   const el=document.getElementById('notes-log');
   if(!el)return;
-  if(notes.length===0){
-    el.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px;text-align:center;font-weight:700">Your notes will appear here</div>';
+  buildNotesFilters();
+
+  const{start,end}=getWeekBounds(notesWeekOffset);
+  const label=document.getElementById('notes-week-label');
+  if(label)label.textContent=getWeekLabel(notesWeekOffset);
+
+  // Filter by week and student
+  let filtered=notes.filter(function(n){
+    const d=new Date(n.created_at);
+    if(d<start||d>end)return false;
+    if(notesStudentFilter!==null&&n.studentId!==notesStudentFilter)return false;
+    return true;
+  });
+
+  if(filtered.length===0){
+    el.innerHTML='<div class="notes-empty">No notes for '+(notesWeekOffset===0?'this week':getWeekLabel(notesWeekOffset))+'.'+(notesStudentFilter!==null?' Try "All" to see all students.':'')+'</div>';
     return;
   }
-  el.innerHTML=notes.map(n=>`
-    <div class="note-item" id="note-${n.id}">
-      <div class="note-item-header">
-        <div class="note-time">${n.time}</div>
-        <div class="note-actions">
-          <button class="note-action-btn note-edit-btn" onclick="openEditNote(${n.id})" title="Edit note">✏️</button>
-          <button class="note-action-btn note-del-btn" onclick="deleteNote(${n.id})" title="Delete note">🗑</button>
-        </div>
-      </div>
-      <div class="note-body">${n.text}</div>
-    </div>`).join('');
+
+  el.innerHTML='';
+  filtered.forEach(function(n){
+    const s=n.studentId?students.find(function(x){return x.id===n.studentId;}):null;
+    const div=document.createElement('div');
+    div.className='note-item';
+    div.id='note-'+n.id;
+    div.style.borderLeftColor=s?s.color:'var(--blue)';
+    if(s){const tag=document.createElement('div');tag.className='note-student-tag';tag.textContent='👤 '+s.name;div.appendChild(tag);}
+    const hdr=document.createElement('div');hdr.className='note-item-header';
+    const timeEl=document.createElement('div');timeEl.className='note-time';timeEl.textContent=n.time;
+    const acts=document.createElement('div');acts.className='note-actions';acts.style.opacity='1';
+    const editBtn=document.createElement('button');editBtn.className='note-action-btn note-edit-btn';editBtn.title='Edit';editBtn.textContent='✏️';
+    editBtn.onclick=(function(nid){return function(){openEditNote(nid);};})(n.id);
+    const delBtn=document.createElement('button');delBtn.className='note-action-btn note-del-btn';delBtn.title='Delete';delBtn.textContent='🗑';
+    delBtn.onclick=(function(nid){return function(){deleteNote(nid);};})(n.id);
+    acts.appendChild(editBtn);acts.appendChild(delBtn);
+    hdr.appendChild(timeEl);hdr.appendChild(acts);
+    div.appendChild(hdr);
+    const body=document.createElement('div');body.className='note-body';body.textContent=n.text;
+    div.appendChild(body);
+    el.appendChild(div);
+  });
 }
 
 async function saveNote(){
@@ -3710,7 +3814,7 @@ function renderNotesStudentDropdown(){
 }
 
 function openEditNote(id){
-  const n=notes.find(x=>x.id===id);if(!n)return;
+  const n=notes.find(x=>String(x.id)===String(id));if(!n)return;id=n.id;
   editingNoteId=id;
   document.getElementById('edit-note-input').value=n.text;
   document.getElementById('edit-note-modal').classList.remove('hidden');
@@ -3726,7 +3830,7 @@ async function saveEditNote(){
   const n=notes.find(x=>x.id===editingNoteId);
   if(!n){closeEditNote();return;}
   n.text=text;
-  if(currentUser&&typeof editingNoteId==='number'&&editingNoteId>1000000){
+  if(currentUser&&editingNoteId){
     await sb.from('teacher_notes').update({text}).eq('id',editingNoteId);
   }
   renderNotesLog();
@@ -3734,7 +3838,7 @@ async function saveEditNote(){
   showToast('✅ Note updated!');
 }
 async function deleteNote(id){
-  notes.splice(notes.findIndex(x=>x.id===id),1);
+  notes.splice(notes.findIndex(x=>String(x.id)===String(id)),1);
   renderNotesLog();
   if(currentUser){await sb.from('teacher_notes').delete().eq('id',id);}
   showToast('🗑 Note deleted.');
