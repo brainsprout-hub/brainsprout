@@ -908,6 +908,7 @@ body.fs-mode #fs-exit-btn{display:block}
     <div class="reward-toolbar">
       <button class="add-student-btn" id="add-student-btn" onclick="openAddStudent()">+ Add Student</button>
       <div class="class-total">🏆 Class Stars: <span id="total-stars">0</span></div>
+      <button onclick="resetAllStars()" style="background:var(--redLight);color:var(--redDark);border:3px solid var(--red);border-radius:16px;padding:10px 16px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 0 var(--red);transition:all .2s">🗑 Reset All Stars</button>
       <select class="filter-select" onchange="filterStudents(this.value)">
         <option value="all">All Students</option>
         <option value="top">Top Stars ⬆</option>
@@ -2716,6 +2717,21 @@ async function removeStar(id){
   await sb.from('students').update({stars:s.stars}).eq('id',id);
   showToast('⭐ Star removed from '+s.name+'. Total: '+s.stars);
 }
+async function resetAllStars(){
+  if(!canAccessPro()){openPaywall();return;}
+  if(students.length===0){showToast('No students to reset.');return;}
+  if(!confirm('Reset ALL stars to 0 for every student in your class? This is useful at the start of a new week.'))return;
+  // Update all students locally
+  students.forEach(function(s){s.stars=0;});
+  // Update all in database
+  await Promise.all(students.map(function(s){
+    return sb.from('students').update({stars:0}).eq('id',s.id);
+  }));
+  renderStudents();
+  updateDashStats();
+  showToast('⭐ All stars reset to 0 — fresh start!');
+}
+
 async function clearStarsCard(id){
   const s=students.find(x=>x.id===id);
   if(!s)return;
