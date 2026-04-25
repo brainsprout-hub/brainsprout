@@ -2600,6 +2600,7 @@ function renderStudents(filter='all'){
       <div class="star-btns">
         <button class="remove-star" onclick="event.stopPropagation();removeStar(${s.id})">−</button>
         <button class="add-star" onclick="event.stopPropagation();addStar(${s.id})">+ Star</button>
+        <button class="remove-star" style="background:var(--redLight);color:var(--redDark);border-color:var(--red);font-size:10px;padding:4px 8px" onclick="event.stopPropagation();clearStarsCard(${s.id})" title="Clear all stars">🗑 Clear</button>
       </div>
       <div class="color-dots">${dots}</div>
     </div>`;
