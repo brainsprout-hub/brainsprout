@@ -3722,6 +3722,12 @@ function changeNotesWeek(dir){
   renderNotesLog();
 }
 
+function filterNotesBySelect(sel){
+  const val=sel.value;
+  notesStudentFilter=val?parseInt(val):null;
+  renderNotesLog();
+}
+
 function filterNotes(studentId,btn){
   notesStudentFilter=studentId;
   document.querySelectorAll('.notes-filter-btn').forEach(b=>b.classList.remove('active'));
@@ -3730,16 +3736,19 @@ function filterNotes(studentId,btn){
 }
 
 function buildNotesFilters(){
-  const row=document.getElementById('notes-filter-row');
-  if(!row)return;
-  row.innerHTML='<button class="notes-filter-btn'+(notesStudentFilter===null?' active':'')+'" onclick="filterNotes(null,this)">📋 All</button>';
+  // Populate the student filter dropdown
+  const sel=document.getElementById('notes-filter-select');
+  if(!sel)return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">👥 All Students</option>';
   students.forEach(function(s){
-    const btn=document.createElement('button');
-    btn.className='notes-filter-btn'+(notesStudentFilter===s.id?' active':'');
-    btn.textContent=s.name;
-    btn.onclick=function(){filterNotes(s.id,btn);};
-    row.appendChild(btn);
+    const opt=document.createElement('option');
+    opt.value=s.id;
+    opt.textContent='👤 '+s.name;
+    if(notesStudentFilter===s.id)opt.selected=true;
+    sel.appendChild(opt);
   });
+  if(current)sel.value=current;
 }
 
 function renderNotesLog(){
