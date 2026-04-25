@@ -3722,10 +3722,85 @@ function changeNotesWeek(dir){
   renderNotesLog();
 }
 
+function onNotesStudentChange(){
+  // When student selector changes, update the notes preview label and re-render
+  const sel=document.getElementById('notes-student-sel');
+  const studentId=sel&&sel.value?parseInt(sel.value):null;
+  notesStudentFilter=studentId;
+  updateNotesPreviewLabel();
+  renderNotesLog();
+}
+
+function changeNotesWeekBySelect(sel){
+  notesWeekOffset=parseInt(sel.value)||0;
+  const fwdBtn=document.getElementById('notes-week-forward');
+  if(fwdBtn){fwdBtn.style.opacity=notesWeekOffset===0?'.4':'1';fwdBtn.style.cursor=notesWeekOffset===0?'not-allowed':'pointer';}
+  updateNotesPreviewLabel();
+  renderNotesLog();
+}
+
+function updateNotesPreviewLabel(){
+  const label=document.getElementById('notes-preview-label');
+  if(!label)return;
+  const sel=document.getElementById('notes-student-sel');
+  const studentId=sel&&sel.value?parseInt(sel.value):null;
+  const s=studentId?students.find(function(x){return x.id===studentId;}):null;
+  const weekStr=notesWeekOffset===0?'This Week':notesWeekOffset===-1?'Last Week':Math.abs(notesWeekOffset)+' Weeks Ago';
+  label.textContent='📖 '+(s?s.name+' Notes':' General Notes')+' — '+weekStr;
+}
+
+function openReportFromNotes(){
+  const sel=document.getElementById('notes-student-sel');
+  if(sel&&sel.value){
+    // Pre-select this student in the report
+    openReport(parseInt(sel.value));
+  } else {
+    openReport();
+  }
+}
+
 function filterNotesBySelect(sel){
   const val=sel.value;
   notesStudentFilter=val?parseInt(val):null;
   renderNotesLog();
+}
+
+function onNotesStudentChange(){
+  const sel=document.getElementById('notes-student-sel');
+  const val=sel?sel.value:'';
+  notesStudentFilter=val?parseInt(val):null;
+  updateNotesPreviewLabel();
+  renderNotesLog();
+}
+
+function onNotesWeekChange(sel){
+  notesWeekOffset=parseInt(sel.value)||0;
+  const fwd=document.getElementById('notes-week-forward');
+  if(fwd){fwd.style.opacity=notesWeekOffset===0?'.4':'1';}
+  updateNotesPreviewLabel();
+  renderNotesLog();
+}
+
+function updateNotesPreviewLabel(){
+  const label=document.getElementById('notes-preview-label');
+  if(!label)return;
+  const sel=document.getElementById('notes-student-sel');
+  const studentName=sel&&sel.value?sel.options[sel.selectedIndex].text.replace('👤 ',''):'General Notes';
+  const weekLabel=getWeekLabel(notesWeekOffset);
+  label.textContent='📖 '+studentName+' — '+weekLabel;
+}
+
+function openReportForSelected(){
+  // Set report to selected student if any
+  const sel=document.getElementById('notes-student-sel');
+  openReport();
+  if(sel&&sel.value){
+    setTimeout(function(){
+      const reportSel=document.getElementById('report-student-sel');
+      if(reportSel)reportSel.value=sel.value;
+      if(typeof renderReport==='function')renderReport();
+    },200);
+  }
 }
 
 function filterNotes(studentId,btn){
@@ -3736,26 +3811,27 @@ function filterNotes(studentId,btn){
 }
 
 function buildNotesFilters(){
-  // Populate the student filter dropdown
-  const sel=document.getElementById('notes-filter-select');
-  if(!sel)return;
-  const current=sel.value;
-  sel.innerHTML='<option value="">👥 All Students</option>';
-  students.forEach(function(s){
-    const opt=document.createElement('option');
-    opt.value=s.id;
-    opt.textContent='👤 '+s.name;
-    if(notesStudentFilter===s.id)opt.selected=true;
-    sel.appendChild(opt);
-  });
-  if(current)sel.value=current;
+  // Populate student dropdowns in notes section
+  const mainSel=document.getElementById('notes-student-sel');
+  if(mainSel){
+    const currentVal=mainSel.value;
+    mainSel.innerHTML='<option value="">📋 General Notes</option>';
+    students.forEach(function(s){
+      const opt=document.createElement('option');
+      opt.value=s.id;
+      opt.textContent='👤 '+s.name;
+      mainSel.appendChild(opt);
+    });
+    mainSel.value=currentVal;
+  }
+  updateNotesPreviewLabel();
 }
 
 function renderNotesLog(){
   const el=document.getElementById('notes-log');
   if(!el)return;
   buildNotesFilters();
-
+  updateNotesPreviewLabel();
   const{start,end}=getWeekBounds(notesWeekOffset);
   const label=document.getElementById('notes-week-label');
   if(label)label.textContent=getWeekLabel(notesWeekOffset);
@@ -3818,8 +3894,11 @@ async function saveNote(){
 function renderNotesStudentDropdown(){
   const sel=document.getElementById('notes-student-sel');
   if(!sel)return;
-  sel.innerHTML='<option value="">📋 General note (no student)</option>'
-    +students.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">📋 General Notes</option>'
+    +students.map(s=>'<option value="'+s.id+'">👤 '+s.name+'</option>').join('');
+  if(cur)sel.value=cur;
+  updateNotesPreviewLabel();
 }
 
 function openEditNote(id){
@@ -4060,7 +4139,7 @@ function openProfile(studentId){
 function closeProfile(){document.getElementById('profile-overlay').classList.add('hidden');}
 
 // ── WEEKLY REPORT ──
-function openReport(){
+function openReport(preSelectStudentId){
   const sel=document.getElementById('report-student-sel');
   if(sel){
     sel.innerHTML='<option value="">— Select a student —</option>'
@@ -4075,7 +4154,26 @@ function openReport(){
   document.getElementById('report-overlay').classList.remove('hidden');
   document.getElementById('report-body').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above to view their weekly report.</div>';
 }
-function closeReport(){document.getElementById('report-overlay').classList.add('hidden');}
+function closeReport(){
+  document.getElementById('report-overlay').classList.add('hidden');
+  reportWeekOffset=0;
+}
+
+let reportWeekOffset=0;
+function changeReportWeek(dir){
+  reportWeekOffset+=dir;
+  if(reportWeekOffset>0)reportWeekOffset=0;
+  const fwd=document.getElementById('report-week-forward');
+  if(fwd){fwd.style.opacity=reportWeekOffset===0?'.4':'1';fwd.style.cursor=reportWeekOffset===0?'not-allowed':'pointer';}
+  // Update week label
+  const{start,end}=getWeekBounds(reportWeekOffset);
+  const fmt=function(d){return d.toLocaleDateString([],{month:'short',day:'numeric'});};
+  const wl=document.getElementById('report-week-label');
+  if(wl)wl.textContent=reportWeekOffset===0?'This Week':fmt(start)+' – '+fmt(end);
+  // Re-render report
+  const sel=document.getElementById('report-student-sel');
+  renderReportForStudentWeek(sel?sel.value:'',reportWeekOffset);
+}
 
 function printReport(){
   const sel=document.getElementById('report-student-sel');
@@ -4084,17 +4182,19 @@ function printReport(){
   if(!s)return;
 
   const weekLabel=document.getElementById('report-week-label')?.textContent||'';
-  const cutoff=new Date(Date.now()-7*24*60*60*1000);
+  const{start:weekStart,end:weekEnd}=getWeekBounds(reportWeekOffset||0);
+  const cutoff=weekStart;
+  const cutoffEnd=weekEnd;
   const fmtDT=fmtLocalDateTime;
   const printDate=new Date().toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'});
 
-  const moodRows=moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=cutoff)
+  const moodRows=moodLogs.filter(m=>m.studentId===s.id&&new Date(m.loggedAt)>=cutoff&&new Date(m.loggedAt)<=cutoffEnd)
     .map(m=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap">'+fmtDT(m.loggedAt)+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">'+(MOOD_EMOJI[m.mood]||'')+' '+m.mood+'</td></tr>').join('');
 
-  const sensRows=sensoryLogs.filter(l=>l.studentId===s.id&&l.active&&new Date(l.loggedAt)>=cutoff)
+  const sensRows=sensoryLogs.filter(l=>l.studentId===s.id&&l.active&&new Date(l.loggedAt)>=cutoff&&new Date(l.loggedAt)<=cutoffEnd)
     .map(l=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap">'+fmtDT(l.loggedAt)+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">'+l.need+'</td></tr>').join('');
 
-  const noteRows=notes.filter(n=>n.studentId===s.id&&n.created_at&&new Date(n.created_at)>=cutoff)
+  const noteRows=notes.filter(n=>n.studentId===s.id&&n.created_at&&new Date(n.created_at)>=cutoff&&new Date(n.created_at)<=cutoffEnd)
     .map(n=>'<tr><td style="color:#666;font-size:12px;padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap;vertical-align:top">'+n.time+'</td><td style="padding:7px 10px;border-bottom:1px solid #eee">'+n.text+'</td></tr>').join('');
 
   const emptyRow='<tr><td colspan="2" style="padding:10px;color:#aaa;font-style:italic;font-size:13px">None recorded this week.</td></tr>';
@@ -4160,6 +4260,9 @@ function buildPrintSection(title,rows,emptyMsg){
 }
 
 function renderReportForStudent(idStr){
+  renderReportForStudentWeek(idStr,reportWeekOffset||0);
+}
+function renderReportForStudentWeek(idStr,weekOffset){
   if(!idStr){document.getElementById('report-body').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Select a student above.</div>';return;}
   const studentId=parseInt(idStr);
   const s=students.find(x=>x.id===studentId);
@@ -4577,7 +4680,11 @@ init();
     <div class="report-header">
       <div>
         <h2>📊 Weekly Report</h2>
-        <p id="report-week-label">Week of —</p>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <button onclick="changeReportWeek(-1)" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);border-radius:10px;padding:5px 12px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;color:#fff">‹</button>
+          <p id="report-week-label" style="margin:0;flex:1;text-align:center">Week of —</p>
+          <button id="report-week-forward" onclick="changeReportWeek(1)" style="background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);border-radius:10px;padding:5px 12px;font-family:'Baloo 2',cursive;font-weight:900;font-size:16px;cursor:pointer;color:#fff;opacity:.4">›</button>
+        </div>
       </div>
       <button class="report-close" onclick="closeReport()">✕</button>
     </div>
