@@ -1110,27 +1110,38 @@ body.fs-mode #fs-exit-btn{display:block}
 <!-- TEACHER NOTES -->
       <div class="tool-card" id="notes-card" style="grid-column:1/-1;position:relative">
         <h3>📝 Teacher Notes</h3>
-        <div class="notes-student-row">
-          <select class="notes-student-sel" id="notes-student-sel">
-            <option value="">📋 General note (no student)</option>
+
+        <!-- ROW 1: Student picker + Weekly Report -->
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+          <select class="notes-student-sel" id="notes-student-sel" onchange="onNotesStudentChange()" style="flex:1;min-width:160px">
+            <option value="">📋 General Notes</option>
           </select>
-          <button onclick="openReport()" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:12px;padding:8px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark);white-space:nowrap">📊 Weekly Report</button>
+          <button onclick="openReportForSelected()" style="background:var(--blue);color:#fff;border:3px solid var(--blueDark);border-radius:12px;padding:9px 14px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;cursor:pointer;box-shadow:0 3px 0 var(--blueDark);white-space:nowrap">📊 Weekly Report</button>
         </div>
-        <textarea class="note-area" id="note-input" rows="3" placeholder="Add a quick observation about a student's behavior, mood, or needs today..."></textarea>
-        <button class="save-note" onclick="saveNote()">💾 Save Note</button>
-        <!-- Week navigation -->
-        <div class="notes-week-nav" id="notes-week-nav">
-          <button class="notes-week-btn" onclick="changeNotesWeek(-1)" title="Previous week">‹</button>
-          <div class="notes-week-label" id="notes-week-label">This Week</div>
-          <button class="notes-week-btn" id="notes-week-forward" onclick="changeNotesWeek(1)" title="Next week" style="opacity:.4;cursor:not-allowed">›</button>
+
+        <!-- ROW 2: Note textarea -->
+        <textarea class="note-area" id="note-input" rows="3" placeholder="Write a note for the selected student or as a general note..."></textarea>
+
+        <!-- ROW 3: Save + Week dropdown -->
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="save-note" onclick="saveNote()" style="margin:0;padding:9px 20px;border-radius:12px;flex-shrink:0">💾 Save</button>
+          <select id="notes-week-select" onchange="onNotesWeekChange(this)" style="flex:1;border:3px solid #E8D5C0;border-radius:12px;padding:8px 12px;font-family:'Baloo 2',cursive;font-size:13px;font-weight:800;background:var(--cream);color:var(--text);outline:none">
+            <option value="0">This Week</option>
+            <option value="-1">Last Week</option>
+            <option value="-2">2 Weeks Ago</option>
+            <option value="-3">3 Weeks Ago</option>
+            <option value="-4">4 Weeks Ago</option>
+          </select>
         </div>
-        <!-- Filter by student -->
-        <div class="notes-filter-row" id="notes-filter-row">
-          <button class="notes-filter-btn active" onclick="filterNotes(null,this)">📋 All</button>
-        </div>
+
+        <!-- Notes preview label -->
+        <div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px" id="notes-preview-label">📖 General Notes — This Week</div>
+        <div class="notes-filter-row" id="notes-filter-row" style="display:none"></div>
         <!-- Notes list -->
-        <div class="notes-log" id="notes-log" style="max-height:280px;overflow-y:auto"><div class="notes-empty">Your notes will appear here</div></div>
-        <div class="feat-lock-overlay" id="notes-lock-overlay" style="position:absolute;inset:0;background:rgba(255,248,240,0.93);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:16px;text-align:center;display:flex">
+        <div class="notes-log" id="notes-log" style="max-height:320px;overflow-y:auto"><div class="notes-empty">No notes yet for this week.</div></div>
+
+        <!-- Pro lock overlay -->
+        <div class="feat-lock-overlay" id="notes-lock-overlay" style="position:absolute;inset:0;background:rgba(255,248,240,0.93);border-radius:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:16px;text-align:center">
           <div style="font-size:36px;margin-bottom:8px">📝</div>
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px">Pro Feature</div>
           <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px">Free for 7 days, then requires the Pro plan (<span class="price-display">$4.99</span>/mo).</div>
