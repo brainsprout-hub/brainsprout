@@ -4279,9 +4279,9 @@ function renderReportForStudentWeek(idStr,weekOffset){
   const s=students.find(x=>x.id===studentId);
   if(!s)return;
 
-  // 7-day window
-  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
-  const inWeek=d=>new Date(d)>=cutoff;
+  // Use proper week bounds based on weekOffset
+  const{start:weekStart,end:weekEnd}=getWeekBounds(weekOffset||0);
+  const inWeek=function(d){const dt=new Date(d);return dt>=weekStart&&dt<=weekEnd;};
 
   const wMoods=moodLogs.filter(m=>m.studentId===studentId&&inWeek(m.loggedAt));
   const wSens=sensoryLogs.filter(l=>l.studentId===studentId&&l.active&&inWeek(l.loggedAt));
@@ -4289,9 +4289,11 @@ function renderReportForStudentWeek(idStr,weekOffset){
 
   const fmtDT=d=>new Date(d).toLocaleString([],{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 
-  const moodRows=wMoods.length?wMoods.map(m=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(m.loggedAt)}</div><div class="report-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div></div>`).join(''):'<div class="report-empty">No mood check-ins this week.</div>';
-  const sensRows=wSens.length?wSens.map(l=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(l.loggedAt)}</div><div class="report-log-val">🫁 ${l.need}</div></div>`).join(''):'<div class="report-empty">No sensory needs logged this week.</div>';
-  const noteRows=wNotes.length?wNotes.map(n=>`<div class="report-log-row"><div class="report-log-time">${n.time}</div><div class="report-log-val">${n.text}</div></div>`).join(''):'<div class="report-empty">No notes this week.</div>';
+  const weekLabel=document.getElementById('report-week-label')?.textContent||'this week';
+  const noInfo='<div class="report-empty" style="padding:10px;color:var(--muted);font-weight:700;font-style:italic;font-size:13px">No information recorded for '+weekLabel+'.</div>';
+  const moodRows=wMoods.length?wMoods.map(m=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(m.loggedAt)}</div><div class="report-log-val">${MOOD_EMOJI[m.mood]||''} ${m.mood}</div></div>`).join(''):noInfo;
+  const sensRows=wSens.length?wSens.map(l=>`<div class="report-log-row"><div class="report-log-time">${fmtDT(l.loggedAt)}</div><div class="report-log-val">🫁 ${l.need}</div></div>`).join(''):noInfo;
+  const noteRows=wNotes.length?wNotes.map(n=>`<div class="report-log-row"><div class="report-log-time">${n.time}</div><div class="report-log-val">${n.text}</div></div>`).join(''):noInfo;
 
   document.getElementById('report-body').innerHTML=`
     <div class="report-student-header">
