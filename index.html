@@ -2716,6 +2716,31 @@ async function removeStar(id){
   await sb.from('students').update({stars:s.stars}).eq('id',id);
   showToast('⭐ Star removed from '+s.name+'. Total: '+s.stars);
 }
+async function clearStarsCard(id){
+  const s=students.find(x=>x.id===id);
+  if(!s)return;
+  if(!confirm('Reset stars to 0 for '+s.name+'?'))return;
+  s.stars=0;
+  await sb.from('students').update({stars:0}).eq('id',id);
+  renderStudents();
+  updateDashStats();
+  showToast('⭐ Stars reset to 0 for '+s.name+'.');
+}
+async function clearStudentStars(){
+  if(!currentProfileId)return;
+  const s=students.find(x=>x.id===currentProfileId);
+  if(!s)return;
+  if(!confirm('Reset stars to 0 for '+s.name+'? Useful at the start of each week.'))return;
+  s.stars=0;
+  await sb.from('students').update({stars:0}).eq('id',currentProfileId);
+  const bigEl=document.getElementById('profile-stars-big');
+  if(bigEl)bigEl.textContent='⭐ 0 stars earned';
+  const swEl=document.getElementById('profile-stars-week');
+  if(swEl)swEl.innerHTML='<div class="profile-log-item" style="font-size:15px;font-weight:900;color:var(--text)">0 total stars</div>';
+  renderStudents();
+  updateDashStats();
+  showToast('⭐ Stars reset to 0 for '+s.name+'.');
+}
 function confirmDelete(id,name){
   if(!canAccessPro()){openPaywall();return;}
   pendingDeleteId=id;
