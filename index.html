@@ -4094,12 +4094,11 @@ function getPriceYearly(){return currentLocale==='ie'?'€32':'$35';}
 function getSaveAmount(){return currentLocale==='ie'?'save ~€28':'save ~$25';}
 
 function startCheckout(){
-  if(!currentUser){openPaywall();return;}
   closePaywall();
   showToast('Redirecting to secure checkout...');
   const L=getLocale();
   const link=selectedPlan==='yearly'?(L.stripeLinkYearly||STRIPE_PRO_LINK):(L.stripeLink||STRIPE_PRO_LINK);
-  setTimeout(()=>{window.location.href=link;},400);
+  setTimeout(function(){window.location.href=link;},400);
 }
 async function manualPlanRefresh(){
   if(!currentUser){showToast('Please log in first.');return;}
