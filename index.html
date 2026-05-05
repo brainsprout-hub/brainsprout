@@ -1167,25 +1167,11 @@ body.fs-mode #fs-exit-btn{display:block}
       </div>
       <div id="account-upgrade-row" style="display:none;margin-bottom:12px">
         <!-- Founding Member -->
-        <div class="founder-banner" style="margin-bottom:14px">
-          <div class="founder-badge">🎉 First 50 Subscribers Only</div>
-          <div style="font-size:16px;font-weight:900;color:#1A4A2A;margin:5px 0;position:relative;z-index:1">Yearly Plan — <span style="color:#1A6AAA;font-size:20px">$25/yr</span> <s style="font-size:13px;color:#999;font-weight:700">$35</s></div>
-          <div><button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim Founding Member Price</button></div>
-          <div class="founder-spots">50 spots only · lock in forever!</div>
-        </div>
         <!-- Inline pricing card -->
         <div style="background:linear-gradient(135deg,#FFF8E1,#fff);border:3px solid var(--yellow);border-radius:18px;padding:20px;margin-bottom:12px">
           <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;text-align:center">🌟 Upgrade to BrainSprout Pro</div>
           <div style="font-size:13px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:16px">Unlock everything — try it free for 7 days</div>
           <!-- Founding Member Offer -->
-          <div class="founder-banner" style="margin-bottom:14px">
-            <div class="founder-badge">🎉 Limited Time Offer</div>
-            <div class="founder-title">Founding Member Special</div>
-            <div class="founder-sub">First 50 subscribers only!</div>
-            <div class="founder-price">$25/yr <s>$35</s></div>
-            <div><button class="founder-btn" onclick="startFounderCheckout()">🌟 Claim Founding Member Price</button></div>
-            <div class="founder-spots">Only 50 spots available — lock in your rate forever!</div>
-          </div>
           <!-- Plan cards -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
             <div id="acct-plan-monthly" onclick="selectAcctPlan('monthly')" style="border:3px solid var(--red);border-radius:14px;padding:12px;text-align:center;cursor:pointer;background:var(--red);color:#fff;transition:all .2s">
@@ -3487,6 +3473,9 @@ const ACTIVITIES=[
   {id:10,title:'Category Race',icon:'📝',cat:'game',time:'5 min',grades:'2-5',bg:'#4A90C4',tc:'#fff',desc:'Name things in a category',steps:['Choose a category (animals, foods, etc.)','Go around — each student names one','If you repeat or pause, sit down','Keep going until one student is left','Give that student a star!']},
   {id:11,title:'Wall Push-Ups',icon:'💪',cat:'move',time:'3 min',grades:'1-5',bg:'#F5C842',tc:'#3A2800',desc:'Proprioception for focus',steps:['Stand arms-length from the wall','Place palms flat on the wall','Slowly do 10 push-ups against wall','These provide calming deep pressure','Perfect for students needing sensory input!']},
   {id:12,title:'Draw & Share',icon:'🎨',cat:'break',time:'5 min',grades:'K-5',bg:'#9B6DFF',tc:'#fff',desc:'Creative expression break',steps:['Hand out paper or whiteboards','Give a prompt: Draw your happy place','Students draw quietly for 3 minutes','Invite 2-3 to share their drawing','Display drawings to celebrate creativity']},
+  {id:13,title:'Emoji Match',icon:'🃏',cat:'game',time:'8 min',grades:'2-5',bg:'#E8404A',tc:'#fff',desc:'Timed whole-class matching game for the smartboard',steps:['Draw a 4x4 grid on the board — 16 squares','Write emoji pairs behind each square (cover with tape or paper)','Split into 2 teams — take turns picking two squares','If the emojis match, that team scores a point!','If they do not match, cover them back up','Set a 5-minute timer — most matches wins a star for each player on the winning team']},
+  {id:14,title:'Word Association',icon:'💬',cat:'game',time:'6 min',grades:'2-5',bg:'#5BAD5A',tc:'#fff',desc:'Fast-paced vocab and critical thinking game',steps:['Everyone stands up','Teacher says a starting word — for example "ocean"','First student says a related word — for example "fish"','Next student says a word related to THAT word','No repeating words — hesitate 3 seconds and sit down','Last student standing earns a star']},
+  {id:15,title:'True or False Buzz',icon:'⚡',cat:'game',time:'6 min',grades:'2-5',bg:'#F5C842',tc:'#3A2800',desc:'Quick-fire whole-class knowledge game',steps:['Display a statement on the smartboard — any subject works','Students show thumbs up for True or thumbs down for False','Call on a student to explain their reasoning','Correct answer = 1 point for their row or table group','Play 10 rounds — the winning group earns a star each','Great for review before a test or end of unit wrap-up']},
 ];
 // Free: 1 game (id1), 1 brain break (id2), 1 movement (id3)
 const FREE_ACTIVITY_IDS=[1,2,3];
